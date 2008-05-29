@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build-jar" name="lanslim">
+    <property environment="env"/>
+	<property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.4"/>
+    <property name="source" value="1.4"/>
+    
+	<path id="lanslim.classpath">
+        <pathelement location="classes"/>
+        <pathelement location="lib/looks-2.1.4.jar"/>
+        <pathelement location="lib/forms-1.2.0.jar"/>
+        <pathelement location="lib/jdic.jar"/>
+    </path>
+    <target depends="clean" name="init">
+        <mkdir dir="classes"/>
+        <mkdir dir="liv"/>
+        <copy includeemptydirs="false" todir="classes">
+            <fileset dir="src" excludes="**/*.java"/>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="classes" failonerror="false"/>
+        <delete dir="liv" failonerror="false"/>
+    </target>
+	
+    <target depends="init" name="build">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="classes" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="lanslim.classpath"/>
+        </javac>
+    </target>
+
+    <target depends="build" name="build-jar">
+    	<unjar src="lib/looks-2.1.4.jar" dest="classes" overwrite="true"/>
+    	<unjar src="lib/forms-1.2.0.jar" dest="classes" overwrite="true"/>
+    	<unjar src="lib/jdic.jar" dest="classes" overwrite="true"/>
+    	<delete file="classes/META_INF/MANIFEST.MF" failonerror="false"/>
+    	<copy file="readme.txt" tofile="classes/readme.txt"/>
+    	<copy file="JGoodies.LICENSE.txt" tofile="classes/JGoodies.LICENSE.txt"/>
+    	<copy file="jdic.COPYING.txt" tofile="classes/jdic.COPYING.txt"/>
+    	<copy file="TableSorter.COPYRIGHT.txt" tofile="classes/TableSorter.COPYRIGHT.txt"/>
+    	<tstamp/>	
+        <jar destfile="liv/lanslim.jar" basedir="classes">
+            <manifest>
+              	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
+              	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
+              	<attribute name="Implementation-Version" value="0.31"/>
+            	<attribute name="Implementation-Vendor" value="Olivier Mourez"/>
+	            <attribute name="Main-Class" value="com.oz.lanslim.LANSLIMMain"/>
+        	</manifest>         
+        </jar>
+    </target>
+
+    <target name="build-exe">
+    	<property name="launch4j.home" value="D:\java\launch4j"/>
+		<path id="launch4j.classpath">
+	        <pathelement location="${launch4j.home}/launch4j.jar"/>
+	        <pathelement location="${launch4j.home}/lib/xstream.jar"/>
+	    </path>
+		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpathref="launch4j.classpath"/>
+		<launch4j configFile="launch4j.xml" />
+    	<copy file="lib/tray.dll" tofile="liv/tray.dll"/>
+	</target>
+	
+	<!-- Test Target -->
+	
+    <target name="LANSLIM 1526 olivier">
+        <java classname="com.oz.lanslim.LANSLIMMain" failonerror="true" fork="yes">
+            <jvmarg line="-Djava.library.path=&quot;D:\documents\workspace\lanslim&quot;"/>
+            <classpath refid="lanslim.classpath"/>
+        </java>
+    </target>
+    <target name="LANSLIM 1527 omz">
+        <java classname="com.oz.lanslim.LANSLIMMain" failonerror="true" fork="yes">
+            <jvmarg line="-Duser.home=."/>
+            <classpath refid="lanslim.classpath"/>
+        </java>
+    </target>
+    <target name="LANSLIM 1528 rezwell">
+        <java classname="com.oz.lanslim.LANSLIMMain" failonerror="true" fork="yes">
+            <jvmarg line="-Duser.home=.."/>
+            <classpath refid="lanslim.classpath"/>
+        </java>
+    </target>
+</project>
