@@ -11,12 +11,9 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.Box;
@@ -34,13 +31,13 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.JTableHeader;
 
-import com.oz.lanslim.LANSLIMMain;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.model.ContactViewListener;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimGroupContact;
@@ -49,8 +46,8 @@ import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimTalkListener;
 import com.oz.lanslim.model.SlimUserContact;
 
-public class MainPane extends JPanel 
-	implements ActionListener, ChangeListener, ContainerListener, SlimTalkListener, KeyListener {
+public class MainPane extends JPanel implements ActionListener, ChangeListener, 
+	ContainerListener, SlimTalkListener, KeyListener, ContactViewListener {
 	
 	private SlimModel model;
 	
@@ -59,6 +56,7 @@ public class MainPane extends JPanel
 	private JButton settingsButton;
 	private JButton aboutButton;
 	private JButton exitButton;
+	private JButton minimizeButton;
 	private JSplitPane mainSplitPane;
 	
 	private JTabbedPane talkTabPanes;
@@ -81,27 +79,24 @@ public class MainPane extends JPanel
 	private JButton deleteButton;
 	private JButton editButton;
 	private JButton refreshButton;
+	private JButton newCatButton;
+	
 	private JScrollPane contactTablePane;
-	private JTable contactTable;
-	private ContactTableModel contactTableModel;
+	private ContactView contactTable;
 	private JPanel filterPane;
 	private JLabel filterLabel;
 	private JTextField filterField;
 	private JCheckBox hideGroupCheckBox;
 	private JCheckBox hideOfflineCheckBox;
 	
-	private JPopupMenu popupMenu;
-	private JMenuItem userDelMenuItem;
-	private JMenuItem userEditMenuItem;
-	private JMenuItem newTalkMenuItem;
-	private JMenuItem inviteMenuItem;
-	private JMenuItem refreshMenuItem;
+	private ContactPopupMenu popupMenu;
 	
 	
 	public MainPane(SlimModel pModel) {
 		super();
 		model = pModel;
 		model.getTalks().registerListener(this);
+		model.getSettings().registerContcatViewListener(this);
 		init();
 	}
 	
@@ -144,6 +139,14 @@ public class MainPane extends JPanel
 				aboutButton.addActionListener(this);
 				aboutButton.setToolTipText("About Dialog");
 				mainBar.add(aboutButton);
+				
+				minimizeButton = new JButton();
+				minimizeButton.setIcon(new SlimIcon("down.png"));
+				minimizeButton.setText("Minimize");
+				minimizeButton.setActionCommand(MainPaneActionCommand.MINIMIZE);
+				minimizeButton.addActionListener(this);
+				minimizeButton.setToolTipText("Minimize Application");
+				mainBar.add(minimizeButton);
 				
 				exitButton = new JButton();
 				exitButton.setIcon(new SlimIcon("exit.png"));
@@ -230,75 +233,6 @@ public class MainPane extends JPanel
 					contactPane.setPreferredSize(new java.awt.Dimension(200, 100));
 					mainLeftPane.add(contactPane, JSplitPane.BOTTOM);
 					{
-						contactTablePane = new JScrollPane();
-						contactPane.add(contactTablePane, BorderLayout.CENTER);
-						{
-							contactTable = new JTable() {
-								String[] columnToolTips = new String[] { "Name", "Status" };
-					            //Implement table header tool tips. 
-					            protected JTableHeader createDefaultTableHeader() {
-					                return new JTableHeader(columnModel) {
-					                    public String getToolTipText(MouseEvent e) {
-					                        java.awt.Point p = e.getPoint();
-					                        int index = columnModel.getColumnIndexAtX(p.x);
-					                        int realIndex = columnModel.getColumn(index).getModelIndex();
-					                        return columnToolTips[realIndex];
-					                    }
-					                };
-					            }
-							};
-							contactTable.setDefaultRenderer(SlimAvailabilityEnum.class, new AvailabilityRenderer());
-							contactTableModel = new ContactTableModel(model.getContacts(), 
-									model.getSettings().isGroupHidden(), model.getSettings().isOfflineHidden());
-							TableSorter ts = new TableSorter(contactTableModel, contactTable.getTableHeader());
-							ts.setColumnComparator(String.class, new Comparator() {
-							        public int compare(Object o1, Object o2) {
-							            return ((String) o1).compareToIgnoreCase((String)o2);
-							        }
-							    });
-							contactTable.setModel(ts);
-							contactTable.getColumnModel().getColumn(1).setPreferredWidth(20);
-							contactTable.setTransferHandler(new ContactTransferHandler(model));
-							contactTable.setDragEnabled(true);
-							contactTablePane.setViewportView(contactTable);
-						}
-				        //Create the popup menu.
-				        popupMenu = new JPopupMenu();
-				        {
-					        userEditMenuItem = new JMenuItem("Edit User/Group", new SlimIcon("note_edit.png"));
-					        userEditMenuItem.addActionListener(this);
-					        userEditMenuItem.setActionCommand(MainPaneActionCommand.USER_EDIT);
-					        popupMenu.add(userEditMenuItem);
-				        }
-				        {
-				        	userDelMenuItem = new JMenuItem("Remove User/Group", new SlimIcon("user_remove.png"));
-				        	userDelMenuItem.addActionListener(this);
-				        	userDelMenuItem.setActionCommand(MainPaneActionCommand.USER_DEL);
-					        popupMenu.add(userDelMenuItem);
-				        }
-				        {
-				        	inviteMenuItem = new JMenuItem("Invite to current talk", new SlimIcon("mail_add.png"));
-				        	inviteMenuItem.setActionCommand(MainPaneActionCommand.INVITE_POPUP);
-				        	inviteMenuItem.addActionListener(this);
-					        popupMenu.add(inviteMenuItem);
-				        }
-				        {
-					        newTalkMenuItem = new JMenuItem("Start new talk", new SlimIcon("comment.png"));
-					        newTalkMenuItem.setActionCommand(MainPaneActionCommand.NEW_TALK_POPUP);
-					        newTalkMenuItem.addActionListener(this);
-					        popupMenu.add(newTalkMenuItem);
-				        }
-				        {
-				        	refreshMenuItem = new JMenuItem("Refresh Availability", new SlimIcon("refresh.png"));
-				        	refreshMenuItem.setActionCommand(MainPaneActionCommand.USER_REFRESH_POPUP);
-				        	refreshMenuItem.addActionListener(this);
-					        popupMenu.add(refreshMenuItem);
-				        }
-				        //Add listener to the table so the popup menu can come up.
-				        MouseListener popupListener = new ContactTableMouseListener(popupMenu, contactTable, model);
-				        contactTable.addMouseListener(popupListener);
-					}
-					{
 						contactBar = new JToolBar();
 						contactBar.setFloatable(false);
 						contactBar.setRollover(true);
@@ -343,28 +277,63 @@ public class MainPane extends JPanel
 							refreshButton.setToolTipText("Resfresh All Availability");
 							contactBar.add(refreshButton);
 						}
+						{
+							newCatButton = new JButton();
+							newCatButton.setIcon(new SlimIcon("folder_add.png"));
+							newCatButton.setActionCommand(MainPaneActionCommand.CATEGORY_NEW);
+							newCatButton.addActionListener(this);
+							newCatButton.setToolTipText("Add Category (Contact Folder)");
+							contactBar.add(newCatButton);
+						}
+
+					}
+					{
+						contactTablePane = new JScrollPane();
+						contactPane.add(contactTablePane, BorderLayout.CENTER);
+
+				        //Create the popup menu.
+				        popupMenu = new ContactPopupMenu(this);
+
+						{
+							if (!model.getSettings().isContactTreeView()) {
+								contactTable = new ContactTable(model, popupMenu);
+								contactTablePane.setViewportView(((JTable)contactTable));
+								newCatButton.setEnabled(false);
+							}
+							else {
+								contactTable = new ContactTree(model, popupMenu);
+								contactTablePane.setViewportView(((JTree)contactTable));
+								newCatButton.setEnabled(true);
+							}
+							model.getContacts().updateListener();
+						}
 					}
 					{
 						filterPane = new JPanel();
 						filterPane.setLayout(new GridLayout(2, 2));
-						hideGroupCheckBox = new JCheckBox("Hide Groups");
-						hideGroupCheckBox.addActionListener(this);
-						hideGroupCheckBox.setActionCommand(MainPaneActionCommand.HIDE_GROUPS);
-						hideGroupCheckBox.setSelected(model.getSettings().isGroupHidden());
-						filterPane.add(hideGroupCheckBox);
-						hideOfflineCheckBox = new JCheckBox("Hide Offline");
-						hideOfflineCheckBox.addActionListener(this);
-						hideOfflineCheckBox.setActionCommand(MainPaneActionCommand.HIDE_OFFLINE);
-						hideOfflineCheckBox.setSelected(model.getSettings().isOfflineHidden());
-						filterPane.add(hideOfflineCheckBox);
-						filterLabel = new JLabel("Filter Name", new SlimIcon("search.png"), SwingConstants.LEADING);
-						filterPane.add(filterLabel);
-						filterField = new JTextField();
-						filterField.setColumns(15);
-						filterField.addKeyListener(this);
-						filterPane.add(filterField);
 						contactPane.add(filterPane, BorderLayout.SOUTH);
-
+						{
+							hideGroupCheckBox = new JCheckBox("Hide Groups");
+							hideGroupCheckBox.addActionListener(this);
+							hideGroupCheckBox.setActionCommand(MainPaneActionCommand.HIDE_GROUPS);
+							hideGroupCheckBox.setSelected(model.getSettings().isGroupHidden());
+							filterPane.add(hideGroupCheckBox);
+						}
+						{
+							hideOfflineCheckBox = new JCheckBox("Hide Offline");
+							hideOfflineCheckBox.addActionListener(this);
+							hideOfflineCheckBox.setActionCommand(MainPaneActionCommand.HIDE_OFFLINE);
+							hideOfflineCheckBox.setSelected(model.getSettings().isOfflineHidden());
+							filterPane.add(hideOfflineCheckBox);
+						}
+						{
+							filterLabel = new JLabel("Filter Name", new SlimIcon("search.png"), SwingConstants.LEADING);
+							filterPane.add(filterLabel);
+							filterField = new JTextField();
+							filterField.setColumns(15);
+							filterField.addKeyListener(this);
+							filterPane.add(filterField);
+						}
 					}
 				}
 			}
@@ -374,46 +343,58 @@ public class MainPane extends JPanel
 	public void actionPerformed(ActionEvent e) {
 		
 		if (e.getActionCommand() == MainPaneActionCommand.SETTINGS) {
-			SettingsFrame lFrame = new SettingsFrame(model);
-			lFrame.pack();
-			lFrame.setLocationRelativeTo(this);
-			lFrame.setVisible(true);
+			if (model.getTalks().size() == 0) {
+				SettingsFrame lFrame = new SettingsFrame((Frame)this.getRootPane().getParent(), model);
+				lFrame.pack();
+				lFrame.setLocationRelativeTo(this);
+				lFrame.setVisible(true);
+			}
+			else {
+				JOptionPane.showMessageDialog(this,
+					    "All talks must be closed",
+					    "Invalid Action",
+					    JOptionPane.WARNING_MESSAGE);
+			}
 		}
 		else if (e.getActionCommand() == MainPaneActionCommand.ABOUT) {
-			JOptionPane.showMessageDialog(this,
-					"Version " + LANSLIMMain.VERSION + " \n" +
-				    "This little Tool has been made by Olivier Mourez\n" +
-				    "If you have any improvements to propose or any issue to report\n" + 
-				    "you can contact me at olivier.mourez@gmail.com",
-				    "About LANSLIM (Local Area Network Server Less Instant Messaging)",
-				    JOptionPane.INFORMATION_MESSAGE);
+			AboutDialog.showDialog(this);
+		}
+		else if (e.getActionCommand() == MainPaneActionCommand.MINIMIZE) {
+			if (model.getSettings().isTrayEnable() && model.getSettings().isCloseAsTray()) {
+				this.getRootPane().getParent().setVisible(false);
+			}
+			else {
+				((Frame)this.getRootPane().getParent()).setExtendedState(Frame.ICONIFIED);
+			}
+			
 		}
 		else if (e.getActionCommand() == MainPaneActionCommand.EXIT) {
 			System.exit(0);
 		}
 		else if (model.getSettings().areValidSettings()) {
 			if (e.getActionCommand() == MainPaneActionCommand.NEW_TALK) {
-				NewTalkFrame lFrame = new NewTalkFrame(model, null, null);
+				NewTalkFrame lFrame = new NewTalkFrame(
+						(Frame)this.getRootPane().getParent(), model, null, null);
 				lFrame.pack();
 				lFrame.setLocationRelativeTo(this);
 				lFrame.setVisible(true);
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.TALK_EDIT) {
 				SlimTalk st = ((TalkPane)talkTabPanes.getSelectedComponent()).getTalk();
-				NewTalkFrame lFrame = new NewTalkFrame(model, null, st);
+				NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
+						model, null, st);
 				lFrame.pack();
 				lFrame.setLocationRelativeTo(this);
 				lFrame.setVisible(true);
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.NEW_TALK_POPUP) {
 				List lContactsToTalkWith = new ArrayList();
-				int[] lSelectedContactIndex = contactTable.getSelectedRows();
-				for (int j = 0 ; j < lSelectedContactIndex.length; j++) {
-					int i = lSelectedContactIndex[j];
-					lContactsToTalkWith.add(model.getContacts().getContactByName(
-							(String)contactTable.getModel().getValueAt(i, 0)));
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				for (int j = 0 ; j < lSelectedContacts.length; j++) {
+					lContactsToTalkWith.add(lSelectedContacts[j]);
 				}
-				NewTalkFrame lFrame = new NewTalkFrame(model, lContactsToTalkWith, null);
+				NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
+						model, lContactsToTalkWith, null);
 				lFrame.pack();
 				lFrame.setLocationRelativeTo(this);
 				lFrame.setVisible(true);
@@ -421,7 +402,8 @@ public class MainPane extends JPanel
 			else if (e.getActionCommand() == MainPaneActionCommand.INVITE) {
 				if (talkTabPanes.getComponents().length > 0) {
 					SlimTalk st = ((TalkPane)talkTabPanes.getSelectedComponent()).getTalk();
-					NewTalkFrame lFrame = new NewTalkFrame(model, null, st);
+					NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
+							model, null, st);
 					lFrame.pack();
 					lFrame.setLocationRelativeTo(this);
 					lFrame.setVisible(true);
@@ -454,13 +436,11 @@ public class MainPane extends JPanel
 			else if (e.getActionCommand() == MainPaneActionCommand.INVITE_POPUP) {
 				if (talkTabPanes.getComponents().length > 0) {
 					SlimTalk st = ((TalkPane)talkTabPanes.getSelectedComponent()).getTalk();
-					int[] lSelectedContactIndex = contactTable.getSelectedRows();
-					if (lSelectedContactIndex.length >= 1) {
+					SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+					if (lSelectedContacts.length >= 1) {
 						List cl = new ArrayList();
-						for (int j = 0 ; j < lSelectedContactIndex.length; j++) {
-							int i = lSelectedContactIndex[j];
-							SlimContact sc = model.getContacts().getContactByName(
-									(String)contactTable.getModel().getValueAt(i, 0));
+						for (int j = 0 ; j < lSelectedContacts.length; j++) {
+							SlimContact sc  = lSelectedContacts[j];
 							if (sc.isGroup()) {
 								cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
 							}
@@ -482,7 +462,7 @@ public class MainPane extends JPanel
 					}
 					else {
 						JOptionPane.showMessageDialog(this,
-						    "At least one contact must be selected in the table",
+						    "At least one contact must be selected",
 						    "Invalid Action",
 						    JOptionPane.WARNING_MESSAGE);
 					}
@@ -495,13 +475,15 @@ public class MainPane extends JPanel
 				}
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.USER_ADD) {
-				NewUserFrame lFrame = new NewUserFrame(model, null);
+				NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
+						model, null);
 				lFrame.pack();
 				lFrame.setLocationRelativeTo(this);
 				lFrame.setVisible(true);
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.GROUP_ADD) {
-				NewGroupFrame lFrame = new NewGroupFrame(model, null);
+				NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
+						model, null);
 				lFrame.pack();
 				lFrame.setLocationRelativeTo(this);
 				lFrame.setVisible(true);
@@ -510,82 +492,116 @@ public class MainPane extends JPanel
 				model.getContacts().refresh();
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.USER_EDIT) {
-				int[] lSelectedContactIndex = contactTable.getSelectedRows();
-				if (lSelectedContactIndex.length == 1) {
-					SlimContact sc = model.getContacts().getContactByName(
-							(String)contactTable.getModel().getValueAt(lSelectedContactIndex[0], 0));
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				if (lSelectedContacts.length == 1) {
+					SlimContact sc = lSelectedContacts[0];
 					if (sc.isGroup()) {
-						NewGroupFrame lFrame = new NewGroupFrame(model, (SlimGroupContact)sc);
+						NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
+								model, (SlimGroupContact)sc);
 						lFrame.pack();
 						lFrame.setLocationRelativeTo(this);
 						lFrame.setVisible(true);
 						
 					}
 					else {
-						NewUserFrame lFrame = new NewUserFrame(model, (SlimUserContact)sc);
+						NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
+								model, (SlimUserContact)sc);
 						lFrame.pack();
 						lFrame.setLocationRelativeTo(this);
 						lFrame.setVisible(true);
 					}
 				}
 				else {
-					JOptionPane.showMessageDialog(this,
-						    "One and only one contact must be selected in the table please select it first",
+					String[] lSelectedCategories = contactTable.getSelectedCategories();
+					if (lSelectedCategories.length == 1) {
+						NewCategoryFrame lFrame = new NewCategoryFrame((Frame)this.getRootPane().getParent(), 
+								model, lSelectedCategories[0]);
+						lFrame.pack();
+						lFrame.setLocationRelativeTo(this);
+						lFrame.setVisible(true);
+					}
+					else {
+						JOptionPane.showMessageDialog(this,
+						    "One and only one user/group/category must be selected please select it first",
 						    "Invalid Action",
 						    JOptionPane.WARNING_MESSAGE);
+					}
 				}
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.USER_REFRESH_POPUP) {
-				int[] lSelectedContactIndex = contactTable.getSelectedRows();
-				if (lSelectedContactIndex.length == 1) {
-					SlimContact sc = model.getContacts().getContactByName(
-							(String)contactTable.getModel().getValueAt(lSelectedContactIndex[0], 0));
-					model.getContacts().refresh(sc);
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				if (lSelectedContacts.length == 1) {
+					model.getContacts().refresh(lSelectedContacts[0]);
 				}
 				else {
 					JOptionPane.showMessageDialog(this,
-						    "One and only one contact must be selected in the table please select it first",
+						    "One and only one contact must be selected please select it first",
 						    "Invalid Action",
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.USER_DEL) {
-				int[] lSelectedContactIndex = contactTable.getSelectedRows();
-				if (lSelectedContactIndex.length < 1) {
-					JOptionPane.showMessageDialog(this,
-						    "At least one contact must be selected in the table",
-						    "Invalid Action",
-						    JOptionPane.WARNING_MESSAGE);
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				String lToDel = "";
+				if (lSelectedContacts.length < 1) {
+					String[] lSelectedCategories = contactTable.getSelectedCategories();
+					if (lSelectedCategories.length < 1) {
+						JOptionPane.showMessageDialog(this,
+							    "At least one Group/User/Category must be selected",
+							    "Invalid Action",
+							    JOptionPane.WARNING_MESSAGE);
+					}
+					else {
+						for (int j = 0 ; j < lSelectedCategories.length; j++) {
+							lToDel = lToDel + "\n-" + lSelectedCategories[j];
+						}
+						int a = JOptionPane.showConfirmDialog(this,
+							    "Are you sure you want to delete categorie(s) listed here below" + lToDel,
+							    "Delete confirmation",
+							    JOptionPane.YES_NO_OPTION,
+							    JOptionPane.WARNING_MESSAGE);
+						if (a == JOptionPane.YES_OPTION) {
+							for (int j = 0 ; j < lSelectedCategories.length; j++) {
+								model.getContacts().removeCategory(lSelectedCategories[j]);
+							}
+		                }
+						
+					}
+
 				}
 				else {
-					String lContactsToDel = "";
-					for (int j = 0 ; j < lSelectedContactIndex.length; j++) {
-						int i = lSelectedContactIndex[j];
-						lContactsToDel = lContactsToDel + "\n-" + contactTable.getModel().getValueAt(i, 0);
+					
+					for (int j = 0 ; j < lSelectedContacts.length; j++) {
+						lToDel = lToDel + "\n-" + lSelectedContacts[j].getName();
 					}
 					int a = JOptionPane.showConfirmDialog(this,
-						    "Are you sure you want to delete contact(s) listed here below" + lContactsToDel,
+						    "Are you sure you want to delete contact(s) listed here below" + lToDel,
 						    "Delete confirmation",
 						    JOptionPane.YES_NO_OPTION,
 						    JOptionPane.WARNING_MESSAGE);
 					if (a == JOptionPane.YES_OPTION) {
-						for (int j = 0 ; j < lSelectedContactIndex.length; j++) {
-							int i = lSelectedContactIndex[j];
-							model.getContacts().removeContactByName(
-									(String)contactTable.getModel().getValueAt(i, 0));
+						for (int j = 0 ; j < lSelectedContacts.length; j++) {
+							model.getContacts().removeContactByName(lSelectedContacts[j].getName());
 						}
 	                }
 				}
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.HIDE_GROUPS) {
 				model.getSettings().setGroupHidden(hideGroupCheckBox.isSelected());
-				contactTableModel.filter(filterField.getText(), 
+				contactTable.filter(filterField.getText(), 
 						hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
 			}
 			else if (e.getActionCommand() == MainPaneActionCommand.HIDE_OFFLINE) {
 				model.getSettings().setOfflineHidden(hideOfflineCheckBox.isSelected());
-				contactTableModel.filter(filterField.getText(), 
+				contactTable.filter(filterField.getText(), 
 						hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
+			}
+			else if (e.getActionCommand() == MainPaneActionCommand.CATEGORY_NEW) {
+				Frame mainFrame = JOptionPane.getFrameForComponent(this);
+				NewCategoryFrame lFrame = new NewCategoryFrame(mainFrame, model, null);
+				lFrame.pack();
+				lFrame.setLocationRelativeTo(this);
+				lFrame.setVisible(true);
 			}
 		}
 		else {
@@ -630,7 +646,7 @@ public class MainPane extends JPanel
 	}
 
 	public void keyReleased(KeyEvent e) {
-		contactTableModel.filter(filterField.getText(), 
+		contactTable.filter(filterField.getText(), 
 				hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
 	}
 
@@ -670,7 +686,23 @@ public class MainPane extends JPanel
 			    JOptionPane.ERROR_MESSAGE);
 	}
 
-	private class MainPaneActionCommand {
+	public void updateContactDisplay(boolean isTreeview) {
+		
+		if (isTreeview && contactTable instanceof JTable) {
+			contactTable = new ContactTree(model, popupMenu);
+			contactTablePane.setViewportView(((JTree)contactTable));
+			newCatButton.setEnabled(true);
+		}
+		else if (!isTreeview && contactTable instanceof JTree) {
+			contactTable = new ContactTable(model, popupMenu);
+			contactTablePane.setViewportView(((JTable)contactTable));
+			newCatButton.setEnabled(false);
+		}
+		model.getContacts().updateListener();
+
+	}
+
+	protected class MainPaneActionCommand {
 
 		public static final String ABOUT = "about";
 		
@@ -692,6 +724,8 @@ public class MainPane extends JPanel
 		
 		public static final String GROUP_ADD = "groupAdd";
 		
+		public static final String MINIMIZE = "minimize";
+		
 		public static final String EXIT = "exit";
 		
 		public static final String ALL_REFRESH = "allRefresh";
@@ -705,6 +739,8 @@ public class MainPane extends JPanel
 		public static final String HIDE_OFFLINE = "hideOffline";
 
 		public static final String USER_REFRESH_POPUP = "userRefresh";
+
+		public static final String CATEGORY_NEW = "categoryNew";
 
 	}
 
