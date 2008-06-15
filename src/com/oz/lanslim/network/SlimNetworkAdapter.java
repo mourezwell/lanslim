@@ -86,6 +86,10 @@ public class SlimNetworkAdapter implements Runnable {
 						else if (SlimMessageTypeEnum.NEW_TALK.equals(sm.getType())) {
 							SlimNewTalkMessage sntm = (SlimNewTalkMessage)sm;
 							boolean success = model.getTalks().receiveNewTalkMessage(sntm);
+							if (!success) {
+								SlimLogger.log("Unable to start new talk ");
+							}
+
 						} 
 						else if (SlimMessageTypeEnum.ERROR_TALK.equals(sm.getType())) {
 							SlimErrorTalkMessage setm = (SlimErrorTalkMessage)sm;
