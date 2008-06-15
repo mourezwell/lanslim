@@ -1,4 +1,5 @@
-package com.oz.lanslim.gui;
+package com.oz.lanslim.gui;	
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -26,7 +27,7 @@ import javax.swing.JTextField;
 
 /**
 */
-public class NewGroupFrame extends JFrame implements ActionListener {
+public class NewGroupFrame extends JDialog implements ActionListener {
 	
 	private JLabel nameLabel;
 	private JTextField nameField;
@@ -42,8 +43,8 @@ public class NewGroupFrame extends JFrame implements ActionListener {
 	private SlimModel model;
 	private SlimGroupContact group;
 	
-	public NewGroupFrame(SlimModel pModel, SlimGroupContact pContact) {
-		super();
+	public NewGroupFrame(Frame pParent, SlimModel pModel, SlimGroupContact pContact) {
+		super(pParent, true);
 		model = pModel;
 		membersCheckBoxList = new ArrayList();
 		group = pContact;
@@ -52,8 +53,12 @@ public class NewGroupFrame extends JFrame implements ActionListener {
 
 	private void initGUI() {
 		try {
-			setTitle("New User Contact");
-			setIconImage(new SlimIcon("comment_edit.png").getImage());
+			if (group == null) {
+				setTitle("New Group Contact");
+			}
+			else {
+				setTitle("Edit Group Contact");
+			}
 			
 			FormLayout thisLayout = new FormLayout(
 					"max(p;5dlu), max(p;5dlu), max(p;5dlu)", 

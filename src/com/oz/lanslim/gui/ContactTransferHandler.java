@@ -12,25 +12,28 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.TransferHandler;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
+import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimGroupContact;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
+import com.oz.lanslim.model.SlimUserContact;
 
 public class ContactTransferHandler extends TransferHandler {
 	
-	private SlimModel model;
 	private SlimTalk talk;
 	private JTabbedPane talkTabPane;
+	private ContactTree tree;
+	private SlimModel model;
 	
-	// for export
-	public ContactTransferHandler(SlimModel pModel) {
-		model = pModel;
+	// for export from ContactView
+	public ContactTransferHandler() {
+		// volontary empty
 	}
 
 	// for import in talkArea
@@ -41,6 +44,12 @@ public class ContactTransferHandler extends TransferHandler {
 	// for import in peopleAera
 	public ContactTransferHandler(JTabbedPane pTalkTabPane) {
 		talkTabPane = pTalkTabPane;
+	}
+
+	// for import in ContactTree
+	public ContactTransferHandler(ContactTree pTree, SlimModel pModel) {
+		tree = pTree;
+		model = pModel;
 	}
 
 	public int getSourceActions(JComponent c) {
@@ -58,38 +67,44 @@ public class ContactTransferHandler extends TransferHandler {
 	 * @return  true if the data can be inserted into the component, false otherwise.
 	 */
         public boolean canImport(JComponent comp, DataFlavor[] flavors) {
+        	boolean lContinue = false;
+        	for (int i = 0;  i < flavors.length && !lContinue; i++) {
+        		if (flavors[i].getRepresentationClass().equals(SlimContact.class)) {
+        			lContinue = true;
+        		}
+        	}
+        	if (!lContinue) {
+        		return false;
+        	}
+        	
         	if (talk != null || talkTabPane != null) {
-	        	for (int i = 0; i< flavors.length; i++) {
-	        		if (flavors[i].getRepresentationClass().equals(SlimContact.class)) {
-	        			return true;
-	        		}
-	        	}
+    			return true;
+        	}
+        	else if (tree != null) {
+				return true;
         	}
         	return false;
         }
         
+        /**
+         * Creates a <code>Transferable</code> to use as the source for
+         * a data transfer. Returns the representation of the data to
+         * be transferred, or <code>null</code> if the component's
+         * property is <code>null</code>
+         *
+         * @param c  the component holding the data to be transferred; this
+         *  argument is provided to enable sharing of <code>TransferHandler</code>s
+         *  by multiple components
+         * @return  the representation of the data to be transferred, or
+         *  <code>null</code> if the property associated with <code>c</code>
+         *  is <code>null</code> 
+         *  
+         */
         protected Transferable createTransferable(JComponent c) {
         	
-        	if (c instanceof JTable) {
-            	JTable contactTable = (JTable)c;
-				int[] lSelectedContactIndex = contactTable.getSelectedRows();
-				if (lSelectedContactIndex.length >= 1) {
-					List cl = new ArrayList();
-					for (int j = 0 ; j < lSelectedContactIndex.length; j++) {
-						int i = lSelectedContactIndex[j];
-						SlimContact sc = model.getContacts().getContactByName(
-								(String)contactTable.getModel().getValueAt(i, 0));
-						if (sc.isGroup()) {
-							cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
-						}
-						else {
-							if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
-								cl.add(sc);
-							}
-						}
-					}
-					return new TransferableContact(cl);
-				}
+        	if (c instanceof ContactView) {
+        		SlimContact[] scs = ((ContactView)c).getSelectedContacts();
+				return new TransferableContact(scs);
 			}
         	else if (c instanceof JEditorPane) {
         		return new StringSelection(((JEditorPane)c).getSelectedText());
@@ -119,8 +134,17 @@ public class ContactTransferHandler extends TransferHandler {
         	}
         	if (st != null) {
             	try {
-            		List contacts = (List)t.getTransferData(new DataFlavor(SlimContact.class, "SlimContact")); 
-            		st.addPeople(contacts);
+            		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, "SlimContact"));
+            		List onlinUserContactsList = new ArrayList();
+            		for (int i = 0; i < contactsArray.length; i++) {
+            			if (contactsArray[i].isGroup()) {
+            				onlinUserContactsList.addAll(((SlimGroupContact)contactsArray[i]).getOnlineMembers());
+            			}
+            			else if (contactsArray[i].getAvailability() == SlimAvailabilityEnum.ONLINE) {
+            				onlinUserContactsList.add(contactsArray[i]);
+            			}
+            		}
+            		st.addPeople(onlinUserContactsList);
             		return true;
             	}
             	catch (SlimException se) {
@@ -136,15 +160,43 @@ public class ContactTransferHandler extends TransferHandler {
             		// should not happen
         		}
         	}
+        	else if (tree != null) {
+        		String lCatName = null;
+        		DefaultMutableTreeNode tn = 
+        			(DefaultMutableTreeNode)tree.getSelectionPath().getLastPathComponent();
+        		if (tn.getUserObject() instanceof String) {
+        			lCatName = (String)tn.getUserObject();
+        			if (SlimContactList.CATEGORY_GROUP.equals(lCatName)) {
+        				return false;
+        			}
+				}
+        		else {
+        			return false;
+        		}
+        		try {
+	        		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, "SlimContact"));
+	        		for (int i = 0; i < contactsArray.length; i++) {
+	        			if (!contactsArray[i].isGroup()) {
+	                		model.getContacts().moveUserIntoCategory((SlimUserContact)contactsArray[i], lCatName);
+	        			}
+	        		}
+        		}
+            	catch (IOException ioe) {
+            		// should not happen
+        		}
+            	catch (UnsupportedFlavorException ufe) {
+            		// should not happen
+        		}
+        	}
             return false;
     	}
 
             
      private class TransferableContact implements Transferable {
 
-    	private List contacts;
+    	private SlimContact[] contacts;
     	 
-    	public TransferableContact(List pContacts) {
+    	public TransferableContact(SlimContact[] pContacts) {
     		contacts = pContacts;
     	}
     	 
@@ -167,7 +219,7 @@ public class ContactTransferHandler extends TransferHandler {
 			return false;
 		}
 		
-		public List getContacts() {
+		public SlimContact[] getContacts() {
 			return contacts;
 		}
      }

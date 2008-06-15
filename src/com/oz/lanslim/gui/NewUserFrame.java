@@ -1,17 +1,26 @@
 package com.oz.lanslim.gui;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
+import java.util.Set;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimSettings;
 import com.oz.lanslim.model.SlimUserContact;
 
 import javax.swing.JButton;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,23 +30,25 @@ import javax.swing.JTextField;
 
 /**
 */
-public class NewUserFrame extends JFrame implements ActionListener {
+public class NewUserFrame extends JDialog implements ActionListener {
 	
 	private JLabel nameLabel;
 	private JTextField nameField;
 	private JLabel portLabel;
 	private JTextField portField;
+	private JLabel hostLabel;
 	private JTextField hostField;
+	private JLabel categoryLabel;
+	private JComboBox categoryComboBox;
 	private JPanel buttonPanel;
 	private JButton cancelButton;
 	private JButton okButton;
-	private JLabel hostLabel;
 
 	private SlimModel model;
 	private SlimUserContact contact;
 	
-	public NewUserFrame(SlimModel pModel, SlimUserContact pContact) {
-		super();
+	public NewUserFrame(Frame pParent, SlimModel pModel, SlimUserContact pContact) {
+		super(pParent, true);
 		contact = pContact;
 		model = pModel;
 		initGUI();
@@ -45,7 +56,6 @@ public class NewUserFrame extends JFrame implements ActionListener {
 
 	private void initGUI() {
 		try {
-			setIconImage(new SlimIcon("comment_edit.png").getImage());
 			if (contact == null) {
 				setTitle("New User Contact");
 			}
@@ -54,7 +64,7 @@ public class NewUserFrame extends JFrame implements ActionListener {
 			}
 			FormLayout thisLayout = new FormLayout(
 					"max(p;5dlu), max(p;5dlu), max(p;5dlu)", 
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)");
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)");
 			getContentPane().setLayout(thisLayout);
 			//this.setPreferredSize(new java.awt.Dimension(190, 160));
 			this.setSize(190, 160);
@@ -96,7 +106,34 @@ public class NewUserFrame extends JFrame implements ActionListener {
 					portField.setEnabled(false);
 				}
 			}
+			{
+				categoryLabel = new JLabel();
+				getContentPane().add(categoryLabel, new CellConstraints("1, 7, 1, 1, default, default"));
+				categoryLabel.setText("Category");
+			}
+			Set lCategoryList = model.getContacts().getAllCategories();
+			int length = lCategoryList.size();
+			String[] lComboBoxModel = new String[length - 1];
+			Iterator it = lCategoryList.iterator();
+			int i = 0;
+			while (it.hasNext()) {
+                String lCat = (String)it.next();
+                if (!SlimContactList.CATEGORY_GROUP.equals(lCat)) {
+                    lComboBoxModel[i] = lCat;
+                    i = i + 1;
+                }
+			}
+			{				
+				ComboBoxModel categoryComboBoxModel = 
+					new DefaultComboBoxModel(lComboBoxModel);
+				categoryComboBox = new JComboBox();
+				categoryComboBox.setModel(categoryComboBoxModel);
+				categoryComboBox.setMaximumSize(new Dimension(40, 20));
+				categoryComboBox.setSelectedIndex(0);
+				getContentPane().add(categoryComboBox, new CellConstraints("3, 7, 1, 1, default, default"));
+			}
 			
+            String lCat = SlimContactList.CATEGORY_UNDEFINED;
 			if (contact != null) {
 				nameField.setText(contact.getName());
 				hostField.setText(contact.getHost());
@@ -106,7 +143,17 @@ public class NewUserFrame extends JFrame implements ActionListener {
 				else {
 					portField.setText(SlimSettings.DEFAULT_PORT);
 				}
-			}
+				String lUserCat = model.getContacts().getCategory(contact); 
+				if (model.getContacts().getCategory(contact) != null) {
+                    lCat = lUserCat;
+				}
+            }
+            for (i = 0; i < length; i++) {
+                if (lCat.equalsIgnoreCase(lComboBoxModel[i])) {
+                    categoryComboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
 			{
 				buttonPanel = new JPanel();
 				okButton = new JButton();
@@ -122,7 +169,7 @@ public class NewUserFrame extends JFrame implements ActionListener {
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("3, 7, 1, 1, default, default"));
+				getContentPane().add(buttonPanel, new CellConstraints("3, 9, 1, 1, default, default"));
 			}
 			
 		} catch(Exception e) {
@@ -148,6 +195,8 @@ public class NewUserFrame extends JFrame implements ActionListener {
 							    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
+						model.getContacts().moveUserIntoCategory(contact, 
+								(String)categoryComboBox.getSelectedItem());
 						setVisible(false);
 					}
 				}
@@ -171,6 +220,8 @@ public class NewUserFrame extends JFrame implements ActionListener {
 							    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
+						model.getContacts().moveUserIntoCategory(newContact, 
+								(String)categoryComboBox.getSelectedItem());
 						JOptionPane.showMessageDialog(this,
 							    "User updated successfully but changes will take effect only on new talks",
 							    "Update Info",

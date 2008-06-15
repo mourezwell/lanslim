@@ -1,6 +1,5 @@
 package com.oz.lanslim.gui;
 
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.TimerTask;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JTable;
 
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
@@ -18,33 +16,25 @@ import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimGroupContact;
 import com.oz.lanslim.model.SlimModel;
 
-public class ContactTableMouseListener extends MouseAdapter {
+public class ContactViewMouseListener extends MouseAdapter {
     private JPopupMenu popup;
-    private JTable contactTable;
+    private ContactView contactView;
     private SlimModel model;
     private boolean doubleclick;
     private Timer doubleTimer;
     
-    public ContactTableMouseListener(JPopupMenu popupMenu, JTable pTable, SlimModel pModel) {
+    public ContactViewMouseListener(JPopupMenu popupMenu, ContactView pView, SlimModel pModel) {
         popup = popupMenu;
-        contactTable = pTable;
+        contactView = pView;
         model = pModel;
         doubleTimer = new Timer();
         doubleclick = false;
     }
 
     public void mousePressed(MouseEvent e) {
-        Point p = e.getPoint();
-        int row = contactTable.rowAtPoint(p);
-        int column = contactTable.columnAtPoint(p);
-        // The autoscroller can generate drag events outside the Table's range.
-        if ((column == -1) || (row == -1)) {
-            return;
-        }
-        if (contactTable.getSelectedRowCount() == 0) {
-        	contactTable.changeSelection(row, column, false, false);
-        }
-        maybeShowPopup(e);
+    	if (contactView.consolidateClickPoint(e)) {
+    		maybeShowPopup(e);	
+    	}
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -58,10 +48,10 @@ public class ContactTableMouseListener extends MouseAdapter {
         else if (e.getClickCount() > 1 && !doubleclick) {
         	doubleclick = true;
         	if (model.getSettings().areValidSettings()) {
-	        	if (contactTable.getSelectedRows().length == 1) {
-	        		List cl = new ArrayList();
-	        		SlimContact sc = model.getContacts().getContactByName(
-							(String)contactTable.getModel().getValueAt(contactTable.getSelectedRow(), 0));
+        		SlimContact[] scs = contactView.getSelectedContacts();
+        		List cl = new ArrayList();
+        		if (scs.length == 1) {
+        			SlimContact sc = scs[0];
 	    			if (sc.isGroup()) {
 	    				if (((SlimGroupContact)sc).getOnlineMembers().size() > 0) {
 	    					cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
@@ -84,6 +74,7 @@ public class ContactTableMouseListener extends MouseAdapter {
 							    JOptionPane.WARNING_MESSAGE);
 	    				}
 	    			}
+	    			
 	    			if (cl.size() > 0) {
 		        		try {
                             cl.add(model.getSettings().getContactInfo());
@@ -97,6 +88,9 @@ public class ContactTableMouseListener extends MouseAdapter {
 						}
 	    			}
 	    		}
+        		else if (contactView.getSelectedCategories().length == 1) {
+        			// nothing to do the tree will expand or collapse as usual
+        		}
 	        	else {
 					JOptionPane.showMessageDialog(e.getComponent(),
 						    "One and only one contact must be selected in the table please select it first",

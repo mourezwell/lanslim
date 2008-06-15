@@ -1,9 +1,9 @@
 package com.oz.lanslim.gui;
 
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
 import com.oz.lanslim.model.SlimAvailabilityEnum;
-import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimContactListener;
 
@@ -23,7 +23,8 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 	public ContactTableModel(SlimContactList pList, boolean pHideGroup, boolean pHideOffline) {
 		list = pList;
 		contactObjectArrayModel = list.getTableModelData();
-		list.addListener(this);
+		list.addContactListener(this);
+		list.addCategoryListener(null);
 		prefixNameFilter = "";
 		hideGroupFilter = pHideGroup;
 		hideOfflineFilter = pHideOffline;
@@ -42,7 +43,7 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
     }
 
     
-    public synchronized void updateContact(SlimContact pContact) {
+    public synchronized void updateContacts() {
 		contactObjectArrayModel = list.getTableModelData();
     	fireTableDataChanged();
     }
@@ -77,7 +78,7 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 	public synchronized Object getValueAt(int rowIndex, int columnIndex) {
 		int r = 0;
 		for (int i = 0; i < contactObjectArrayModel.length; i++) {
-			if (contactObjectArrayModel[i][nameColumnIndex].toString().startsWith(prefixNameFilter)) {
+			if (contactObjectArrayModel[i][nameColumnIndex].toString().toLowerCase().startsWith(prefixNameFilter.toLowerCase())) {
 				if (hideGroupFilter 
 						&& contactObjectArrayModel[i][statusColumnIndex].equals(SlimAvailabilityEnum.UNKNOWN)) {
 					continue;
@@ -103,5 +104,11 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 		fireTableDataChanged();
 	}
 	
-	
+	public void notifyContactError(String pMessage) {
+		JOptionPane.showMessageDialog(null,
+		    pMessage,
+		    "Contact Update Error",
+		    JOptionPane.WARNING_MESSAGE);
+    }
+
 }

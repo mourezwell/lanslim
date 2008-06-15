@@ -1,5 +1,6 @@
 package com.oz.lanslim.gui;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -30,7 +32,7 @@ import javax.swing.JTextField;
 
 /**
 */
-public class NewTalkFrame extends JFrame implements ActionListener {
+public class NewTalkFrame extends JDialog implements ActionListener {
 	
 	private JLabel titleLabel;
 	private JTextField titleField;
@@ -46,8 +48,8 @@ public class NewTalkFrame extends JFrame implements ActionListener {
 	private SlimModel model;
 	private SlimTalk talk;
 	
-	public NewTalkFrame(SlimModel pModel, List pPreSelcetedContacts, SlimTalk pTalk) {
-		super();
+	public NewTalkFrame(Frame pParent, SlimModel pModel, List pPreSelcetedContacts, SlimTalk pTalk) {
+		super(pParent, true);
 		model = pModel;
 		contactCheckBoxList = new ArrayList();
 		talk = pTalk;
@@ -56,7 +58,6 @@ public class NewTalkFrame extends JFrame implements ActionListener {
 
 	private void initGUI( List pPreSelcetdContacts) {
 		try {
-			setIconImage(new SlimIcon("comment_edit.png").getImage());
 			if (talk == null) {
 				setTitle("New Talk");
 			}
