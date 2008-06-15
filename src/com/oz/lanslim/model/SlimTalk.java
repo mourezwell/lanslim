@@ -79,12 +79,12 @@ public class SlimTalk {
 	}
 	
 	public synchronized String getPeopleIn() {	
-		String lResult = "\n"; 
+		String lResult = ""; 
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			lResult = lResult + suc.getName() + "\n";
 		}
-		return lResult.substring(0, lResult.length() - 2);
+		return lResult.substring(0, lResult.length() - 1);
 	}
 	
 	private void sendInviteTalkMessage(SlimUserContact pContact) throws SlimException {
