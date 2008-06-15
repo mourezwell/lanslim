@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.network.SlimNetworkAdapter;
 
 public class SlimModel {
@@ -50,27 +51,43 @@ public class SlimModel {
 		contacts.sendWelcomeMessage();
 	}
 
-	public void exit() throws SlimException, IOException {
+	public void exit() throws SlimException {
 		talks.sendExitMessage();
 		contacts.sendExitMessage();
 		// send all unavailability message
 		networkAdapter.stop();
-		storeSettings();
+		save();
 	}
 	
-	public void storeSettings() throws IOException {
+	public void save() {
+		
 		if (settingsLoaded) {
-			Properties p = new Properties();
-			p.putAll(settings.toProperties());
-			p.putAll(contacts.toProperties());
-			
-			String path = System.getProperty("user.home") +  File.separator + INI_FILE_NAME;
-			FileOutputStream fos = new FileOutputStream(new File(path));
-			p.store(fos, INI_FILE_COMMENTS);
-			
-			fos.flush();
-			fos.close();
+    		try {
+				Properties p = new Properties();
+				p.putAll(settings.toProperties());
+				p.putAll(contacts.toProperties());
+				
+				String path = System.getProperty("user.home") +  File.separator + INI_FILE_NAME;
+				FileOutputStream fos = new FileOutputStream(new File(path));
+				p.store(fos, INI_FILE_COMMENTS);
+				
+				fos.flush();
+				fos.close();
+    		}
+    		catch (IOException ex) {
+    			SlimLogger.log(ex + ":" + ex.getMessage() + " when storing settings");
+    		}
 		}
+	}
+	
+	public void storeSettings() {
+		
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+            	save();
+            }
+        });
+        t.start();
 	}
 
 	public SlimContactList getContacts() {
