@@ -1,5 +1,5 @@
-This tool has been developped by Olivier Mourez but it uses and includes many external products 
-as described below.
+This tool has been created by Olivier Mourez but is now open source under BSD License
+This tool uses and includes many external products as described below.
 
 First this tool include two free libraries from JGoodies Suite (www.jgoodies.com)
 This libraries are under BSD License described below via an extract of their original manifest.

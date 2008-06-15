@@ -39,12 +39,13 @@
     	<copy file="JGoodies.LICENSE.txt" tofile="classes/JGoodies.LICENSE.txt"/>
     	<copy file="jdic.COPYING.txt" tofile="classes/jdic.COPYING.txt"/>
     	<copy file="TableSorter.COPYRIGHT.txt" tofile="classes/TableSorter.COPYRIGHT.txt"/>
+    	<copy file="LANSLIM.LICENSE.txt" tofile="classes/LANSLIM.LICENSE.txt"/>
     	<tstamp/>	
         <jar destfile="liv/lanslim.jar" basedir="classes">
             <manifest>
               	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
               	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
-              	<attribute name="Implementation-Version" value="0.31"/>
+              	<attribute name="Implementation-Version" value="0.6"/>
             	<attribute name="Implementation-Vendor" value="Olivier Mourez"/>
 	            <attribute name="Main-Class" value="com.oz.lanslim.LANSLIMMain"/>
         	</manifest>         
