@@ -42,7 +42,7 @@ public abstract class SlimContact implements Serializable {
 	public boolean equals(Object obj) {
 		if (obj instanceof SlimContact) {
 			SlimContact sc = (SlimContact)obj;
-			return name.equals(sc.name) && isGroup() == sc.isGroup();
+			return name.equalsIgnoreCase(sc.name) && isGroup() == sc.isGroup();
 		}
 		return false;
 	}
