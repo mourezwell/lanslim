@@ -8,9 +8,9 @@ import javax.swing.table.TableCellRenderer;
 
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 
-public class AvailabilityRenderer extends JLabel implements TableCellRenderer {
+public class ContactTableAvailabilityCellRenderer extends JLabel implements TableCellRenderer {
 
-	public AvailabilityRenderer() {
+	public ContactTableAvailabilityCellRenderer() {
 		// empty constructor
     }
 
