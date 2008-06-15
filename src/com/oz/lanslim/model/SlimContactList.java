@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
@@ -32,23 +33,45 @@ public class SlimContactList {
 
 	private static final String MEMBERS_PREFIX = ".members.";
 
+	private static final String CATEGORYNAME_SUFFIX = ".categoryname";
+
+	private static final String CATEGORYMEMBERS_PREFIX = ".categorymembers.";
+
+	private static final String CATEGORYEXPANDED_SUFFIX = ".categoryexpanded";
+
+	public static final String CATEGORY_GROUP = "Groups";
+
+	public static final String CATEGORY_UNDEFINED = "Undefined";
+
+	public static final String GROUP_CATEGORY_NAME = "Groups";
+
+	public static final String UNDEFINED_CATEGORY_NAME = "Undefined";
+	
 	private Map list = null;
 	private SlimContactListener listener = null;
+	private SlimCategoryListener catListener = null;
 	private SlimModel model = null;
 	
+	private Map categoryByContact = null;
+	private Map categories = null;
+
+	
 	public SlimContactList(SlimModel pModel) {
-		list = new HashMap();
 		model = pModel;
+		list = new HashMap();
 		list.put(model.getSettings().getContactInfo().getName(), model.getSettings().getContactInfo());
-		
+		categoryByContact = new HashMap();
+		categories = new HashMap();
+		categories.put(CATEGORY_GROUP, new Boolean(false));
+		categories.put(CATEGORY_UNDEFINED, new Boolean(false));
 	}
 	
 	public SlimContactList(SlimModel pModel, Properties p) {
 		this(pModel);
 		List groupNb = new ArrayList();
 		int i = 1;
-		boolean endUser = false;
-		while (!endUser) {
+		boolean endContact = false;
+		while (!endContact) {
 			String lKey = SLIM_CONTACT_PROPS_PREFIX + i + GROUPNAME_SUFFIX;
 			if (p.getProperty(lKey) != null) {
 				groupNb.add(new Integer(i));
@@ -80,11 +103,34 @@ public class SlimContactList {
 					}
 				}
 				else {
-					endUser = true;
+					lKey = SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYNAME_SUFFIX;
+					if (p.getProperty(lKey) != null) {
+						String lCatName = p.getProperty(lKey);
+						lKey = SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYEXPANDED_SUFFIX;
+						String lCatExpanded = p.getProperty(lKey);
+						categories.put(lCatName, Boolean.valueOf(lCatExpanded));
+						int j = 1;
+						boolean endCategory = false;
+						while (!endCategory) { 
+							lKey = SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYMEMBERS_PREFIX + j  + USERNAME_SUFFIX;
+							String lUserName = p.getProperty(lKey);
+							if (lUserName == null) {
+								endCategory = true;
+							}
+							else {
+								categoryByContact.put(lUserName, lCatName);
+								j = j + 1;
+							}
+						}
+					}
+					else {
+						endContact = true;
+					}
 				}
 			} 
 			i = i + 1;
 		}
+		
 		for (Iterator it = groupNb.iterator(); it.hasNext();) {
 			int j = ((Integer)it.next()).intValue();
 			String lKey = SLIM_CONTACT_PROPS_PREFIX + j + GROUPNAME_SUFFIX;
@@ -92,12 +138,12 @@ public class SlimContactList {
 			try {
 				SlimGroupContact g = new SlimGroupContact(lName, new ArrayList());
 				int k = 1;
-				endUser = false;
-				while (!endUser) {
+				boolean endGroup = false;
+				while (!endGroup) {
 					lKey = SLIM_CONTACT_PROPS_PREFIX + j + MEMBERS_PREFIX + k  + USERNAME_SUFFIX;
 					lName = p.getProperty(lKey);
 					if (lName == null) {
-						endUser = true;
+						endGroup = true;
 					}
 					else {
 						if (list.containsKey(lName.trim()) 
@@ -115,6 +161,14 @@ public class SlimContactList {
 			catch (SlimException e) {
 				SlimLogger.log(e + ":" + e.getMessage() + " at SlimContactList()");
 			}
+		}
+		
+		// in case they are not already defined
+		if (!categories.containsKey(CATEGORY_GROUP)) {
+			categories.put(CATEGORY_GROUP, new Boolean(true));
+		}
+		if (!categories.containsKey(CATEGORY_UNDEFINED)) {
+			categories.put(CATEGORY_UNDEFINED, new Boolean(true));
 		}
 	}
 	
@@ -171,60 +225,79 @@ public class SlimContactList {
 		return (SlimContact)list.get(pName);
 	}
 	
+
 	public synchronized boolean addContact(SlimContact pContact) {
-		if (list.containsKey(pContact.getName())) {
-			return false;
+
+		SlimContact existingContactWithSameName = (SlimContact)list.get(pContact.getName());
+		if (existingContactWithSameName != null) {
+			if (pContact.isGroup() || existingContactWithSameName.isGroup()) {
+				return false;
+			}
+			if (existingContactWithSameName.getAvailability() != SlimAvailabilityEnum.OFFLINE) {
+				return false;
+			}
+			try {
+				((SlimUserContact)existingContactWithSameName).setHost(
+						((SlimUserContact)pContact).getHost());
+				((SlimUserContact)existingContactWithSameName).setPort(
+						String.valueOf(((SlimUserContact)pContact).getPort()));
+			}
+			catch (SlimException se) {
+				return false;
+			}
+			updateListener();
+			return true;
 		}
-		list.put(pContact.getName(), pContact);
-		updateListener(pContact);
 		
-		if (!pContact.isGroup()) {
+		list.put(pContact.getName(), pContact);
+		updateListener();
+		
+		if (pContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
 			sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
 		}
-		try {
-			model.storeSettings();
-		}
-		catch (IOException ioe) {
-			// ignore it during runtime, exception logged at exit
-		}
-
+		
+		model.storeSettings();
 		return true;
 	}
 
 	public synchronized boolean updateContact(SlimContact pOldContact, SlimContact pNewContact) {
 		
 		SlimContact sc = (SlimContact)list.get(pNewContact.getName());
-		
-		if (sc != null && !sc.equals(pOldContact)) {
+		if (sc != null && !sc.equals(pOldContact) 
+				&& sc.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
 			return false;
 		}
-		list.remove(pOldContact.getName());
-		list.put(pNewContact.getName(), pNewContact);
-		updateListener(pNewContact);
 		
-		if (!pNewContact.isGroup() && !(pNewContact.equals(model.getSettings().getContactInfo()))) {
+		list.remove(pOldContact.getName());
+		
+		list.put(pNewContact.getName(), pNewContact);
+		updateListener();
+		
+		if (pNewContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {  
 			sendAvailabiltyMessage((SlimUserContact)pNewContact, SlimAvailabilityEnum.ONLINE);
 		}
-		try {
-			model.storeSettings();
-		}
-		catch (IOException ioe) {
-			// ignore it during runtime, exception logged at exit
-		}
+		
+		model.storeSettings();
 		return true;
 	}
 
 	public synchronized boolean removeContactByName(String pContactName) {
 		SlimContact lRemoved = (SlimContact)list.remove(pContactName);
-		if (lRemoved != null) {
-			updateListener(lRemoved);
-			return true;
+		if (lRemoved == null) {
+			return false;
 		}
-		return false;
+		updateListener();
+		model.storeSettings();
+		return true;
 	}
 
 	
 	public Properties toProperties() {
+		Map contactByCategory = new HashMap();
+		for (Iterator it = categories.keySet().iterator(); it.hasNext();) {
+			contactByCategory.put(it.next(), new ArrayList());
+		}
+
 		Properties p = new Properties();
 		int i = 1;
 		for (Iterator it = list.values().iterator(); it.hasNext();) {
@@ -240,26 +313,56 @@ public class SlimContactList {
 				}					
 			}
 			else {
-				SlimUserContact gc = (SlimUserContact)c;
-				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERNAME_SUFFIX, gc.getName());
-				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERIP_SUFFIX, gc.getHost());
-				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERPORT_SUFFIX, Integer.toString(gc.getPort()));
+				SlimUserContact uc = (SlimUserContact)c;
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERNAME_SUFFIX, uc.getName());
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERIP_SUFFIX, uc.getHost());
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERPORT_SUFFIX, Integer.toString(uc.getPort()));
+				
+				if (categoryByContact.containsKey(uc.getName())) {
+					String lCat = (String)categoryByContact.get(uc.getName());
+					List lMemb = (List)contactByCategory.get(lCat);
+					lMemb.add(uc.getName());
+				}
 			}
 			i = i + 1;
 		}
+		
+		for (Iterator it = categories.keySet().iterator(); it.hasNext();) {
+			String cat = (String)it.next();
+			List members = (List)contactByCategory.get(cat);
+			p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYNAME_SUFFIX, cat);
+			p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYEXPANDED_SUFFIX, categories.get(cat).toString());
+			int j = 1; 
+			for (Iterator it2 = members.iterator(); it2.hasNext();) {
+				String uc = (String)it2.next();
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYMEMBERS_PREFIX + j + USERNAME_SUFFIX, uc);
+				j = j + 1;
+			}
+			i = i + 1;
+		}
+
 		return p;
 	}
 
-	private void updateListener(SlimContact pContact) {
+	public void updateListener() {
 		if (listener != null) {
-			listener.updateContact(pContact);
+			listener.updateContacts();
 		}
 	}
-		
-	public void addListener(SlimContactListener pListener) {
+	
+	private void notifyErrorToListener(String pMessage) {
+		if (listener != null) {
+			listener.notifyContactError(pMessage);
+		}
+	}
+
+	public void addContactListener(SlimContactListener pListener) {
 		listener = pListener;
 	}
 	
+	public void addCategoryListener(SlimCategoryListener pListener) {
+		catListener = pListener;
+	}
 	
 
 	private void sendAvailabiltyMessage(SlimUserContact pContact, SlimAvailabilityEnum pStatus) {
@@ -274,11 +377,12 @@ public class SlimContactList {
 		}
 	}
 
-	public void receiveAvailabiltyMessage(SlimAvailabilityUserMessage pMessage) {
+	public synchronized void receiveAvailabiltyMessage(SlimAvailabilityUserMessage pMessage) {
 		
 		SlimUserContact knownSuc = getOrAddUserByAddress(pMessage.getSender());
 		
 		SlimAvailabilityEnum ase = pMessage.getAvailability();
+		
 		if (ase == SlimAvailabilityEnum.ONLINE) {
 			knownSuc.setAvailability(ase);
 			sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.UNKNOWN);
@@ -289,7 +393,7 @@ public class SlimContactList {
 		else { // offline
 			knownSuc.setAvailability(ase);
 		}
-		updateListener(knownSuc);
+		updateListener();
 	}
 
 	protected void sendUpdateUserMessage(SlimUserContact pOldSettings) throws SlimException {
@@ -309,34 +413,37 @@ public class SlimContactList {
 		}
 	}
 
-	public void receiveUpdateUserMessage(SlimUpdateUserMessage pMessage) {
-		SlimUserContact oldSuc = getOrAddUserByAddress(pMessage.getSender());
-		try {
-			pMessage.getSender().setName(oldSuc.getName());
-		}
-		catch (SlimException se) {
-			// can not happen since name has been set successfuly for sender user
-		}
-		updateContact(oldSuc, pMessage.getSender());
+	public synchronized void receiveUpdateUserMessage(SlimUpdateUserMessage pMessage) {
 		
-		// acquittement car il se peut qu'il s'agisse de son premier message 
-		// en lieu et place du availablity initial
-		sendAvailabiltyMessage(pMessage.getSender(), SlimAvailabilityEnum.ONLINE);
+		SlimUserContact oldSuc = getOrAddUserByAddress(pMessage.getOldSettings());
+		boolean lUpdated = updateContact(oldSuc, pMessage.getSender());
+		
+		if (lUpdated) {
+			// acquittement since it can be sender first message instead of availability message 
+			// only sent when setting are OK
+			sendAvailabiltyMessage(pMessage.getSender(), SlimAvailabilityEnum.ONLINE);
+		}
+		else {
+			notifyErrorToListener(
+					"Unable to update Contact info due to other online contact with same name");
+		}
 	}
 
 	
 	protected synchronized SlimUserContact getOrAddUserByAddress(SlimUserContact pSuc) {
-		SlimUserContact knownSuc = null;
+		
+		SlimUserContact knownUserByAdress = null;
 		for (Iterator it = getAllUserContact().iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (suc.getHost().equalsIgnoreCase(pSuc.getHost()) 
 					&& suc.getPort() == pSuc.getPort()) {
-				knownSuc = suc;
+				knownUserByAdress = suc;
 				break;
 			}
 		}
-		if (knownSuc == null) {
-			knownSuc = pSuc;
+		
+		if (knownUserByAdress == null) {
+			knownUserByAdress = pSuc;
 			boolean lResult = false;
 			String lOrignalName = pSuc.getName();
 			int i = 0;
@@ -352,7 +459,16 @@ public class SlimContactList {
 				}
 			}
 		}
-		return knownSuc;
+		else {
+			SlimContact existingContactWithSameName = (SlimContact)list.get(pSuc.getName());
+			if (existingContactWithSameName != null 
+					&& !existingContactWithSameName.equals(knownUserByAdress)) {
+				if (existingContactWithSameName.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					updateContact(existingContactWithSameName, knownUserByAdress);
+				}
+			}
+		}
+		return knownUserByAdress;
 	}
 	
 	protected void sendExitMessage() {
@@ -383,7 +499,6 @@ public class SlimContactList {
 		}
 	}
 	
-	
 	public synchronized void refresh(SlimContact pContact) {
 		if (!pContact.isGroup() && !(pContact.equals(model.getSettings().getContactInfo()))) {
 			pContact.setAvailability(SlimAvailabilityEnum.OFFLINE);
@@ -395,7 +510,7 @@ public class SlimContactList {
 		boolean lError = false;
 		BufferedReader reader = new BufferedReader(new FileReader(contactFile));
 		String lLine = reader.readLine();
-		Map nameTransaltion = new HashMap();
+		Map nameTranslation = new HashMap();
 		while (lLine != null) {
 			if (lLine.trim().length() != 0 && !lLine.startsWith("#")) {
 				String[] splittedLine = lLine.split(";");
@@ -413,7 +528,7 @@ public class SlimContactList {
 							String lName = splittedLine[1].trim();
 							SlimUserContact suc = getOrAddUserByAddress(new SlimUserContact(lName, splittedLine[2].trim(), lPort.trim()));
 							if (!suc.getName().equals(lName)) {
-								nameTransaltion.put(lName, suc.getName());
+								nameTranslation.put(lName, suc.getName());
 							}
 						}
 						catch (SlimException se) {
@@ -434,7 +549,7 @@ public class SlimContactList {
 								}
 								for (int i= 2; i < splittedLine.length; i++) {
 									String lUserName = splittedLine[i];
-									String lLocalName = (String)nameTransaltion.get(lUserName);
+									String lLocalName = (String)nameTranslation.get(lUserName);
 									if (lLocalName != null) {
 										lUserName = lLocalName;
 									}
@@ -459,21 +574,18 @@ public class SlimContactList {
 								SlimLogger.log("Invalid Contact on Line " + lLine + " details : " + se.getMessage() + ". Line ignored");
 								lError = true;
 							}
-
 						}
+					}
+					else  {
+						SlimLogger.log("Invalid line format " + lLine + " must be match pattern USER;<Name>;<host>[;<port>] or GROUP;<Name>;<user1Name>[;<user2Name>...]. Line ignored");
+						lError = true;
 					}
 				}
 			}
 			lLine = reader.readLine();
 		}
 		reader.close();
-		try {
-			// done here because group are not added with update/addConatct methods
-			model.storeSettings();
-		}
-		catch (IOException ioe) {
-			// ignore it during runtime, exception logged at exit
-		}
+		model.storeSettings();
 		return lError;
 	}
 
@@ -503,4 +615,93 @@ public class SlimContactList {
 		writer.close();
 	}
 
+	// CATEGORY MANAGEMENT
+	
+	public synchronized String getCategory(SlimUserContact pContact) {
+		return (String)categoryByContact.get(pContact.getName());
+	}
+
+	public synchronized Set getAllCategories() {
+		return categories.keySet();
+	}
+	
+	public synchronized Boolean isExpanded(String pCat) {
+		return (Boolean)categories.get(pCat);
+	}
+	
+	public synchronized void setExpanded(String pCat, Boolean pExpanded) {
+		if (!pExpanded.equals(categories.get(pCat))) { 
+			categories.put(pCat, pExpanded);
+			model.storeSettings();
+		}
+	}
+
+
+	public synchronized boolean addCategory(String pNewCat, Boolean pExpanded) {
+		if (categories.containsKey(pNewCat)) {
+			return false;
+		}
+		categories.put(pNewCat, pExpanded);
+		if (catListener != null) {
+			catListener.addCategory(pNewCat, pExpanded);
+		}
+		model.storeSettings();
+		return true;
+	}
+	
+	public synchronized void moveUserIntoCategory(SlimUserContact pContact, String pCat) {
+		String lOldCat = (String)categoryByContact.get(pContact.getName());
+		categoryByContact.put(pContact.getName(), pCat);
+		if (catListener != null) {
+			catListener.moveUserIntoCategory(pContact, lOldCat, pCat);
+		}
+		model.storeSettings();
+	}
+
+	public synchronized boolean removeCategory(String pCat) {
+		if (pCat.equals(CATEGORY_GROUP) || pCat.equals(CATEGORY_UNDEFINED)) {
+			return false;
+		}
+		String userName = null;
+		Iterator it = categoryByContact.keySet().iterator();
+		while (it.hasNext()) {
+			userName = (String)it.next();
+			if (categoryByContact.get(userName).equals(pCat)) {
+				categoryByContact.remove(userName);
+			}
+		}
+		categories.remove(pCat);
+		if (catListener != null) {
+			catListener.removeCategory(pCat);
+		}
+		model.storeSettings();
+		return true;
+	}
+
+	public synchronized boolean renameCategory(String pOldCat, String pNewCat) {
+		if (categories.containsKey(pNewCat) || pOldCat.equalsIgnoreCase(GROUP_CATEGORY_NAME) 
+				|| pOldCat.equalsIgnoreCase(UNDEFINED_CATEGORY_NAME)) {
+			return false;
+		}
+		categories.put(pNewCat, categories.get(pOldCat));
+		String userName = null;
+		Iterator it = categoryByContact.keySet().iterator();
+		while (it.hasNext()) {
+			userName = (String)it.next();
+			if (categoryByContact.get(userName).equals(pOldCat)) {
+				categoryByContact.put(userName, pNewCat);
+			}
+		}
+		categories.remove(pOldCat);
+		if (catListener != null) {
+			catListener.renameCategory(pOldCat, pNewCat);
+		}
+		model.storeSettings();
+		return true;
+	}
+	
+	public SlimUserContact getSettingsUser() {
+		return model.getSettings().getContactInfo();
+	}
+	
 }
