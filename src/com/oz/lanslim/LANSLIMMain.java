@@ -6,6 +6,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.File;
@@ -34,10 +36,10 @@ import com.oz.lanslim.model.SlimIconListener;
 import com.oz.lanslim.model.SlimModel;
 
 public class LANSLIMMain extends JFrame 
-	implements WindowFocusListener, SlimIconListener, ActionListener {
+	implements WindowFocusListener, SlimIconListener, ActionListener, ComponentListener {
 
 	
-	public static final String VERSION = "V0.5";
+	public static final String VERSION = "0.6";
 	
 	{
 		
@@ -60,8 +62,6 @@ public class LANSLIMMain extends JFrame
 	private SystemTray systemTray = null;
 	private TrayIcon trayIcon = null;
 	private JPopupMenu trayMenu = null;
-	private PrintStream errStream = null;
-	private PrintStream outStream = null;
 	
 	/**
 	* Auto-generated main method to display this JFrame
@@ -82,12 +82,12 @@ public class LANSLIMMain extends JFrame
 	
 	public LANSLIMMain() throws IOException, SlimException {
 		super();
-		errStream = new PrintStream(
+		PrintStream lErrStream = new PrintStream(
 				new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.err", true), true);
-		System.setErr(errStream);
-		outStream = new PrintStream(
+		System.setErr(lErrStream);
+		PrintStream lOutStream = new PrintStream(
 				new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.out", true), true);
-		System.setOut(outStream);
+		System.setOut(lOutStream);
 		iconTimer = new Timer();
 		iconTimer.schedule(new TimerTask() {
 			public void run() {
@@ -99,9 +99,6 @@ public class LANSLIMMain extends JFrame
 			public void run() {
 				try {
 					model.exit();
-				}
-				catch (IOException ioe) {
-					SlimLogger.log(ioe + ":" + ioe.getMessage() + " at windowClosing");
 				}
 				catch (SlimException se) {
 					SlimLogger.log(se + ":" + se.getMessage() + " at windowClosing");
@@ -122,8 +119,10 @@ public class LANSLIMMain extends JFrame
 
 			mainPanel = new MainPane(model);
 			getContentPane().add(mainPanel, BorderLayout.CENTER);
-			setSize(600, 400);
+			setSize(model.getSettings().getW(), model.getSettings().getH());
+			setLocation(model.getSettings().getX(), model.getSettings().getY());
 			addWindowListener(new MainPaneWindowListener(model, this));
+			addComponentListener(this);
 					    
 		    try {
 		    	systemTray = SystemTray.getDefaultSystemTray();
@@ -164,7 +163,7 @@ public class LANSLIMMain extends JFrame
 			SlimLogger.log(e + ":" + e.getMessage() + " at LANSLIMMain.initGUI()");
 		}
 		
-		if (!model.getSettings().isTrayEnable() || !model.getSettings().isStartAsTrayForced()) {
+		if (!model.getSettings().isTrayEnable() || !model.getSettings().isStartAsTray()) {
 			setVisible(true);
 			toFront();
 		}
@@ -290,6 +289,26 @@ public class LANSLIMMain extends JFrame
 				}
 			}
 		});
+	}
+
+	public void componentHidden(ComponentEvent e) {
+		// Nothing to do
+	}
+
+	public void componentMoved(ComponentEvent e) {
+		if (model != null) {
+			model.getSettings().setLocation(e.getComponent().getLocation());
+		}
+	}
+
+	public void componentResized(ComponentEvent e) {
+		if (model != null) {
+			model.getSettings().setSize(e.getComponent().getSize());
+		}
+	}
+
+	public void componentShown(ComponentEvent e) {
+		// Nothing to do
 	}
 	
 }
