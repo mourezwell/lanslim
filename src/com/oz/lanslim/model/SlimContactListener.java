@@ -2,6 +2,8 @@ package com.oz.lanslim.model;
 
 public interface SlimContactListener {
 
-	public void updateContact(SlimContact pContact);
-	
+	public void updateContacts();
+
+	public void notifyContactError(String pMessage);
+
 }
