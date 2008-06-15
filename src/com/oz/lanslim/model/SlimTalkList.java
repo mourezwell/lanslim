@@ -92,4 +92,8 @@ public class SlimTalkList {
 	public synchronized SlimTalk getTalkById(String pId) {
 		return (SlimTalk)talks.get(pId);
 	}
+	
+	public synchronized int size() {
+		return talks.size();
+	}
 }
