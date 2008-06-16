@@ -12,8 +12,12 @@
   <customProcName>true</customProcName>
   <stayAlive>false</stayAlive>
   <icon>comments.ico</icon>
+  <singleInstance>
+    <mutexName>LANSLIM</mutexName>
+    <windowTitle>LANSLIM</windowTitle>
+  </singleInstance> 
   <jre>
-    <path></path>
+    <path>%JAVA_HOME%</path>
     <minVersion>1.4.2</minVersion>
     <maxVersion></maxVersion>
     <dontUsePrivateJres>false</dontUsePrivateJres>
@@ -21,12 +25,12 @@
     <maxHeapSize>0</maxHeapSize>
   </jre>
   <versionInfo>
-    <fileVersion>0.4.0.0</fileVersion>
-    <txtFileVersion>V0.4</txtFileVersion>
-    <fileDescription>First deployment version</fileDescription>
-    <copyright>created by Olivier Mourez but free to use</copyright>
-    <productVersion>0.4.0.0</productVersion>
-    <txtProductVersion>V0.4</txtProductVersion>
+    <fileVersion>0.6.0.0</fileVersion>
+    <txtFileVersion>V0.6</txtFileVersion>
+    <fileDescription>Deployment version</fileDescription>
+    <copyright>Created by Olivier Mourez but free to use</copyright>
+    <productVersion>0.6.0.0</productVersion>
+    <txtProductVersion>V0.6</txtProductVersion>
     <productName>LANSLIM (Local Area Network Instant Messaging)</productName>
     <companyName>None</companyName>
     <internalName>lanslim</internalName>
