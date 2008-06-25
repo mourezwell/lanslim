@@ -632,9 +632,7 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 		if (talkTabPanes.getSelectedComponent() != null) {
 			peopleInArea.setText(
 					((TalkPane)talkTabPanes.getSelectedComponent()).getTalk().getPeopleIn());
-			if (((Component)e.getSource()).isValid()) {
-					talkTabPanes.setIconAt(talkTabPanes.getSelectedIndex(), null);
-			}
+			talkTabPanes.setIconAt(talkTabPanes.getSelectedIndex(), null);
 		}
 		else {
 			peopleInArea.setText("");
@@ -672,7 +670,7 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 				}
 			}
 		}
-		if (((TalkPane)talkTabPanes.getSelectedComponent()).getTalk() ==  pTalk) {
+		else {
 			peopleInArea.setText(pTalk.getPeopleIn());
 			talkTabPanes.setToolTipTextAt(talkTabPanes.getSelectedIndex(), pTalk.getPeopleIn().replaceAll("\n", ", "));
 			talkTabPanes.setTitleAt(talkTabPanes.getSelectedIndex(), pTalk.getTitle());

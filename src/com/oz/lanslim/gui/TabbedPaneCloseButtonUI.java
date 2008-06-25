@@ -9,6 +9,8 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
  
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
  
 class TabbedPaneCloseButtonUI extends BasicTabbedPaneUI {
@@ -126,7 +128,13 @@ class TabbedPaneCloseButtonUI extends BasicTabbedPaneUI {
                 		for (int i = 0; i < pcla.length; i++) {
                 			pcla[i].propertyChange(evt);
                 		}
-                			
+                	}
+                	ChangeListener[] cla = tabPane.getChangeListeners();
+                	if (pcla != null ) {
+                		ChangeEvent evt = new ChangeEvent(tabPane);
+                		for (int i = 0; i < cla.length; i++) {
+                			cla[i].stateChanged(evt);
+                		}
                 	}
                 	if (removeEnable) {
                 		tabPane.remove(tabIndex);
