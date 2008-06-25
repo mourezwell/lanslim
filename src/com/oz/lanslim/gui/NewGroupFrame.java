@@ -93,7 +93,12 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 					for (Iterator it = model.getContacts().getAllUserContact().iterator(); it.hasNext();) {
 						SlimContact c =(SlimContact)it.next();
 						JCheckBox cb = new JCheckBox();
-						membersCheckPanel.add(cb);
+						int i = 0;
+						while (i < membersCheckPanel.getComponentCount() 
+							&& c.getName().compareToIgnoreCase(((JCheckBox)membersCheckPanel.getComponent(i)).getText()) > 0) {
+							i++;
+						}
+						membersCheckPanel.add(cb, i);
 						cb.addActionListener(this);
 						cb.setText(c.getName());
 						membersCheckBoxList.add(cb);
