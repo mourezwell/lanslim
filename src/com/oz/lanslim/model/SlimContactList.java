@@ -245,18 +245,17 @@ public class SlimContactList {
 			catch (SlimException se) {
 				return false;
 			}
-			updateListener();
-			return true;
 		}
-		
-		list.put(pContact.getName(), pContact);
-		updateListener();
-		
-		if (pContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-			sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
+		else {
+			existingContactWithSameName = pContact;
+			list.put(pContact.getName(), pContact);
 		}
 		
 		model.storeSettings();
+		updateListener();
+		if (existingContactWithSameName.getAvailability() != SlimAvailabilityEnum.UNKNOWN) {  
+			sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
+		}
 		return true;
 	}
 
@@ -267,28 +266,47 @@ public class SlimContactList {
 				&& sc.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
 			return false;
 		}
+
+		String lOldName = pOldContact.getName();
+		try {
+			pOldContact.setName(pNewContact.getName());
+			pOldContact.setAvailability(pNewContact.getAvailability());
 		
-		list.remove(pOldContact.getName());
-		
-		list.put(pNewContact.getName(), pNewContact);
-		updateListener();
-		
-		if (pNewContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {  
-			sendAvailabiltyMessage((SlimUserContact)pNewContact, SlimAvailabilityEnum.ONLINE);
+			if (pOldContact.isGroup()) {
+				((SlimGroupContact)pOldContact).updateMembers((((SlimGroupContact)pNewContact).getMembers()));
+			}
+			else {
+				((SlimUserContact)pOldContact).setHost(((SlimUserContact)pNewContact).getHost());
+				((SlimUserContact)pOldContact).setPort(Integer.toString(((SlimUserContact)pNewContact).getPort()));
+			}
+		}
+		catch (SlimException e) {
+			// attributes already validated since they are extracted from valid contact
 		}
 		
+		list.remove(lOldName);
+		list.put(pOldContact.getName(), pOldContact);
+		
 		model.storeSettings();
+		updateListener();
+		
+		if (pOldContact.getAvailability() != SlimAvailabilityEnum.UNKNOWN) {  
+			sendAvailabiltyMessage((SlimUserContact)pOldContact, SlimAvailabilityEnum.ONLINE);
+		}
 		return true;
 	}
 
-	public synchronized boolean removeContactByName(String pContactName) {
+	public synchronized void removeContactByName(String pContactName) {
 		SlimContact lRemoved = (SlimContact)list.remove(pContactName);
-		if (lRemoved == null) {
-			return false;
-		}
-		updateListener();
+		if (lRemoved != null) {
+			List lGroupList = getAllGroupContact();
+			for (Iterator it = lGroupList.iterator(); it.hasNext();) {
+				SlimGroupContact sgc = (SlimGroupContact)it.next();
+				sgc.getMembers().remove(lRemoved);
+			}
+		}		
 		model.storeSettings();
-		return true;
+		updateListener();
 	}
 
 	
@@ -416,17 +434,8 @@ public class SlimContactList {
 	public synchronized void receiveUpdateUserMessage(SlimUpdateUserMessage pMessage) {
 		
 		SlimUserContact oldSuc = getOrAddUserByAddress(pMessage.getOldSettings());
-		boolean lUpdated = updateContact(oldSuc, pMessage.getSender());
 		
-		if (lUpdated) {
-			// acquittement since it can be sender first message instead of availability message 
-			// only sent when setting are OK
-			sendAvailabiltyMessage(pMessage.getSender(), SlimAvailabilityEnum.ONLINE);
-		}
-		else {
-			notifyErrorToListener(
-					"Unable to update Contact info due to other online contact with same name");
-		}
+		sendAvailabiltyMessage(oldSuc, SlimAvailabilityEnum.ONLINE);
 	}
 
 	
@@ -446,16 +455,14 @@ public class SlimContactList {
 			knownUserByAdress = pSuc;
 			boolean lResult = false;
 			String lOrignalName = pSuc.getName();
-			int i = 0;
-			while (!lResult) {
-				lResult = addContact(pSuc);
-				if (!lResult) {
-					try {
-						pSuc.setName(lOrignalName + i);
-					}
-					catch (SlimException se) {
-						// should not happen since name has been accepted before
-					}
+			lResult = addContact(pSuc);
+			if (!lResult) {
+				try {
+					pSuc.setName(lOrignalName + "(" + pSuc.getHost() + ")");
+					addContact(pSuc);
+				}
+				catch (SlimException se) {
+					SlimLogger.log("Can not add user " + pSuc.getName());
 				}
 			}
 		}
@@ -464,7 +471,7 @@ public class SlimContactList {
 			if (existingContactWithSameName != null 
 					&& !existingContactWithSameName.equals(knownUserByAdress)) {
 				if (existingContactWithSameName.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					updateContact(existingContactWithSameName, knownUserByAdress);
+					addContact(knownUserByAdress);
 				}
 			}
 		}

@@ -198,12 +198,8 @@ public class SlimSettings {
 			if (areValidSettings(pContact, testNetwork)) {
 				SlimUserContact pOld = new SlimUserContact(contactInfo.getName(), contactInfo.getHost(), 
 						Integer.toString(contactInfo.getPort()));
-	
-				contactInfo.setName(pContact.getName());
-				contactInfo.setHost(pContact.getHost());
-				contactInfo.setPort(Integer.toString(pContact.getPort()));
-
-				boolean lUpdated = model.getContacts().updateContact(pOld, contactInfo);
+				
+				boolean lUpdated = model.getContacts().updateContact(contactInfo, pContact);
 				  
 				if (!lUpdated) {
 					throw new SlimException("UserName already declared please remove it first or choose another one");
