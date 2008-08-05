@@ -6,7 +6,7 @@ import com.oz.lanslim.model.SlimUserContact;
 
 public abstract class SlimTalkMessage extends SlimMessage implements Serializable {
 
-	private static final String TALKID_ITEM = "TalkId"; 
+	protected static final String TALKID_ITEM = "TalkId"; 
 
 	private String talkId;
 	

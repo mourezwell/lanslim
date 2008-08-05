@@ -1,7 +1,9 @@
 package com.oz.lanslim.message;
 
 import java.io.Serializable;
+import java.util.Map;
 
+import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimInviteTalkMessage extends SlimTalkMessage implements Serializable {
@@ -21,5 +23,14 @@ public class SlimInviteTalkMessage extends SlimTalkMessage implements Serializab
 	public String toString() {
 		return super.toString() + itemToString(CONTACT_ITEM, newContact.toString());
 	}
-	
+
+	public static SlimInviteTalkMessage fromStringItems(Map pItems) throws SlimException {
+		SlimUserContact ex = 
+			SlimUserContact.fromString((String)pItems.get(CONTACT_ITEM));
+		SlimUserContact suc = 
+			SlimUserContact.fromString((String)pItems.get(SENDER_ITEM));
+		String tid = (String)pItems.get(TALKID_ITEM);
+		return new SlimInviteTalkMessage(suc, tid, ex);
+	}
+
 }

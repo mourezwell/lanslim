@@ -1,9 +1,11 @@
 package com.oz.lanslim.message;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimNewTalkMessage extends SlimTalkMessage implements Serializable {
@@ -28,12 +30,21 @@ public class SlimNewTalkMessage extends SlimTalkMessage implements Serializable 
 	}
 
 	public String toString() {
-		String s = "";
-		for (Iterator it = participants.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			s = s + suc.toString() + LIST_SEPARATOR;
+		return super.toString() + itemToString(TITLE_ITEM, title) 
+		+ itemToString(PARTICIPANTS_ITEM, listToString(participants));
+	}
+
+	public static SlimNewTalkMessage fromStringItems(Map pItems) throws SlimException {
+		String titl = (String)pItems.get(TITLE_ITEM);
+		SlimUserContact suc = 
+			SlimUserContact.fromString((String)pItems.get(SENDER_ITEM));
+		String tid = (String)pItems.get(TALKID_ITEM);
+		String[] attendees = listFromString((String)pItems.get(PARTICIPANTS_ITEM));
+		List part = new ArrayList(attendees.length);
+		for (int i = 0; i < attendees.length; i++) {
+			part.add(SlimUserContact.fromString(attendees[i]));
 		}
-		return super.toString() + itemToString(TITLE_ITEM, title) + itemToString(PARTICIPANTS_ITEM, s);
+		return new SlimNewTalkMessage(suc, tid, titl, part);
 	}
 
 }

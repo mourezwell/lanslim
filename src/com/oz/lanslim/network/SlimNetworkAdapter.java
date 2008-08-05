@@ -8,7 +8,7 @@ import java.util.TimerTask;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
-import com.oz.lanslim.message.SlimErrorTalkMessage;
+import com.oz.lanslim.message.SlimExcludeTalkMessage;
 import com.oz.lanslim.message.SlimExitTalkMessage;
 import com.oz.lanslim.message.SlimInviteTalkMessage;
 import com.oz.lanslim.message.SlimMessage;
@@ -79,7 +79,7 @@ public class SlimNetworkAdapter implements Runnable {
 							SlimAvailabilityUserMessage saum = (SlimAvailabilityUserMessage)sm;
 							model.getContacts().receiveAvailabiltyMessage(saum);
 						} 
-						else if (SlimMessageTypeEnum.UPDATE_SETTINGS.equals(sm.getType())) {
+						else if (SlimMessageTypeEnum.UPDATE_USER.equals(sm.getType())) {
 							SlimUpdateUserMessage suum = (SlimUpdateUserMessage)sm;
 							model.getContacts().receiveUpdateUserMessage(suum);
 						}
@@ -88,17 +88,6 @@ public class SlimNetworkAdapter implements Runnable {
 							boolean success = model.getTalks().receiveNewTalkMessage(sntm);
 							if (!success) {
 								SlimLogger.log("Unable to start new talk ");
-							}
-
-						} 
-						else if (SlimMessageTypeEnum.ERROR_TALK.equals(sm.getType())) {
-							SlimErrorTalkMessage setm = (SlimErrorTalkMessage)sm;
-							SlimTalk st = model.getTalks().getTalkById(setm.getTalkId());
-							if (st != null) {
-								st.receiveErrorTalkMessage(setm);
-							}
-							else {
-								SlimLogger.log("Received invalid talk id in message, message ignored " + setm);
 							}
 						} 
 						else if (SlimMessageTypeEnum.EXIT_TALK.equals(sm.getType())) {
@@ -132,6 +121,20 @@ public class SlimNetworkAdapter implements Runnable {
 								SlimLogger.log("Received invalid talk id in message, message ignored " + sutm);
 							}
 						}
+						else if (SlimMessageTypeEnum.EXCLUDE_TALK.equals(sm.getType())) {
+							SlimExcludeTalkMessage setm = (SlimExcludeTalkMessage)sm;
+							SlimTalk st = model.getTalks().getTalkById(setm.getTalkId());
+							if (st != null) {
+								st.receiveExcludeTalkMessage(setm);
+								iconListener.startIconBlinking();
+							}
+							else {
+								SlimLogger.log("Received invalid talk id in message, message ignored " + setm);
+							}
+						}				
+						else {
+							SlimLogger.log("Received invalid message or contacts not initailzed yet " + sm);
+						}
 					}
 					catch (RuntimeException re) {
 						SlimLogger.log(re + " caught when receiving message " + re.getMessage());
@@ -152,7 +155,7 @@ public class SlimNetworkAdapter implements Runnable {
 	
 	public void send(SlimMessage pMessage, SlimUserContact pContact) throws SlimException {
 		
-		if (pMessage.getType() == SlimMessageTypeEnum.UPDATE_SETTINGS) {
+		if (pMessage.getType() == SlimMessageTypeEnum.UPDATE_USER) {
 			reset();
 		}
 		if (initOK) {

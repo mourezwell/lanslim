@@ -9,14 +9,24 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.Map;
 
+import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.message.SlimAvailabilityUserMessage;
+import com.oz.lanslim.message.SlimExcludeTalkMessage;
+import com.oz.lanslim.message.SlimExitTalkMessage;
+import com.oz.lanslim.message.SlimInviteTalkMessage;
 import com.oz.lanslim.message.SlimMessage;
+import com.oz.lanslim.message.SlimMessageTypeEnum;
+import com.oz.lanslim.message.SlimNewTalkMessage;
+import com.oz.lanslim.message.SlimUpdateTalkMessage;
+import com.oz.lanslim.message.SlimUpdateUserMessage;
 import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimSocket {
 
-	private static final int MAX_MESSAGE_SIZE = 32000;
+	private static final int MAX_MESSAGE_SIZE = 32768;
 	private DatagramSocket socket;
 	
 	public SlimSocket(String pHost, int pPort) throws SocketException {
@@ -27,7 +37,9 @@ public class SlimSocket {
 	public void close() {
 		socket.close();
 	}
-
+	
+/* Serilaization Solution 
+ 
 	public SlimMessage receive() throws IOException {
 		DatagramPacket dp = new DatagramPacket(new byte[MAX_MESSAGE_SIZE], MAX_MESSAGE_SIZE);
 		socket.receive(dp);
@@ -61,5 +73,56 @@ public class SlimSocket {
 		dp.setSocketAddress(new InetSocketAddress(pContact.getHost(), pContact.getPort()));
 		socket.send(dp);
 	}
-	
+ */
+
+	/* without serialization */
+	public SlimMessage receive() throws IOException {
+		DatagramPacket dp = new DatagramPacket(new byte[MAX_MESSAGE_SIZE], MAX_MESSAGE_SIZE);
+		socket.receive(dp);
+		String lMessage = new String(dp.getData(), 0, dp.getLength());
+		try {
+			Map lItems = SlimMessage.itemsFromString(lMessage);
+			SlimMessageTypeEnum type = SlimMessage.getType(lItems);
+			
+			if (type == SlimMessageTypeEnum.AVAILABILITY) {
+				return SlimAvailabilityUserMessage.fromStringItems(lItems);
+			} 
+			else if (type == SlimMessageTypeEnum.EXCLUDE_TALK){
+				return SlimExcludeTalkMessage.fromStringItems(lItems);
+			}				
+			else if (type == SlimMessageTypeEnum.EXIT_TALK) { 
+				return SlimExitTalkMessage.fromStringItems(lItems);
+			}
+			else if (type == SlimMessageTypeEnum.INVITE_TALK){
+				return SlimInviteTalkMessage.fromStringItems(lItems);
+			}				
+			else if (type == SlimMessageTypeEnum.NEW_TALK){
+				return SlimNewTalkMessage.fromStringItems(lItems);
+			}				
+			else if (type == SlimMessageTypeEnum.UPDATE_USER){
+				return SlimUpdateUserMessage.fromStringItems(lItems);
+			}				
+			else if (type == SlimMessageTypeEnum.UPDATE_TALK){
+				return SlimUpdateTalkMessage.fromStringItems(lItems);
+			}				
+			else {
+				SlimLogger.log("Received Unknown Type : " + type);
+				return null;
+			}
+		}
+		catch (SlimException se) {
+			SlimLogger.log("Received Unrecognized datagram : " + lMessage);
+			return null;
+		}
+	}
+
+	public void send(SlimMessage pMessage, SlimUserContact pContact) throws IOException {
+		String lMessageAstring = pMessage.toString();
+		byte[] ba = lMessageAstring.getBytes();
+		DatagramPacket dp = new DatagramPacket(ba, ba.length);
+		dp.setSocketAddress(new InetSocketAddress(pContact.getHost(), pContact.getPort()));
+		socket.send(dp);
+	}
+
+	/* */
 }

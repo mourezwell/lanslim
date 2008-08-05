@@ -11,7 +11,7 @@ public class SlimMessageTypeEnum implements Serializable {
 	private int id = 0;
 	private String text = null;
 	
-	public static final SlimMessageTypeEnum UPDATE_SETTINGS = new SlimMessageTypeEnum(0, "UPDATE_SETTINGS");
+	public static final SlimMessageTypeEnum UPDATE_USER = new SlimMessageTypeEnum(0, "UPDATE_USER");
 
 	public static final SlimMessageTypeEnum AVAILABILITY = new SlimMessageTypeEnum(1, "AVAILABILITY");
 	
@@ -23,8 +23,7 @@ public class SlimMessageTypeEnum implements Serializable {
 
 	public static final SlimMessageTypeEnum UPDATE_TALK = new SlimMessageTypeEnum(5, "UPDATE_TALK");
 
-	public static final SlimMessageTypeEnum ERROR_TALK = new SlimMessageTypeEnum(6, "ERROR_TALK");
-	
+	public static final SlimMessageTypeEnum EXCLUDE_TALK = new SlimMessageTypeEnum(6, "EXCLUDE_TALK");
 	
 	private SlimMessageTypeEnum(int i, String s) {
 		id = i;
@@ -35,6 +34,30 @@ public class SlimMessageTypeEnum implements Serializable {
 		return text;
 	}
 
+	public static SlimMessageTypeEnum fromString(String pType) throws SlimException {
+		if (UPDATE_USER.toString().equals(pType)) {
+			return UPDATE_USER;
+		}
+		if (AVAILABILITY.toString().equals(pType)) {
+			return AVAILABILITY;
+		}
+		if (NEW_TALK.toString().equals(pType)) {
+			return NEW_TALK;
+		}
+		if (EXIT_TALK.toString().equals(pType)) {
+			return EXIT_TALK;
+		}
+		if (INVITE_TALK.toString().equals(pType)) {
+			return INVITE_TALK;
+		}
+		if (UPDATE_TALK.toString().equals(pType)) {
+			return UPDATE_TALK;
+		}
+		if (EXCLUDE_TALK.toString().equals(pType)) {
+			return EXCLUDE_TALK;
+		}
+		throw new SlimException("Invald Message type " + pType);
+	}
 	public int toInt() {
 		return id;
 	}
@@ -42,7 +65,7 @@ public class SlimMessageTypeEnum implements Serializable {
 	public static SlimMessageTypeEnum fromInt(int pType) throws SlimException {
 		switch (pType) {
 			case 0:
-				return UPDATE_SETTINGS;
+				return UPDATE_USER;
 			case 1:
 				return AVAILABILITY;
 			case 2:
@@ -54,7 +77,7 @@ public class SlimMessageTypeEnum implements Serializable {
 			case 5: 
 				return UPDATE_TALK;
 			case 6: 
-				return ERROR_TALK;
+				return EXCLUDE_TALK;
 			default:
 				throw new SlimException("Invald Message type " + pType);
 		}
