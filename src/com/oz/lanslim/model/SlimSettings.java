@@ -2,7 +2,6 @@ package com.oz.lanslim.model;
 
 import java.awt.Dimension;
 import java.awt.Point;
-import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

@@ -368,12 +368,6 @@ public class SlimContactList {
 		}
 	}
 	
-	private void notifyErrorToListener(String pMessage) {
-		if (listener != null) {
-			listener.notifyContactError(pMessage);
-		}
-	}
-
 	public void addContactListener(SlimContactListener pListener) {
 		listener = pListener;
 	}

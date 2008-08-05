@@ -6,6 +6,4 @@ public interface SlimTalkListener {
 
 	public void notifyNewTalk(SlimTalk pTalk);
 	
-	public void notifyNewTalkError(String pMessage);
-
 }

@@ -7,6 +7,10 @@ import com.oz.lanslim.SlimException;
 
 public abstract class SlimContact implements Serializable {
 
+	protected static final String HOST_SEPARATOR = "@";  
+	protected static final String PORT_SEPARATOR = ":";  
+	protected final static String FORMIDDEN_CHAR = "]";
+	
 	private String name = null;
 
 	private SlimAvailabilityEnum availability = SlimAvailabilityEnum.OFFLINE;
@@ -23,8 +27,13 @@ public abstract class SlimContact implements Serializable {
 		if (pName == null || pName.trim().length() == 0) {
 			throw new SlimException("Invalid User/Group Name which must not be null or empty");
 		}
-		else if (pName.indexOf("@") > 0) {
-			throw new SlimException("Invalid User/Group Name which must not contain @ character");
+		else if (pName.indexOf(HOST_SEPARATOR) > 0) {
+			throw new SlimException("Invalid User/Group Name which must not contain character " 
+					+ HOST_SEPARATOR);
+		}
+		else if (pName.indexOf(FORMIDDEN_CHAR) > 0) {
+			throw new SlimException("Invalid User/Group Name which must not contain character " 
+					+ FORMIDDEN_CHAR);
 		}
 		name = pName;
 	}

@@ -11,7 +11,7 @@ import java.util.List;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.gui.SlimIcon;
-import com.oz.lanslim.message.SlimErrorTalkMessage;
+import com.oz.lanslim.message.SlimExcludeTalkMessage;
 import com.oz.lanslim.message.SlimExitTalkMessage;
 import com.oz.lanslim.message.SlimInviteTalkMessage;
 import com.oz.lanslim.message.SlimNewTalkMessage;
@@ -58,11 +58,6 @@ public class SlimTalk {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!newPeopleIn.contains(suc)) {
 				newPeopleIn.add(suc);
-			}
-		}
-		for (Iterator it = pInvitedContacts.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!peopleIn.contains(suc)) {
 				sendNewTalkMessage(suc, newPeopleIn);
 				sendInviteTalkMessage(suc);
 				text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
@@ -77,19 +72,58 @@ public class SlimTalk {
 			listener.notifyTextTalkUpdate(this);
 		}
 	}
+
+	public synchronized void removePeople(Object[] pExcludedContacts) throws SlimException {
+		
+		List newPeopleIn = new ArrayList();
+		newPeopleIn.addAll(peopleIn);
+		SlimUserContact suc = null;
+		for (int i = 0; i < pExcludedContacts.length; i++) {;
+			if (newPeopleIn.contains(pExcludedContacts[i])) {
+				suc = (SlimUserContact)pExcludedContacts[i];
+				newPeopleIn.remove(suc);
+				sendExcludeTalkMessage(suc);
+				text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
+					+ suc.getName() + " has been excluded from the talk by you</b><br>";
+				if (listener !=  null) {
+					listener.notifyTextTalkUpdate(this);
+				}
+			}
+		}
+		peopleIn = newPeopleIn;
+		if (listener !=  null) {
+			listener.notifyTextTalkUpdate(this);
+		}
+	}
+
+	public synchronized List getPeopleIn() {
+		return peopleIn;
+	}
 	
-	public synchronized String getPeopleIn() {	
+	public synchronized String getPeopleInListAsString() {
 		String lResult = ""; 
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
-			lResult = lResult + suc.getName() + "\n";
+			lResult = lResult + suc.getName() + ", ";
 		}
-		return lResult.substring(0, lResult.length() - 1);
+		return lResult;
 	}
 	
 	private void sendInviteTalkMessage(SlimUserContact pContact) throws SlimException {
 		SlimUserContact sender = model.getSettings().getContactInfo();
 		SlimInviteTalkMessage setm = new SlimInviteTalkMessage(sender, getId(), pContact);
+		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+			SlimUserContact suc = (SlimUserContact)it.next();
+			if (!suc.equals(model.getSettings().getContactInfo())) {
+				model.getNetworkAdapter().send(setm, suc);
+			}
+		}
+	}
+
+	
+	private void sendExcludeTalkMessage(SlimUserContact pContact) throws SlimException {
+		SlimUserContact sender = model.getSettings().getContactInfo();
+		SlimExcludeTalkMessage setm = new SlimExcludeTalkMessage(sender, getId(), pContact);
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
@@ -112,20 +146,25 @@ public class SlimTalk {
 		}
 	}
 	
-	// no sendErrorMessage in talk class because this message means impossible to create talk
-	// the message is sent in TalkList class
-	public synchronized void receiveErrorTalkMessage(SlimErrorTalkMessage pMessage) {
-		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getSender());
+	public synchronized void receiveExcludeTalkMessage(SlimExcludeTalkMessage pMessage) {
+		
+		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getExcludedContact());
 		if (peopleIn.contains(knownSuc)) {
 			peopleIn.remove(knownSuc);
 			text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
-				+ pMessage.getSender().getName() + " can not join the talk </b><br>";
+				+ pMessage.getExcludedContact().getName() + " has been excluded from the talk by " 
+				+ pMessage.getSender().getName() + "</b><br>";
+			if (model.getSettings().getContactInfo().equals(knownSuc)) {
+				text = text + "<font color=\"FF0000\"><b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
+				+ "This talk tab won't be updated anymore even if you are invited back, which will appear as a new talk for you</b></font><br>";
+				peopleIn.clear();
+			}
 			if (listener !=  null) {
 				listener.notifyTextTalkUpdate(this);
 			}
 		}
 	}
-	
+
 	protected synchronized void sendExitTalkMessage() throws SlimException {
 		SlimUserContact sender = model.getSettings().getContactInfo();
 		SlimExitTalkMessage setm = new SlimExitTalkMessage(sender, getId());

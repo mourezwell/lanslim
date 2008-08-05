@@ -2,10 +2,16 @@ package com.oz.lanslim.model;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.oz.lanslim.SlimException;
 
 public class SlimUserContact extends SlimContact implements Serializable {
+
+	private static final Pattern USER_PATTERN = Pattern.compile(
+			"([^" + HOST_SEPARATOR + "]*)" + HOST_SEPARATOR + 
+			"([^\\" + PORT_SEPARATOR + "]*)" + PORT_SEPARATOR + "([0-9]{1,6})");  
 
 	private String host = null;
 
@@ -45,6 +51,12 @@ public class SlimUserContact extends SlimContact implements Serializable {
 		else if (address.getAddress().isAnyLocalAddress()) {
 			throw new SlimException(pIp + " must not be wildcard address");
 		}
+		else if (pIp.indexOf(PORT_SEPARATOR) > 0) {
+			throw new SlimException(pIp + " must not contain character " + PORT_SEPARATOR );
+		}
+		else if (pIp.indexOf(FORMIDDEN_CHAR) > 0) {
+			throw new SlimException(pIp + " must not contain character " + FORMIDDEN_CHAR );
+		}
 		host = pIp;
 	}
 
@@ -83,6 +95,15 @@ public class SlimUserContact extends SlimContact implements Serializable {
 	}
 	
 	public String toString() {
-		return (getName()+"@"+host+":"+port);
+		return (getName() + HOST_SEPARATOR + host + PORT_SEPARATOR + port);
 	}
+	
+	public static SlimUserContact fromString(String pString) throws SlimException {
+		Matcher lMatch = USER_PATTERN.matcher(pString);
+		if (lMatch.matches()) {
+			return new SlimUserContact(lMatch.group(1), lMatch.group(2), lMatch.group(3));
+		}
+		throw new SlimException(pString + " does not match user pattern ");
+	}
+
 }

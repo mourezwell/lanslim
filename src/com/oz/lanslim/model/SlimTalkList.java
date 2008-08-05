@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.oz.lanslim.SlimException;
-import com.oz.lanslim.message.SlimErrorTalkMessage;
 import com.oz.lanslim.message.SlimNewTalkMessage;
 
 public class SlimTalkList {
@@ -55,32 +54,15 @@ public class SlimTalkList {
 			SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(suc);
 			attendees.add(knownSuc);
 		}
-		
-		if (talks.containsKey(pMessage.getTalkId()) || listener == null) {
-			try {
-				sendErrorTalkMessage(attendees, pMessage.getTalkId());
-			}
-			catch (SlimException se) {
-				// no network error possible in this case since we have received a message thanks to it
-			}
-			return false;
-		}
+
 		SlimTalk lTalk = new SlimTalk(model, pMessage.getTitle(), pMessage.getTalkId(), attendees);
+		// the new talk may replace previous one, which won't be updated anymore
 		talks.put(lTalk.getId(), lTalk);
 		listener.notifyNewTalk(lTalk);
+		
 		return true;
 	}
 
-	private void sendErrorTalkMessage(List pAttendees, String pTalkId) throws SlimException {
-		SlimErrorTalkMessage setm = new SlimErrorTalkMessage(model.getSettings().getContactInfo(), pTalkId);
-		for (Iterator it = pAttendees.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
-				model.getNetworkAdapter().sendDelayedMessage(setm, suc);
-			}
-		}
-	}
-	
 	public synchronized void sendExitMessage() throws SlimException {
 		
 		for (Iterator it = talks.values().iterator(); it.hasNext();) {

@@ -30,6 +30,20 @@ public class SlimAvailabilityEnum implements Serializable {
 		return id;
 	}
 
+	public static SlimAvailabilityEnum fromString(String pType) throws SlimException {
+		
+		if (ONLINE.toString().equals(pType)) {
+			return ONLINE;
+		}
+		if (OFFLINE.toString().equals(pType)) {
+			return OFFLINE;
+		}
+		if (UNKNOWN.toString().equals(pType)) {
+			return UNKNOWN;
+		}
+		throw new SlimException("Invalid Availability " + pType);
+	}
+
 	public static SlimAvailabilityEnum fromInt(int pType) throws SlimException {
 		switch (pType) {
 			case 0:
