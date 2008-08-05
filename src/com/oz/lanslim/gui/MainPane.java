@@ -178,20 +178,22 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 		else if (e.getActionCommand() == MainPaneActionCommand.EXIT) {
 			System.exit(0);
 		}
-		else if (model.getSettings().areValidSettings()) {
-			if (e.getActionCommand() == MainPaneActionCommand.NEW_TALK) {
-				NewTalkFrame lFrame = new NewTalkFrame(
-						(Frame)this.getRootPane().getParent(), model, null, null);
-				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
-				lFrame.setVisible(true);
+		else if (e.getActionCommand() == MainPaneActionCommand.NEW_TALK) {
+			if (model.getSettings().areValidSettings()) {
+				if (e.getActionCommand() == MainPaneActionCommand.NEW_TALK) {
+					NewTalkFrame lFrame = new NewTalkFrame(
+							(Frame)this.getRootPane().getParent(), model, null, null);
+					lFrame.pack();
+					lFrame.setLocationRelativeTo(this);
+					lFrame.setVisible(true);
+				}
+				else {
+					JOptionPane.showMessageDialog(this,
+					    "All actions are disabled until you set properly your settings",
+					    "Invalid Action",
+					    JOptionPane.WARNING_MESSAGE);
+				}
 			}
-		}
-		else {
-			JOptionPane.showMessageDialog(this,
-			    "All actions are disabled until you set properly your settings",
-			    "Invalid Action",
-			    JOptionPane.WARNING_MESSAGE);
 		}
 	}
 

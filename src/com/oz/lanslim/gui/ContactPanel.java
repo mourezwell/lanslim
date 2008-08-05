@@ -202,185 +202,193 @@ public class ContactPanel extends JPanel
 	}
 
 	public void actionPerformed(ActionEvent e ) {
-		if (e.getActionCommand() == ContactPaneActionCommand.HIDE_GROUPS) {
-			model.getSettings().setGroupHidden(hideGroupCheckBox.isSelected());
-			contactTable.filter(filterField.getText(), 
-					hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.HIDE_OFFLINE) {
-			model.getSettings().setOfflineHidden(hideOfflineCheckBox.isSelected());
-			contactTable.filter(filterField.getText(), 
-					hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.NEW_TALK_POPUP) {
-			List lContactsToTalkWith = new ArrayList();
-			SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
-			for (int j = 0 ; j < lSelectedContacts.length; j++) {
-				lContactsToTalkWith.add(lSelectedContacts[j]);
+		if (model.getSettings().areValidSettings()) {
+			if (e.getActionCommand() == ContactPaneActionCommand.HIDE_GROUPS) {
+				model.getSettings().setGroupHidden(hideGroupCheckBox.isSelected());
+				contactTable.filter(filterField.getText(), 
+						hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
 			}
-			NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
-					model, lContactsToTalkWith, null);
-			lFrame.pack();
-			lFrame.setLocationRelativeTo(this);
-			lFrame.setVisible(true);
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.INVITE_POPUP) {
-			SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
-			if (lSelectedContacts.length >= 1) {
-				List cl = new ArrayList();
+			else if (e.getActionCommand() == ContactPaneActionCommand.HIDE_OFFLINE) {
+				model.getSettings().setOfflineHidden(hideOfflineCheckBox.isSelected());
+				contactTable.filter(filterField.getText(), 
+						hideGroupCheckBox.isSelected(), hideOfflineCheckBox.isSelected());
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.NEW_TALK_POPUP) {
+				List lContactsToTalkWith = new ArrayList();
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
 				for (int j = 0 ; j < lSelectedContacts.length; j++) {
-					SlimContact sc  = lSelectedContacts[j];
-					if (sc.isGroup()) {
-						cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
-					}
-					else {
-						if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
-							cl.add(sc);
+					lContactsToTalkWith.add(lSelectedContacts[j]);
+				}
+				NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
+						model, lContactsToTalkWith, null);
+				lFrame.pack();
+				lFrame.setLocationRelativeTo(this);
+				lFrame.setVisible(true);
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.INVITE_POPUP) {
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				if (lSelectedContacts.length >= 1) {
+					List cl = new ArrayList();
+					for (int j = 0 ; j < lSelectedContacts.length; j++) {
+						SlimContact sc  = lSelectedContacts[j];
+						if (sc.isGroup()) {
+							cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
+						}
+						else {
+							if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
+								cl.add(sc);
+							}
 						}
 					}
-				}
-				SlimTalk st = talkDisplay.getDisplayedTalk();
-				if (st != null) {
-					try {
-						st.addPeople(cl);
+					SlimTalk st = talkDisplay.getDisplayedTalk();
+					if (st != null) {
+						try {
+							st.addPeople(cl);
+						}
+						catch (SlimException se) {
+							JOptionPane.showMessageDialog(this,
+								    "Unable to send Invitation message or notification",
+								    "Network Error",
+								    JOptionPane.ERROR_MESSAGE);
+						}
 					}
-					catch (SlimException se) {
+					else {
 						JOptionPane.showMessageDialog(this,
-							    "Unable to send Invitation message or notification",
-							    "Network Error",
-							    JOptionPane.ERROR_MESSAGE);
+							    "At least one talk must be started",
+							    "Invalid Action",
+							    JOptionPane.WARNING_MESSAGE);
 					}
 				}
 				else {
 					JOptionPane.showMessageDialog(this,
-						    "At least one talk must be started",
+					    "At least one contact must be selected",
+					    "Invalid Action",
+					    JOptionPane.WARNING_MESSAGE);
+				}
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.USER_ADD) {
+				NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
+						model, null);
+				lFrame.pack();
+				lFrame.setLocationRelativeTo(this);
+				lFrame.setVisible(true);
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.GROUP_ADD) {
+				NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
+						model, null);
+				lFrame.pack();
+				lFrame.setLocationRelativeTo(this);
+				lFrame.setVisible(true);
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.ALL_REFRESH) {
+				model.getContacts().refresh();
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.USER_EDIT) {
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				if (lSelectedContacts.length == 1) {
+					SlimContact sc = lSelectedContacts[0];
+					if (sc.isGroup()) {
+						NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
+								model, (SlimGroupContact)sc);
+						lFrame.pack();
+						lFrame.setLocationRelativeTo(this);
+						lFrame.setVisible(true);
+						
+					}
+					else {
+						NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
+								model, (SlimUserContact)sc);
+						lFrame.pack();
+						lFrame.setLocationRelativeTo(this);
+						lFrame.setVisible(true);
+					}
+				}
+				else {
+					String[] lSelectedCategories = contactTable.getSelectedCategories();
+					if (lSelectedCategories.length == 1) {
+						NewCategoryFrame lFrame = new NewCategoryFrame((Frame)this.getRootPane().getParent(), 
+								model, lSelectedCategories[0]);
+						lFrame.pack();
+						lFrame.setLocationRelativeTo(this);
+						lFrame.setVisible(true);
+					}
+					else {
+						JOptionPane.showMessageDialog(this,
+						    "One and only one user/group/category must be selected please select it first",
+						    "Invalid Action",
+						    JOptionPane.WARNING_MESSAGE);
+					}
+				}
+			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.USER_REFRESH_POPUP) {
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				if (lSelectedContacts.length == 1) {
+					model.getContacts().refresh(lSelectedContacts[0]);
+				}
+				else {
+					JOptionPane.showMessageDialog(this,
+						    "One and only one contact must be selected please select it first",
 						    "Invalid Action",
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
-			else {
-				JOptionPane.showMessageDialog(this,
-				    "At least one contact must be selected",
-				    "Invalid Action",
-				    JOptionPane.WARNING_MESSAGE);
-			}
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.USER_ADD) {
-			NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
-					model, null);
-			lFrame.pack();
-			lFrame.setLocationRelativeTo(this);
-			lFrame.setVisible(true);
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.GROUP_ADD) {
-			NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
-					model, null);
-			lFrame.pack();
-			lFrame.setLocationRelativeTo(this);
-			lFrame.setVisible(true);
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.ALL_REFRESH) {
-			model.getContacts().refresh();
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.USER_EDIT) {
-			SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
-			if (lSelectedContacts.length == 1) {
-				SlimContact sc = lSelectedContacts[0];
-				if (sc.isGroup()) {
-					NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
-							model, (SlimGroupContact)sc);
-					lFrame.pack();
-					lFrame.setLocationRelativeTo(this);
-					lFrame.setVisible(true);
+			else if (e.getActionCommand() == ContactPaneActionCommand.USER_DEL) {
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				String lToDel = "";
+				if (lSelectedContacts.length < 1) {
+					String[] lSelectedCategories = contactTable.getSelectedCategories();
+					if (lSelectedCategories.length < 1) {
+						JOptionPane.showMessageDialog(this,
+							    "At least one Group/User/Category must be selected",
+							    "Invalid Action",
+							    JOptionPane.WARNING_MESSAGE);
+					}
+					else {
+						for (int j = 0 ; j < lSelectedCategories.length; j++) {
+							lToDel = lToDel + "\n-" + lSelectedCategories[j];
+						}
+						int a = JOptionPane.showConfirmDialog(this,
+							    "Are you sure you want to delete categorie(s) listed here below" + lToDel,
+							    "Delete confirmation",
+							    JOptionPane.YES_NO_OPTION,
+							    JOptionPane.WARNING_MESSAGE);
+						if (a == JOptionPane.YES_OPTION) {
+							for (int j = 0 ; j < lSelectedCategories.length; j++) {
+								model.getContacts().removeCategory(lSelectedCategories[j]);
+							}
+		                }
+					}
+				}
+				else {
 					
-				}
-				else {
-					NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
-							model, (SlimUserContact)sc);
-					lFrame.pack();
-					lFrame.setLocationRelativeTo(this);
-					lFrame.setVisible(true);
-				}
-			}
-			else {
-				String[] lSelectedCategories = contactTable.getSelectedCategories();
-				if (lSelectedCategories.length == 1) {
-					NewCategoryFrame lFrame = new NewCategoryFrame((Frame)this.getRootPane().getParent(), 
-							model, lSelectedCategories[0]);
-					lFrame.pack();
-					lFrame.setLocationRelativeTo(this);
-					lFrame.setVisible(true);
-				}
-				else {
-					JOptionPane.showMessageDialog(this,
-					    "One and only one user/group/category must be selected please select it first",
-					    "Invalid Action",
-					    JOptionPane.WARNING_MESSAGE);
-				}
-			}
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.USER_REFRESH_POPUP) {
-			SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
-			if (lSelectedContacts.length == 1) {
-				model.getContacts().refresh(lSelectedContacts[0]);
-			}
-			else {
-				JOptionPane.showMessageDialog(this,
-					    "One and only one contact must be selected please select it first",
-					    "Invalid Action",
-					    JOptionPane.WARNING_MESSAGE);
-			}
-		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.USER_DEL) {
-			SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
-			String lToDel = "";
-			if (lSelectedContacts.length < 1) {
-				String[] lSelectedCategories = contactTable.getSelectedCategories();
-				if (lSelectedCategories.length < 1) {
-					JOptionPane.showMessageDialog(this,
-						    "At least one Group/User/Category must be selected",
-						    "Invalid Action",
-						    JOptionPane.WARNING_MESSAGE);
-				}
-				else {
-					for (int j = 0 ; j < lSelectedCategories.length; j++) {
-						lToDel = lToDel + "\n-" + lSelectedCategories[j];
+					for (int j = 0 ; j < lSelectedContacts.length; j++) {
+						lToDel = lToDel + "\n-" + lSelectedContacts[j].getName();
 					}
 					int a = JOptionPane.showConfirmDialog(this,
-						    "Are you sure you want to delete categorie(s) listed here below" + lToDel,
+						    "Are you sure you want to delete contact(s) listed here below" + lToDel,
 						    "Delete confirmation",
 						    JOptionPane.YES_NO_OPTION,
 						    JOptionPane.WARNING_MESSAGE);
 					if (a == JOptionPane.YES_OPTION) {
-						for (int j = 0 ; j < lSelectedCategories.length; j++) {
-							model.getContacts().removeCategory(lSelectedCategories[j]);
+						for (int j = 0 ; j < lSelectedContacts.length; j++) {
+							model.getContacts().removeContactByName(lSelectedContacts[j].getName());
 						}
 	                }
 				}
 			}
-			else {
-				
-				for (int j = 0 ; j < lSelectedContacts.length; j++) {
-					lToDel = lToDel + "\n-" + lSelectedContacts[j].getName();
-				}
-				int a = JOptionPane.showConfirmDialog(this,
-					    "Are you sure you want to delete contact(s) listed here below" + lToDel,
-					    "Delete confirmation",
-					    JOptionPane.YES_NO_OPTION,
-					    JOptionPane.WARNING_MESSAGE);
-				if (a == JOptionPane.YES_OPTION) {
-					for (int j = 0 ; j < lSelectedContacts.length; j++) {
-						model.getContacts().removeContactByName(lSelectedContacts[j].getName());
-					}
-                }
+			else if (e.getActionCommand() == ContactPaneActionCommand.CATEGORY_NEW) {
+				Frame mainFrame = JOptionPane.getFrameForComponent(this);
+				NewCategoryFrame lFrame = new NewCategoryFrame(mainFrame, model, null);
+				lFrame.pack();
+				lFrame.setLocationRelativeTo(this);
+				lFrame.setVisible(true);
 			}
 		}
-		else if (e.getActionCommand() == ContactPaneActionCommand.CATEGORY_NEW) {
-			Frame mainFrame = JOptionPane.getFrameForComponent(this);
-			NewCategoryFrame lFrame = new NewCategoryFrame(mainFrame, model, null);
-			lFrame.pack();
-			lFrame.setLocationRelativeTo(this);
-			lFrame.setVisible(true);
+		else {
+			JOptionPane.showMessageDialog(this,
+				    "All actions are disabled until you set properly your settings",
+				    "Invalid Action",
+				    JOptionPane.WARNING_MESSAGE);
 		}
 	}
 	
