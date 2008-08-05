@@ -25,12 +25,12 @@
     <maxHeapSize>0</maxHeapSize>
   </jre>
   <versionInfo>
-    <fileVersion>0.6.1.0</fileVersion>
-    <txtFileVersion>V0.61</txtFileVersion>
-    <fileDescription>Deployment version</fileDescription>
+    <fileVersion>0.7.0.0</fileVersion>
+    <txtFileVersion>V0.7</txtFileVersion>
+    <fileDescription>Deployement version</fileDescription>
     <copyright>Created by Olivier Mourez but free to use</copyright>
-    <productVersion>0.6.1.0</productVersion>
-    <txtProductVersion>V0.61</txtProductVersion>
+    <productVersion>0.7.0.0</productVersion>
+    <txtProductVersion>V0.7</txtProductVersion>
     <productName>LANSLIM (Local Area Network Instant Messaging)</productName>
     <companyName>None</companyName>
     <internalName>lanslim</internalName>

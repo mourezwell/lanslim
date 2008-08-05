@@ -39,7 +39,7 @@ public class LANSLIMMain extends JFrame
 	implements WindowFocusListener, SlimIconListener, ActionListener, ComponentListener {
 
 	
-	public static final String VERSION = "0.62";
+	public static final String VERSION = "0.7";
 	
 	{
 		

@@ -45,7 +45,7 @@
             <manifest>
               	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
               	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
-              	<attribute name="Implementation-Version" value="0.62"/>
+              	<attribute name="Implementation-Version" value="0.7"/>
             	<attribute name="Implementation-Vendor" value="Olivier Mourez"/>
 	            <attribute name="Main-Class" value="com.oz.lanslim.LANSLIMMain"/>
         	</manifest>         
