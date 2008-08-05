@@ -57,11 +57,10 @@ public class ContactTable extends JTable implements ContactView {
         if ((column == -1) || (row == -1)) {
             return false;
         }
-        if (getSelectedRowCount() == 0) {
+        if (getSelectedRowCount() <= 1) {
         	changeSelection(row, column, false, false);
         }
         return true;
-
 	}
 
     //Implement table header tool tips. 

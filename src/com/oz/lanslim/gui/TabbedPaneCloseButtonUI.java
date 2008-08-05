@@ -129,15 +129,15 @@ class TabbedPaneCloseButtonUI extends BasicTabbedPaneUI {
                 			pcla[i].propertyChange(evt);
                 		}
                 	}
+                	if (removeEnable) {
+                		tabPane.remove(tabIndex);
+                	}
                 	ChangeListener[] cla = tabPane.getChangeListeners();
                 	if (pcla != null ) {
                 		ChangeEvent evt = new ChangeEvent(tabPane);
                 		for (int i = 0; i < cla.length; i++) {
                 			cla[i].stateChanged(evt);
                 		}
-                	}
-                	if (removeEnable) {
-                		tabPane.remove(tabIndex);
                 	}
                 }
             }

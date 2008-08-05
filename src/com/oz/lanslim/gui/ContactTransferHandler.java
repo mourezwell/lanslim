@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -27,7 +26,7 @@ import com.oz.lanslim.model.SlimUserContact;
 public class ContactTransferHandler extends TransferHandler {
 	
 	private SlimTalk talk;
-	private JTabbedPane talkTabPane;
+	private TalkSelector talkTabPane;
 	private ContactTree tree;
 	private SlimModel model;
 	
@@ -42,7 +41,7 @@ public class ContactTransferHandler extends TransferHandler {
 	}
 
 	// for import in peopleAera
-	public ContactTransferHandler(JTabbedPane pTalkTabPane) {
+	public ContactTransferHandler(TalkSelector pTalkTabPane) {
 		talkTabPane = pTalkTabPane;
 	}
 
@@ -126,8 +125,8 @@ public class ContactTransferHandler extends TransferHandler {
         public boolean importData(JComponent comp, Transferable t) {
         	
         	SlimTalk st = null;
-        	if (talkTabPane != null && talkTabPane.getComponents().length > 0) {
-				st = ((TalkPane)talkTabPane.getSelectedComponent()).getTalk();
+        	if (talkTabPane != null && talkTabPane.getDisplayedTalk() != null) {
+				st = talkTabPane.getDisplayedTalk();
         	}
         	else if (talk != null) {
         		st = talk;

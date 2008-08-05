@@ -52,11 +52,6 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 		return columnNames.length;
 	}
 
-	public Object setValueAt(int rowIndex, int columnIndex) {
-		// Not used since table is not editable
-		return null;
-	}
-
 	public synchronized int getRowCount() {
 		int r = 0;
 		for (int i = 0; i < contactObjectArrayModel.length; i++) {

@@ -46,14 +46,14 @@ public class TalkPane extends JSplitPane
 	private JTextArea newMessageArea;
 	private JScrollPane talkAreaPane;
 	private JScrollPane messageAreaPane;
-	private JButton sendButton;
-	private JComboBox smileyCBox;
-	private JButton underlineButton;
-	private JButton italicButton;
-	private JButton boldButton;
 	private JPanel newMessagePane;
 	private JToolBar messageToolbar;
 	private JButton colorButton;
+	private JButton sendButton;
+	private JButton underlineButton;
+	private JButton italicButton;
+	private JButton boldButton;
+	private JComboBox smileyCBox;
 	private JComboBox sizeComboBox;
 
 	private MainPane mainPane = null;
@@ -133,7 +133,7 @@ public class TalkPane extends JSplitPane
 				{
 					ComboBoxModel sizeComboBoxModel = 
 						new DefaultComboBoxModel(
-								new String[] { "1", "2", "3", "4", "5", "6", "7"  });
+								new String[] { "1", "2", "3", "4", "5", "6", "7" });
 					sizeComboBox = new JComboBox();
 					sizeComboBox.setModel(sizeComboBoxModel);
 					sizeComboBox.setSelectedIndex(3);
@@ -163,8 +163,7 @@ public class TalkPane extends JSplitPane
 						intArray[i] = new Integer(i);
 					}
 					smileyCBox = new JComboBox(intArray);
-			        SmileyComboBoxRenderer renderer= new SmileyComboBoxRenderer();
-			        smileyCBox.setRenderer(renderer);
+			        smileyCBox.setRenderer(new SmileyComboBoxRenderer());
 			        smileyCBox.setMaximumRowCount(5);
 			        smileyCBox.setMaximumSize(new Dimension(80, 24));
 			        smileyCBox.addActionListener(this);
@@ -284,10 +283,6 @@ public class TalkPane extends JSplitPane
 		// job is done directly in main pane
 	}
 
-	public void notifyNewTalkError(String pMessage) {
-		// job is done directly in main pane
-	}
-
 	private void send() {
 		try {
 			talkModel.sendUpdateTalkMessage(newMessageArea.getText(), true);
@@ -314,6 +309,27 @@ public class TalkPane extends JSplitPane
 		talkArea.setText("<html>" + pTalk.getText() + "</html>");
 		talkArea.setCaretPosition(talkArea.getDocument().getLength());
 		mainPane.notifyTextTalkUpdate(pTalk);
+		
+		if (talkModel.getPeopleIn().size() <= 1) {
+			newMessageArea.setEnabled(false);
+			sendButton.setEnabled(false);
+			colorButton.setEnabled(false);
+			underlineButton.setEnabled(false);
+			italicButton.setEnabled(false);
+			boldButton.setEnabled(false);
+			smileyCBox.setEnabled(false);
+			sizeComboBox.setEnabled(false);
+		}
+		else {
+			newMessageArea.setEnabled(true);
+			sendButton.setEnabled(true);
+			colorButton.setEnabled(true);
+			underlineButton.setEnabled(true);
+			italicButton.setEnabled(true);
+			boldButton.setEnabled(true);
+			smileyCBox.setEnabled(true);
+			sizeComboBox.setEnabled(true);
+		}
 	}
 
 	private class TalkPaneActionCommand {
@@ -387,7 +403,7 @@ public class TalkPane extends JSplitPane
 		writer.write("#Lanslim Talk Export \n");
 		writer.write("#Date : " + new Date() + "\n");
 		writer.write("#Talk Title : " + talkModel.getTitle() + "\n");
-		writer.write("#People In : " + talkModel.getPeopleIn().replaceAll("\n", ", ") + "\n");
+		writer.write("#People In : " + talkModel.getPeopleInListAsString() + "\n");
 		writer.write("#Talk Text :\n");
 		Clipboard cb = new Clipboard("Lanslim");
 		talkArea.select(0, talkArea.getSelectionEnd()); // select All

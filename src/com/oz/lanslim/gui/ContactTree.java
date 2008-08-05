@@ -88,7 +88,7 @@ public class ContactTree extends JTree implements ContactView,
         if (row == -1) {
             return false;
         }
-        if (getSelectionCount() == 0) {
+        if (getSelectionCount() <= 1) {
         	setSelectionRow(row);
         }
         return true;

@@ -23,7 +23,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -58,10 +57,12 @@ public class SettingsFrame extends JDialog implements ActionListener {
 	private FileDialog fileChooser; 
 	
 	private SlimModel model;
+	private boolean userLocked;
 	
-	public SettingsFrame(Frame pParent, SlimModel pModel) {
+	public SettingsFrame(Frame pParent, SlimModel pModel, boolean pUserLocked) {
 		super(pParent, true);
 		model = pModel;
+		userLocked = pUserLocked;
 		initGUI();
 	}
 
@@ -245,6 +246,12 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				buttonPanel.add(cancelButton);
 				
 				getContentPane().add(buttonPanel, new CellConstraints("4, 18, 1, 1, default, center"));
+			}
+			
+			if (userLocked) {
+				nameField.setEnabled(false);
+				hostField.setEnabled(false);
+				portField.setEnabled(false);
 			}
 			
 		} catch(Exception e) {
