@@ -20,6 +20,10 @@ public class SlimSettings {
 	private static final String HOST_PROP = SLIM_SETTINGS_PROPS_PREFIX + "host";
 	private static final String PORT_PROP = SLIM_SETTINGS_PROPS_PREFIX + "port";
 	private static final String COLOR_PROP = SLIM_SETTINGS_PROPS_PREFIX + "color";
+	private static final String UNDERLINE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "underline";
+	private static final String ITALIC_PROP = SLIM_SETTINGS_PROPS_PREFIX + "italic";
+	private static final String BOLD_PROP = SLIM_SETTINGS_PROPS_PREFIX + "bold";
+	private static final String SIZE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "size";
 	private static final String START_PROP = SLIM_SETTINGS_PROPS_PREFIX + "startAsTray";
 	private static final String CLOSE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "closeAsTray";
 	private static final String HIDEGRP_PROP = SLIM_SETTINGS_PROPS_PREFIX + "hideGroup";
@@ -35,6 +39,10 @@ public class SlimSettings {
 	
 	private static final String DEFAULT_NAME = "yourAlias";
 	private static final String DEFAULT_COLOR = "000000";
+	private static final int DEFAULT_SIZE = 4;
+	private static final boolean DEFAULT_BOLD = false;
+	private static final boolean DEFAULT_ITALIC = false;
+	private static final boolean DEFAULT_UNDERLINE = false;
 	private static final boolean DEFAULT_START = false;
 	private static final boolean DEFAULT_STOP = false;
 	private static final boolean DEFAULT_TRAY_ENABLE = true;
@@ -51,6 +59,10 @@ public class SlimSettings {
 	
 	private  SlimModel model = null;
 	private  String color = DEFAULT_COLOR;
+	private  int size = DEFAULT_SIZE;
+	private  boolean underline = DEFAULT_UNDERLINE;
+	private  boolean italic = DEFAULT_ITALIC;
+	private  boolean bold = DEFAULT_BOLD;
 	
 	private  boolean networkValid = DEFAULT_NETWORK_VALID;
 	private  boolean unlockPort = DEFAULT_UNLOCK_PORT;
@@ -78,6 +90,11 @@ public class SlimSettings {
 		contactInfo = new SlimUserContact(DEFAULT_NAME, InetAddress.getLocalHost().getHostName(), DEFAULT_PORT);
 		contactInfo.setAvailability(SlimAvailabilityEnum.OFFLINE);
 		color = DEFAULT_COLOR;
+		size = DEFAULT_SIZE;
+		underline = DEFAULT_UNDERLINE;
+		italic = DEFAULT_ITALIC;
+		bold = DEFAULT_BOLD;
+		
 		model = pModel;
 		networkValid = DEFAULT_NETWORK_VALID;
 		unlockPort = Boolean.getBoolean(UNLOCK_PORT_SYTEM_PROPERTY_KEY);
@@ -135,7 +152,32 @@ public class SlimSettings {
 				// ignore start exception
 			}
 		}
-		
+
+		lTemp = p.getProperty(SIZE_PROP);
+		if (lTemp != null) {
+			try {
+				setFontSize(Integer.parseInt(lTemp));
+			}
+			catch (SlimException se) {
+				// ignore start exception
+			}
+		}
+
+		lTemp = p.getProperty(BOLD_PROP);
+		if (lTemp != null) {
+			setBold(Boolean.valueOf(lTemp).booleanValue());
+		}
+
+		lTemp = p.getProperty(ITALIC_PROP);
+		if (lTemp != null) {
+			setItalic(Boolean.valueOf(lTemp).booleanValue());
+		}
+
+		lTemp = p.getProperty(UNDERLINE_PROP);
+		if (lTemp != null) {
+			setUnderline(Boolean.valueOf(lTemp).booleanValue());
+		}
+
 		lTemp = p.getProperty(START_PROP);
 		if (lTemp != null) {
 			setStartAsTray(Boolean.valueOf(lTemp).booleanValue());
@@ -242,6 +284,10 @@ public class SlimSettings {
 		p.put(PORT_PROP, Integer.toString(contactInfo.getPort()));
 		p.put(HOST_PROP, contactInfo.getHost());
 		p.put(COLOR_PROP, getColor());
+		p.put(SIZE_PROP, Integer.toString(getFontSize()));
+		p.put(BOLD_PROP, Boolean.toString(isBold()));
+		p.put(ITALIC_PROP, Boolean.toString(isItalic()));
+		p.put(UNDERLINE_PROP, Boolean.toString(isUnderline()));
 		p.put(START_PROP, Boolean.toString(isStartAsTray()));
 		p.put(CLOSE_PROP, Boolean.toString(isCloseAsTray()));
 		p.put(HIDEGRP_PROP, Boolean.toString(isGroupHidden()));
@@ -412,5 +458,42 @@ public class SlimSettings {
 		if (initOk) {
             model.storeSettings();
 		}
+	}
+
+	public boolean isBold() {
+		return bold;
+	}
+
+	public void setBold(boolean bold) {
+		this.bold = bold;
+	}
+
+	public boolean isItalic() {
+		return italic;
+	}
+
+	public void setItalic(boolean italic) {
+		this.italic = italic;
+	}
+
+	public int getFontSize() {
+		return size;
+	}
+
+	public void setFontSize(int size) throws SlimException {
+		if (size > 0  && size < 8) {
+			this.size = size;
+		}
+		else {
+			throw new SlimException("Invalid font size must be between 1 and 7");
+		}
+	}
+
+	public boolean isUnderline() {
+		return underline;
+	}
+
+	public void setUnderline(boolean underline) {
+		this.underline = underline;
 	}
 }
