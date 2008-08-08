@@ -13,6 +13,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.model.HTMLConstants;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimUserContact;
 
@@ -20,8 +21,11 @@ import javax.swing.JButton;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -52,17 +56,28 @@ public class SettingsFrame extends JDialog implements ActionListener {
 	private JLabel hostLabel;
 	private JLabel colorLabel;
 	private JButton colorButton;
+	private JButton underlineButton;
+	private JButton italicButton;
+	private JButton boldButton;
+	private JComboBox sizeComboBox;
+
 	private JCheckBox startAsTrayButton;
 	private JCheckBox closeAsTrayButton;
 	private FileDialog fileChooser; 
 	
 	private SlimModel model;
 	private boolean userLocked;
+	private boolean boldSelected;
+	private boolean italicSelected;
+	private boolean underSelected;
 	
 	public SettingsFrame(Frame pParent, SlimModel pModel, boolean pUserLocked) {
 		super(pParent, true);
 		model = pModel;
 		userLocked = pUserLocked;
+		boldSelected = model.getSettings().isBold();
+		italicSelected = model.getSettings().isItalic();
+		underSelected = model.getSettings().isUnderline();
 		initGUI();
 	}
 
@@ -112,18 +127,60 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			}
 			{
 				colorLabel = new JLabel();
-				colorLabel.setText("Color");
+				colorLabel.setText("Default Style");
 				getContentPane().add(colorLabel, new CellConstraints("2, 8, 1, 1, default, default"));
 			}
 			{
+				
+				JPanel buttonPanel = new JPanel();
+				boldButton = new JButton();
+				boldButton.setIcon(new SlimIcon("bold.png"));
+				boldButton.addActionListener(this);
+				boldButton.setActionCommand(SettingsActionCommand.BOLD);
+				boldButton.setToolTipText("Bold");
+				boldButton.setBorder(SlimButtonBorder.getSelectedBorder(boldSelected));
+				buttonPanel.add(boldButton);
+
+				italicButton = new JButton();
+				italicButton.setIcon(new SlimIcon("italic.png"));
+				italicButton.addActionListener(this);
+				italicButton.setActionCommand(SettingsActionCommand.ITALIC);
+				italicButton.setToolTipText("Italic");
+				italicButton.setBorder(SlimButtonBorder.getSelectedBorder(italicSelected));
+				buttonPanel.add(italicButton);
+
+				underlineButton = new JButton();
+				underlineButton.setIcon(new SlimIcon("underline.png"));
+				underlineButton.addActionListener(this);
+				underlineButton.setActionCommand(SettingsActionCommand.UNDERLINE);
+				underlineButton.setToolTipText("Underline");
+				underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(underSelected));
+				buttonPanel.add(underlineButton);
+
+				ComboBoxModel sizeComboBoxModel = 
+					new DefaultComboBoxModel(
+							new String[] { "1", "2", "3", "4", "5", "6", "7" });
+				sizeComboBox = new JComboBox();
+				sizeComboBox.setModel(sizeComboBoxModel);
+				sizeComboBox.setSelectedIndex(model.getSettings().getFontSize() - 1);
+				sizeComboBox.setMaximumSize(new Dimension(40, 20));
+				sizeComboBox.addActionListener(this);
+				sizeComboBox.setActionCommand(SettingsActionCommand.SIZE);
+				sizeComboBox.setToolTipText("Size (Html style, default is 4)");
+				buttonPanel.add(sizeComboBox);
+				
 				colorButton = new JButton();
-				colorButton.setText("<html><font color=\"" + model.getSettings().getColor() 
-						+ "\"><b>Default Color</b></font></html>");
+				colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
+						+ model.getSettings().getColor() + HTMLConstants.FONTSIZE 
+						+ "3" + HTMLConstants.TAGEND + HTMLConstants.BOLD +  "Default Color"  
+						+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 				colorButton.setMaximumSize(new Dimension(140, 20));
 				colorButton.addActionListener(this); 
-				colorButton.setActionCommand("Color");
-				colorButton.setToolTipText("Default Color");
-				getContentPane().add(colorButton, new CellConstraints("4, 8, 1, 1, default, default"));
+				colorButton.setActionCommand(SettingsActionCommand.COLOR);
+				colorButton.setToolTipText("Color");
+				buttonPanel.add(colorButton);
+				
+				getContentPane().add(buttonPanel, new CellConstraints("4, 8, 1, 1, default, default"));
 			}
 			{
 				JPanel closeActionGroupPanel = new JPanel(new GridLayout(0, 1));
@@ -135,8 +192,8 @@ public class SettingsFrame extends JDialog implements ActionListener {
 					JLabel trayLabel = new JLabel();
 					trayLabel.setIcon(new SlimIcon("info.png"));
 					closeActionGroupPanel.add(trayLabel);
-					trayLabel.setText("<html>SystemTrayIcon disabled, please check that <br>" 
-							+ " tray.dll(or so) is present in the executable directory</html>");
+					trayLabel.setText(HTMLConstants.HTML + "SystemTrayIcon disabled, please check that" + HTMLConstants.NEWLINE 
+							+ " tray.dll(or so) is present in the executable directory" + HTMLConstants.ENDHTML);
 				}
 				else {
 					startAsTrayButton = new JCheckBox("Start As Tray");
@@ -159,13 +216,13 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				importButton = new JButton();
 				importButton.setText("Import");
 				importButton.setIcon(new SlimIcon("folder_previous.png"));
-				importButton.setActionCommand("Import");
+				importButton.setActionCommand(SettingsActionCommand.IMPORT);
 				importButton.addActionListener(this);
 				
 				exportButton = new JButton();
 				exportButton.setText("Export");
 				exportButton.setIcon(new SlimIcon("folder_next.png"));
-				exportButton.setActionCommand("Export");
+				exportButton.setActionCommand(SettingsActionCommand.EXPORT);
 				exportButton.addActionListener(this);
 
 				buttonPanel.add(importButton);
@@ -234,12 +291,12 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				JPanel buttonPanel = new JPanel();
 				okButton = new JButton();
 				okButton.setText("OK");
-				okButton.setActionCommand("OK");
+				okButton.setActionCommand(SettingsActionCommand.OK);
 				okButton.addActionListener(this);
 				
 				cancelButton = new JButton();
 				cancelButton.setText("Cancel");
-				cancelButton.setActionCommand("Cancel");
+				cancelButton.setActionCommand(SettingsActionCommand.CANCEL);
 				cancelButton.addActionListener(this);
 
 				buttonPanel.add(okButton);
@@ -261,7 +318,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand().equals("OK")) {
+		if (e.getActionCommand().equals(SettingsActionCommand.OK)) {
 			
             if (model.getSettings().isTrayEnable()) {
     			model.getSettings().setCloseAsTray(closeAsTrayButton.isSelected());
@@ -269,8 +326,14 @@ public class SettingsFrame extends JDialog implements ActionListener {
             }
 			model.getSettings().setContactTreeView(treeButton.isSelected());
 			model.getSettings().setQuickDnd(quickButton.isSelected());
-			
+
+			model.getSettings().setBold(boldSelected);
+			model.getSettings().setItalic(italicSelected);
+			model.getSettings().setUnderline(underSelected);
+					
 			try {
+				model.getSettings().setFontSize(sizeComboBox.getSelectedIndex() + 1);
+				
 				SlimUserContact contact = 
 					new SlimUserContact(nameField.getText(), hostField.getText(), portField.getText());
 				
@@ -284,10 +347,23 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				    JOptionPane.WARNING_MESSAGE);
 			}
 		}
-		else if (e.getActionCommand().equals("Cancel")) {
+		else if (e.getActionCommand().equals(SettingsActionCommand.BOLD)) {
+			boldSelected = !boldSelected;
+			boldButton.setBorder(SlimButtonBorder.getSelectedBorder(boldSelected));
+				
+		}
+		else if (e.getActionCommand().equals(SettingsActionCommand.UNDERLINE)) {
+			underSelected = !underSelected;
+			underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(underSelected));
+		}
+		else if (e.getActionCommand().equals(SettingsActionCommand.ITALIC)) {
+			italicSelected = !italicSelected;
+			italicButton.setBorder(SlimButtonBorder.getSelectedBorder(italicSelected));
+		}
+		else if (e.getActionCommand().equals(SettingsActionCommand.CANCEL)) {
 			setVisible(false);
 		}
-		else if (e.getActionCommand().equals("Color")) {
+		else if (e.getActionCommand().equals(SettingsActionCommand.COLOR)) {
 		    Color newColor = JColorChooser.showDialog(
 		    		this,
 		            "Choose Default Text Color",
@@ -297,15 +373,17 @@ public class SettingsFrame extends JDialog implements ActionListener {
 					 model.getSettings().setColor(TalkPane.toDoubleHex(newColor.getRed()) 
 							 + TalkPane.toDoubleHex(newColor.getGreen()) 
 							 + TalkPane.toDoubleHex(newColor.getBlue()));
-					 colorButton.setText("<html><font color=\"" + model.getSettings().getColor() 
-							 + "\"><b>Default Color</b></font></html>");
+					 colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
+								+ model.getSettings().getColor() + HTMLConstants.FONTSIZE 
+								+ "3" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "Default Color" 
+								+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 				 }
 				 catch (SlimException se) {
 					 // impossible case due to toDoubleHex method
 				 }
 			 }
 		}
-		else if (e.getActionCommand().equals("Export")) {
+		else if (e.getActionCommand().equals(SettingsActionCommand.EXPORT)) {
 			fileChooser = new FileDialog((Frame)getOwner(), "Export Contact", FileDialog.SAVE);
 			fileChooser.show();
             String lFileName = fileChooser.getFile();
@@ -322,7 +400,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
                 }
             }
 		}
-		else if (e.getActionCommand().equals("Import")) {
+		else if (e.getActionCommand().equals(SettingsActionCommand.IMPORT)) {
 			fileChooser = new FileDialog((Frame)getOwner(), "Import Contact", FileDialog.LOAD);
 			fileChooser.show();
             String lFileName = fileChooser.getFile();
@@ -347,4 +425,25 @@ public class SettingsFrame extends JDialog implements ActionListener {
 		}
 	}
 
+	private class SettingsActionCommand {
+		
+		public static final String COLOR = "color";
+		
+		public static final String BOLD = "bold";
+
+		public static final String ITALIC = "italic";
+
+		public static final String UNDERLINE = "underline";
+		
+		public static final String SIZE = "size";
+
+		public static final String IMPORT = "import";
+
+		public static final String EXPORT = "export";
+
+		public static final String OK = "ok";
+
+		public static final String CANCEL = "cancel";
+
+	}
 }
