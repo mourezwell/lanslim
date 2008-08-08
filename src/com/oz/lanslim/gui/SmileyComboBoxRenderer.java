@@ -5,9 +5,14 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import com.oz.lanslim.model.SlimTalk;
+
 public class SmileyComboBoxRenderer extends JLabel implements ListCellRenderer {
 
-	public SmileyComboBoxRenderer() {
+	private boolean enable = false;
+	
+	public SmileyComboBoxRenderer(boolean pEnabled) {
+		enable = pEnabled;
 		setOpaque(true);
 		setHorizontalAlignment(CENTER);
 		setVerticalAlignment(CENTER);
@@ -32,10 +37,14 @@ public class SmileyComboBoxRenderer extends JLabel implements ListCellRenderer {
 		}
 
 		// Set the icon and text. If icon was null, say so.
-		String imgLocation = selectedIndex + ".png";
-		setText(" : $" + selectedIndex + "$");
-		setIcon(new SlimIcon(imgLocation));
-
+		if (enable) {
+			String imgLocation = selectedIndex + ".png";
+			setText(" " + SlimTalk.smileyText[selectedIndex]);
+			setIcon(new SlimIcon(imgLocation));
+		}
+		else {
+			setText(" " + SlimTalk.smileyText[selectedIndex]);
+		}
 		return this;
 	}
 

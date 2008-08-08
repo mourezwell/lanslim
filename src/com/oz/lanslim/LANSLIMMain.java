@@ -32,6 +32,7 @@ import org.jdesktop.jdic.tray.TrayIcon;
 import com.oz.lanslim.gui.MainPane;
 import com.oz.lanslim.gui.MainPaneWindowListener;
 import com.oz.lanslim.gui.SlimIcon;
+import com.oz.lanslim.model.HTMLConstants;
 import com.oz.lanslim.model.SlimIconListener;
 import com.oz.lanslim.model.SlimModel;
 
@@ -82,12 +83,14 @@ public class LANSLIMMain extends JFrame
 	
 	public LANSLIMMain() throws IOException, SlimException {
 		super();
-		PrintStream lErrStream = new PrintStream(
-				new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.err", true), true);
-		System.setErr(lErrStream);
-		PrintStream lOutStream = new PrintStream(
-				new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.out", true), true);
-		System.setOut(lOutStream);
+		if (System.getProperty("debug") == null) {
+			PrintStream lErrStream = new PrintStream(
+					new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.err", true), true);
+			System.setErr(lErrStream);
+			PrintStream lOutStream = new PrintStream(
+					new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.out", true), true);
+			System.setOut(lOutStream);
+		}
 		iconTimer = new Timer();
 		iconTimer.schedule(new TimerTask() {
 			public void run() {
@@ -151,7 +154,9 @@ public class LANSLIMMain extends JFrame
 			    GraphicsConfiguration gc = gd.getDefaultConfiguration();
 			    Rectangle vb = gc.getBounds();
 			    newMessageWindow.setBounds(vb.x + vb.width - 120, vb.y +  vb.height - 60, 120, 30);
-			    JButton label = new JButton("<html><u>New Message</u></html>", new SlimIcon("comments.png"));
+			    JButton label = new JButton(HTMLConstants.HTML + HTMLConstants.UNDERLINE 
+			    		+ "New Message" + HTMLConstants.ENDUNDERLINE + HTMLConstants.ENDHTML, 
+			    		new SlimIcon("comments.png"));
 			    label.setActionCommand("SHOW");
 			    label.addActionListener(this);
 			    newMessageWindow.getContentPane().add(label);

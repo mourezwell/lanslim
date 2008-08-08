@@ -33,14 +33,17 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.TransferHandler;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.text.html.HTMLEditorKit;
 
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.model.HTMLConstants;
 import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimTalkListener;
 
 public class TalkPane extends JSplitPane 
-	implements ActionListener, SlimTalkListener, KeyListener {
+	implements ActionListener, SlimTalkListener, KeyListener, CaretListener {
 	
 	private JEditorPane talkArea;
 	private JTextArea newMessageArea;
@@ -56,15 +59,19 @@ public class TalkPane extends JSplitPane
 	private JComboBox smileyCBox;
 	private JComboBox sizeComboBox;
 
-	private MainPane mainPane = null;
+	private SlimTalkListener mainPane = null;
 	private SlimTalk talkModel = null; 
 	private String[] history = null; 
 	private int historyIndex = 0; 
 	private int historyCallIndex = 0; 
 	
-	public TalkPane(MainPane pPane, SlimTalk pTalk) {
+	private boolean underline = false;
+	private boolean bold = false;
+	private boolean italic = false;
+	
+	public TalkPane(SlimTalkListener pMainPane, SlimTalk pTalk) {
 		super();
-		mainPane = pPane;
+		mainPane = pMainPane;
 		talkModel = pTalk;
 		init();
 		talkModel.registerListener(this);
@@ -72,6 +79,9 @@ public class TalkPane extends JSplitPane
 		history = new String[10];
 		historyIndex = 0;
 		historyCallIndex = 0;
+		underline = pTalk.isDefaultUndeline();
+		bold = pTalk.isDefaultBold();
+		italic = pTalk.isDefaultItalic();
 	}
 	
 	
@@ -90,7 +100,7 @@ public class TalkPane extends JSplitPane
 				talkArea.setEditorKit(new HTMLEditorKit());
 				talkArea.setEditable(false);
 				talkAreaPane.setViewportView(talkArea);
-				talkArea.setText("<html>" + talkModel.getText() + "</html>");
+				talkArea.setText(HTMLConstants.HTML + talkModel.getText() + HTMLConstants.ENDHTML);
 				talkArea.addHyperlinkListener(new SlimHyperlinkListener());
 				talkArea.setTransferHandler(new ContactTransferHandler(talkModel));
 				talkAreaPane.setPreferredSize(new java.awt.Dimension(310, 200));
@@ -112,6 +122,8 @@ public class TalkPane extends JSplitPane
 					boldButton.addActionListener(this);
 					boldButton.setActionCommand(TalkPaneActionCommand.BOLD);
 					boldButton.setToolTipText("Bold");
+					boldButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultBold()));
+			        messageToolbar.addSeparator();
 					messageToolbar.add(boldButton);
 				}
 				{
@@ -120,6 +132,8 @@ public class TalkPane extends JSplitPane
 					italicButton.addActionListener(this);
 					italicButton.setActionCommand(TalkPaneActionCommand.ITALIC);
 					italicButton.setToolTipText("Italic");
+					italicButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultItalic()));
+			        messageToolbar.addSeparator();
 					messageToolbar.add(italicButton);
 				}
 				{
@@ -128,7 +142,24 @@ public class TalkPane extends JSplitPane
 					underlineButton.addActionListener(this);
 					underlineButton.setActionCommand(TalkPaneActionCommand.UNDERLINE);
 					underlineButton.setToolTipText("Underline");
+					underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultUndeline()));
+			        messageToolbar.addSeparator();
 					messageToolbar.add(underlineButton);
+				}
+				{
+					colorButton = new JButton();
+					colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
+						+ talkModel.getMessageFontColor() + HTMLConstants.FONTSIZE 
+						+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+						+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
+					colorButton.setMaximumSize(new Dimension(20, 20));
+					colorButton.setMinimumSize(new Dimension(20, 20));
+					colorButton.addActionListener(this); 
+					colorButton.setActionCommand(TalkPaneActionCommand.COLOR);
+					colorButton.setToolTipText("Color");
+					colorButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
+					messageToolbar.addSeparator();
+					messageToolbar.add(colorButton);
 				}
 				{
 					ComboBoxModel sizeComboBoxModel = 
@@ -136,7 +167,7 @@ public class TalkPane extends JSplitPane
 								new String[] { "1", "2", "3", "4", "5", "6", "7" });
 					sizeComboBox = new JComboBox();
 					sizeComboBox.setModel(sizeComboBoxModel);
-					sizeComboBox.setSelectedIndex(3);
+					sizeComboBox.setSelectedIndex(Integer.parseInt(talkModel.getMessageFontSize()) -1);
 					sizeComboBox.setMaximumSize(new Dimension(40, 20));
 					sizeComboBox.addActionListener(this);
 					sizeComboBox.setActionCommand(TalkPaneActionCommand.SIZE);
@@ -145,25 +176,12 @@ public class TalkPane extends JSplitPane
 					messageToolbar.add(sizeComboBox);
 				}
 				{
-					colorButton = new JButton();
-					colorButton.setText("<html><font color=\"" + talkModel.getMessageFontColor() 
-							+ "\"><b>A</b></font></html>");
-					colorButton.setMaximumSize(new Dimension(20, 20));
-					colorButton.setMinimumSize(new Dimension(20, 20));
-					colorButton.addActionListener(this); 
-					colorButton.setActionCommand(TalkPaneActionCommand.COLOR);
-					colorButton.setToolTipText("Color");
-					messageToolbar.addSeparator();
-					messageToolbar.add(colorButton);
-				}
-				{
-					int smileyNb = 14;
-					Integer[] intArray = new Integer[smileyNb];
-					for (int i = 0; i < smileyNb; i++) {
+					Integer[] intArray = new Integer[SlimTalk.smileyText.length];
+					for (int i = 0; i < SlimTalk.smileyText.length; i++) {
 						intArray[i] = new Integer(i);
 					}
 					smileyCBox = new JComboBox(intArray);
-			        smileyCBox.setRenderer(new SmileyComboBoxRenderer());
+			        smileyCBox.setRenderer(new SmileyComboBoxRenderer(true));
 			        smileyCBox.setMaximumRowCount(5);
 			        smileyCBox.setMaximumSize(new Dimension(80, 24));
 			        smileyCBox.addActionListener(this);
@@ -188,11 +206,21 @@ public class TalkPane extends JSplitPane
 				{
 					newMessageArea = new JTextArea();
 					messageAreaPane.setViewportView(newMessageArea);
-					newMessageArea.setText("");
 					newMessageArea.setToolTipText("Enter to send message, Alt+Enter to insert newline, Shift+Up (+Down) To browse your message history");
 					newMessageArea.addKeyListener(this);
 					newMessageArea.setLineWrap(true);
 					newMessageArea.setWrapStyleWord(true);
+					newMessageArea.setText("");
+					newMessageArea.addCaretListener(this);
+					if (talkModel.isDefaultBold()) {
+						newMessageArea.setText(newMessageArea.getText() + HTMLConstants.BOLD);
+					}
+					if (talkModel.isDefaultItalic()) {
+						newMessageArea.setText(newMessageArea.getText() + HTMLConstants.ITALIC);
+					}
+					if (talkModel.isDefaultUndeline()) {
+						newMessageArea.setText(newMessageArea.getText() + HTMLConstants.UNDERLINE);
+					}
 				}
 			}
 		}
@@ -210,48 +238,33 @@ public class TalkPane extends JSplitPane
 				 talkModel.setMessageFontColor(toDoubleHex(newColor.getRed()) 
 						 + toDoubleHex(newColor.getGreen()) 
 						 + toDoubleHex(newColor.getBlue()));
-				 colorButton.setText("<html><font color=\"" + talkModel.getMessageFontColor() 
-						 + "\"><b>A</b></font></html>");
+				 colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
+							+ talkModel.getMessageFontColor() + HTMLConstants.FONTSIZE 
+							+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+							+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 			 }
 	    	 newMessageArea.requestFocus();
 		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.SIZE) {
+			talkModel.setMessageFontSize(sizeComboBox.getSelectedItem().toString());
+    		newMessageArea.requestFocus();
+		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.BOLD) {
-			if (newMessageArea.getSelectedText() == null) {
-				newMessageArea.setText(newMessageArea.getText() + "<b> </b>");
-	        }
-			else {
-				int start = newMessageArea.getSelectionStart();
-				int end = newMessageArea.getSelectionEnd();
-				String before = newMessageArea.getText().substring(0, start);
-				String after = newMessageArea.getText().substring(end);
-				newMessageArea.setText(before + "<b>" + newMessageArea.getSelectedText() + "</b>" + after);
-			}
+			styleButtonAction(bold, HTMLConstants.BOLD, HTMLConstants.ENDBOLD);
+			bold = !bold;
+			boldButton.setBorder(SlimButtonBorder.getSelectedBorder(bold));
 			newMessageArea.requestFocus();
 		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.ITALIC) {
-			if (newMessageArea.getSelectedText() == null) {
-				newMessageArea.setText(newMessageArea.getText() + "<i> </i>");
-	        }
-			else {
-				int start = newMessageArea.getSelectionStart();
-				int end = newMessageArea.getSelectionEnd();
-				String before = newMessageArea.getText().substring(0, start);
-				String after = newMessageArea.getText().substring(end);
-				newMessageArea.setText(before + "<i>" + newMessageArea.getSelectedText() + "</i>" + after);
-			}
+			styleButtonAction(italic, HTMLConstants.ITALIC, HTMLConstants.ENDITALIC);
+			italic = !italic;
+			italicButton.setBorder(SlimButtonBorder.getSelectedBorder(italic));
 			newMessageArea.requestFocus();
 		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.UNDERLINE) {
-			if (newMessageArea.getSelectedText() == null) {
-				newMessageArea.setText(newMessageArea.getText() + "<u> </u>");
-	        }
-			else {
-				int start = newMessageArea.getSelectionStart();
-				int end = newMessageArea.getSelectionEnd();
-				String before = newMessageArea.getText().substring(0, start);
-				String after = newMessageArea.getText().substring(end);
-				newMessageArea.setText(before + "<u>" + newMessageArea.getSelectedText() + "</u>" + after);
-			}
+			styleButtonAction(underline, HTMLConstants.UNDERLINE, HTMLConstants.ENDUNDERLINE);
+			underline = !underline;
+			underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(underline));
 			newMessageArea.requestFocus();
 		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.SEND) {
@@ -261,11 +274,9 @@ public class TalkPane extends JSplitPane
     		int lPos = newMessageArea.getSelectionStart();
 			String before = newMessageArea.getText().substring(0, lPos);
 			String after = newMessageArea.getText().substring(lPos);
-    		newMessageArea.setText(before + "$" + smileyCBox.getSelectedIndex() + "$" + after);
-    		newMessageArea.requestFocus();
-		}
-		else if (e.getActionCommand() == TalkPaneActionCommand.SIZE) {
-			talkModel.setMessageFontSize(sizeComboBox.getSelectedItem().toString());
+    		newMessageArea.setText(before + SlimTalk.smileyText[smileyCBox.getSelectedIndex()] + after);
+    		newMessageArea.setCaretPosition(lPos 
+    				+ SlimTalk.smileyText[smileyCBox.getSelectedIndex()].length());
     		newMessageArea.requestFocus();
 		}
 
@@ -295,6 +306,15 @@ public class TalkPane extends JSplitPane
 			}
 			historyCallIndex = historyIndex;
 			newMessageArea.setText("");
+			if (talkModel.isDefaultBold()) {
+				newMessageArea.setText(newMessageArea.getText() + HTMLConstants.BOLD);
+			}
+			if (talkModel.isDefaultItalic()) {
+				newMessageArea.setText(newMessageArea.getText() + HTMLConstants.ITALIC);
+			}
+			if (talkModel.isDefaultUndeline()) {
+				newMessageArea.setText(newMessageArea.getText() + HTMLConstants.UNDERLINE);
+			}
 		}
 		catch (SlimException se) {
 			JOptionPane.showMessageDialog(this,
@@ -306,7 +326,7 @@ public class TalkPane extends JSplitPane
 	}
 	
 	public void notifyTextTalkUpdate(SlimTalk pTalk) {
-		talkArea.setText("<html>" + pTalk.getText() + "</html>");
+		talkArea.setText(HTMLConstants.HTML + pTalk.getText() + HTMLConstants.ENDHTML);
 		talkArea.setCaretPosition(talkArea.getDocument().getLength());
 		mainPane.notifyTextTalkUpdate(pTalk);
 		
@@ -314,9 +334,14 @@ public class TalkPane extends JSplitPane
 			newMessageArea.setEnabled(false);
 			sendButton.setEnabled(false);
 			colorButton.setEnabled(false);
+			colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
+					+ HTMLConstants.GREY + HTMLConstants.FONTSIZE 
+					+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+					+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 			underlineButton.setEnabled(false);
 			italicButton.setEnabled(false);
 			boldButton.setEnabled(false);
+	        smileyCBox.setRenderer(new SmileyComboBoxRenderer(false));
 			smileyCBox.setEnabled(false);
 			sizeComboBox.setEnabled(false);
 		}
@@ -324,9 +349,14 @@ public class TalkPane extends JSplitPane
 			newMessageArea.setEnabled(true);
 			sendButton.setEnabled(true);
 			colorButton.setEnabled(true);
+			colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
+					+ talkModel.getMessageFontColor() + HTMLConstants.FONTSIZE 
+					+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+					+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 			underlineButton.setEnabled(true);
 			italicButton.setEnabled(true);
 			boldButton.setEnabled(true);
+	        smileyCBox.setRenderer(new SmileyComboBoxRenderer(true));
 			smileyCBox.setEnabled(true);
 			sizeComboBox.setEnabled(true);
 		}
@@ -358,6 +388,7 @@ public class TalkPane extends JSplitPane
 				String before = newMessageArea.getText().substring(0, lPos);
 				String after = newMessageArea.getText().substring(lPos);
 				newMessageArea.setText(before + "\n" + after);
+				newMessageArea.setCaretPosition(before.length());
 	        }
 	        else {
 	        	send();		        
@@ -431,5 +462,45 @@ public class TalkPane extends JSplitPane
 	}
 
 
+	public void caretUpdate(CaretEvent e) {
+		
+		String s = newMessageArea.getText().substring(0, Math.min(e.getDot(), e.getMark()));
+		bold = s.lastIndexOf(HTMLConstants.BOLD) > s.lastIndexOf(HTMLConstants.ENDBOLD);
+		boldButton.setBorder(SlimButtonBorder.getSelectedBorder(bold));
+		italic = s.lastIndexOf(HTMLConstants.ITALIC) > s.lastIndexOf(HTMLConstants.ENDITALIC);
+		italicButton.setBorder(SlimButtonBorder.getSelectedBorder(italic));
+		underline = s.lastIndexOf(HTMLConstants.UNDERLINE) > s.lastIndexOf(HTMLConstants.ENDUNDERLINE);
+		underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(underline));
+	}
+
+	private void styleButtonAction(boolean currValue, String ifFalse, String ifTrue) {
+
+		if (newMessageArea.getSelectedText() == null) {
+			int start = newMessageArea.getCaret().getDot();
+			String before = newMessageArea.getText().substring(0, start);
+			String after = newMessageArea.getText().substring(start);
+			if (!currValue) {
+				newMessageArea.setText(before + ifFalse + after);
+				newMessageArea.setCaretPosition(start + ifFalse.length());
+			}
+			else {
+				newMessageArea.setText(before + ifTrue + after);
+				newMessageArea.setCaretPosition(start + ifTrue.length());
+			}
+        }
+		else {
+			int start = newMessageArea.getSelectionStart();
+			int end = newMessageArea.getSelectionEnd();
+			String before = newMessageArea.getText().substring(0, start);
+			String after = newMessageArea.getText().substring(end);
+			if (!currValue) {
+				newMessageArea.setText(before + ifFalse + newMessageArea.getSelectedText() + ifTrue + after);
+			}
+			else {
+				newMessageArea.setText(before + ifTrue + newMessageArea.getSelectedText() + ifFalse + after);
+			}
+			newMessageArea.setCaretPosition(end + ifFalse.length() + ifTrue.length());
+		}
+	}
 	
 }

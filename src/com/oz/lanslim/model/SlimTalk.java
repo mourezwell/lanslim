@@ -1,10 +1,7 @@
 package com.oz.lanslim.model;
 
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,7 +16,14 @@ import com.oz.lanslim.message.SlimUpdateTalkMessage;
 
 public class SlimTalk {
 
-	private static final DateFormat myFormat = new SimpleDateFormat("HH:mm:ss");
+	public static final String[] smileyText = new String[] {
+			":)", ":(", "=(", ":D", ";)", ":o", ":[", ":#", ":*", "<3" 
+	};
+
+	public static final String[] smileyTextRegExp = new String[] {
+			"\\:\\)", "\\:\\(", "\\=\\(", "\\:D", ";\\)", "\\:o", "\\:\\[", "\\:\\#", "\\:\\*", "<3" 
+	};
+
 
 	private String title = null;
 	private String id = null;
@@ -37,7 +41,7 @@ public class SlimTalk {
 
 		id = pId;
 		messageFontColor = pModel.getSettings().getColor();
-		messageFontSize = "4";
+		messageFontSize = String.valueOf(pModel.getSettings().getFontSize());
 		text = "";
 	}
 
@@ -60,8 +64,9 @@ public class SlimTalk {
 				newPeopleIn.add(suc);
 				sendNewTalkMessage(suc, newPeopleIn);
 				sendInviteTalkMessage(suc);
-				text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
-					+ suc.getName() + " has been invited to join the talk by you</b><br>";
+				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
+					+ suc.getName() + " has been invited to join the talk by you" 
+					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				if (listener !=  null) {
 					listener.notifyTextTalkUpdate(this);
 				}
@@ -83,8 +88,9 @@ public class SlimTalk {
 				suc = (SlimUserContact)pExcludedContacts[i];
 				newPeopleIn.remove(suc);
 				sendExcludeTalkMessage(suc);
-				text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
-					+ suc.getName() + " has been excluded from the talk by you</b><br>";
+				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
+					+ suc.getName() + " has been excluded from the talk by you"
+					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				if (listener !=  null) {
 					listener.notifyTextTalkUpdate(this);
 				}
@@ -137,9 +143,9 @@ public class SlimTalk {
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getNewContact());
 		if (!peopleIn.contains(knownSuc)) {
 			peopleIn.add(knownSuc);
-			text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
 				+ pMessage.getNewContact().getName() + " has been invited to join the talk by " 
-				+ pMessage.getSender().getName() + " </b><br>";
+				+ pMessage.getSender().getName() + HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (listener !=  null) {
 				listener.notifyTextTalkUpdate(this);
 			}
@@ -151,12 +157,13 @@ public class SlimTalk {
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getExcludedContact());
 		if (peopleIn.contains(knownSuc)) {
 			peopleIn.remove(knownSuc);
-			text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
 				+ pMessage.getExcludedContact().getName() + " has been excluded from the talk by " 
-				+ pMessage.getSender().getName() + "</b><br>";
+				+ pMessage.getSender().getName() + HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (model.getSettings().getContactInfo().equals(knownSuc)) {
-				text = text + "<font color=\"FF0000\"><b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
-				+ "This talk tab won't be updated anymore even if you are invited back, which will appear as a new talk for you</b></font><br>";
+				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
+				+ "This talk tab won't be updated anymore even if you are invited back, which will appear as a new talk for you"
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				peopleIn.clear();
 			}
 			if (listener !=  null) {
@@ -180,8 +187,9 @@ public class SlimTalk {
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getSender());
 		if (peopleIn.contains(knownSuc)) {
 			peopleIn.remove(knownSuc);
-			text = text + "<b>SYSTEM [" + myFormat.format(new Date()) + "]>" 
-				+ pMessage.getSender().getName() + " has left the talk </b><br>";
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
+				+ pMessage.getSender().getName() + " has left the talk " + HTMLConstants.ENDBOLD 
+				+ HTMLConstants.NEWLINE;
 			if (listener !=  null) {
 				listener.notifyTextTalkUpdate(this);
 			}
@@ -264,38 +272,57 @@ public class SlimTalk {
 	private String prepareMessageBeforeSending(String pMessageArea) {
 		
 		String temp = pMessageArea ;
-		temp = temp.replaceAll("\\n", "<br>");
+		temp = temp.replaceAll("\\n", HTMLConstants.NEWLINE);
 		
-		return ("<font color=\"" + messageFontColor + "\" size=\"" + messageFontSize + "\">" + temp + "</font><br>");
+		int bold = count(temp, HTMLConstants.BOLD);
+		int endbold = count(temp, HTMLConstants.ENDBOLD);
+		for (int i = 0; i< bold - endbold; i++) {
+			temp = temp + HTMLConstants.ENDBOLD;
+		}
+		int italic = count(temp, HTMLConstants.ITALIC);
+		int enditalic = count(temp, HTMLConstants.ENDITALIC);
+		for (int i = 0; i< italic - enditalic; i++) {
+			temp = temp + HTMLConstants.ENDITALIC;
+		}
+		int underline = count(temp, HTMLConstants.UNDERLINE);
+		int endunderline = count(temp, HTMLConstants.ENDUNDERLINE);
+		for (int i = 0; i< underline - endunderline; i++) {
+			temp = temp + HTMLConstants.ENDUNDERLINE;
+		}
+		
+		return (HTMLConstants.FONTCOLOR + messageFontColor + HTMLConstants.FONTSIZE + messageFontSize 
+				+ HTMLConstants.TAGEND + temp + HTMLConstants.ENDFONT + HTMLConstants.NEWLINE);
 	}
 
+	
+	private int count(String base, String searchFor) {
+	    int len   = searchFor.length();
+	    int result = 0;
+	  
+	    if (len > 0) {  // search only if there is something
+	        int start = base.indexOf(searchFor);
+	        while (start != -1) {
+	            result++;
+	            start = base.indexOf(searchFor, start+len);
+	        }
+	    }
+	    return result;
+	}
+
+
+	
 	private String buildMessageBeforeDisplaying(String pMessageArea, SlimUserContact pSender) {
 		
 		String temp = pMessageArea ;
 
+
 		// add smilleys
-		int s = temp.indexOf("$");
-		while (s >= 0) {
-			int e = temp.indexOf("$", s + 1);
-			if (e == s+2 || e == s+3) {
-				String t = null;	
-				try {
-					int smilNb = Integer.parseInt(temp.substring(s+1, e));
-					t = getSmileyImgTag(smilNb);
-				}
-				catch (NumberFormatException ex) {
-					SlimLogger.log(temp.substring(s+1, e) + " is not valid Number");
-				}
-				if (t != null) { 
-					temp = temp.substring(0, s) 
-						+ temp.substring(s, temp.length()).replaceFirst("\\$[^\\$]*\\$", t);
-				}
-			}
-			s = temp.indexOf("$", s + 1);
+		for (int i = 0; i < smileyTextRegExp.length; i++) {
+			temp = temp.replaceAll(smileyTextRegExp[i], getSmileyImgTag(i));
 		}
 		
 		// add hyperlink
-		s = temp.indexOf("http");
+		int s = temp.indexOf("http");
 		while (s >= 0) {
 			if (s > 1 && temp.charAt(s-1) == '=') {
 				s = temp.indexOf("http", s + 1);
@@ -303,26 +330,39 @@ public class SlimTalk {
 			else {
 				int e = temp.indexOf(" ", s + 1);
 				if (e == -1) {
-					e = temp.indexOf("</font><br>", s + 1);
+					e = temp.indexOf(HTMLConstants.ENDFONT + HTMLConstants.NEWLINE, s + 1);
 				}
 				if (e != -1) {
-					temp = temp.substring(0, s) + "<a href=" + temp.substring(s, e) + ">" 
-						+ temp.substring(s, e) + "</a>" + temp.substring(e, temp.length());
+					temp = temp.substring(0, s) + HTMLConstants.LINK + temp.substring(s, e) + HTMLConstants.TAGEND 
+						+ temp.substring(s, e) + HTMLConstants.ENDLINK + temp.substring(e, temp.length());
 				}
 				s = temp.indexOf("http", s + 2*(e-s) + 14);
 			}
 		}
 		
-		return "<b>" + pSender.getName() + " [" + myFormat.format(new Date()) + "]</b>> " + temp;
+		return HTMLConstants.getHeader(pSender.getName()) + temp;
 	}
 	
 	private String getSmileyImgTag(int smilNb) {
 		URL imageURL = ClassLoader.getSystemResource(SlimIcon.IMAGE_PACKAGE + smilNb + ".png");
 		if (imageURL != null) {
-			return ("<img src=\"" + imageURL + "\"></img> ");
+			return (HTMLConstants.IMAGE + imageURL + HTMLConstants.TAGEND + HTMLConstants.ENDIMAGE);
 		}
 		SlimLogger.log(smilNb + " is not valid Smiley");
 		return null;
+	}
+
+	
+	public boolean isDefaultBold() {
+		return model.getSettings().isBold();
+	}
+
+	public boolean isDefaultItalic() {
+		return model.getSettings().isItalic();
+	}
+
+	public boolean isDefaultUndeline() {
+		return model.getSettings().isUnderline();
 	}
 
 }
