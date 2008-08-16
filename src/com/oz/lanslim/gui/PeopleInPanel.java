@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
@@ -53,23 +54,23 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 		add(peopleInBar, BorderLayout.NORTH);
 		{
 			peopleInLabel = new JLabel();
-			peopleInLabel.setText("Who's In ?");
+			peopleInLabel.setText(Externalizer.getString("LANSLIM.32")); //$NON-NLS-1$
 			peopleInBar.add(peopleInLabel);
 		}
 		{
 			peopleInviteButton = new JButton();
-			peopleInviteButton.setIcon(new SlimIcon("mail_add.png"));
+			peopleInviteButton.setIcon(new SlimIcon("mail_add.png")); //$NON-NLS-1$
 			peopleInviteButton.setActionCommand(PeopleInAcionCommand.INVITE);
-			peopleInviteButton.setToolTipText("Invite contact to current talk");
+			peopleInviteButton.setToolTipText(Externalizer.getString("LANSLIM.33")); //$NON-NLS-1$
 			peopleInviteButton.addActionListener(this);
 			peopleInBar.addSeparator();
 			peopleInBar.add(peopleInviteButton);
 		}
 		{
 			peopleExcludeButton = new JButton();
-			peopleExcludeButton.setIcon(new SlimIcon("mail_remove.png"));
+			peopleExcludeButton.setIcon(new SlimIcon("mail_remove.png")); //$NON-NLS-1$
 			peopleExcludeButton.setActionCommand(PeopleInAcionCommand.EXCLUDE);
-			peopleExcludeButton.setToolTipText("Exclude contact from current talk");
+			peopleExcludeButton.setToolTipText(Externalizer.getString("LANSLIM.26")); //$NON-NLS-1$
 			peopleExcludeButton.addActionListener(this);
 			peopleInBar.addSeparator();
 			peopleInBar.add(peopleExcludeButton);
@@ -94,16 +95,16 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 		if (e.getActionCommand() == PeopleInAcionCommand.INVITE) {
 			SlimTalk st = talkDisplay.getDisplayedTalk();
 			if (st != null) {
-				NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
+				NewTalkFrame lFrame = new NewTalkFrame((Frame)getRootPane().getParent(), 
 						model, null, st);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 			else {
-				JOptionPane.showMessageDialog(this,
-					    "At least one talk must be started",
-					    "Invalid Action",
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.23"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
 			}
 		}
@@ -116,23 +117,23 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 						st.removePeople(excluded);
 					}
 					catch (SlimException lE) {
-						JOptionPane.showMessageDialog(this,
-							    "At least one message could not be sent",
-							    "Network Error",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.34"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 				}
 				else {
-					JOptionPane.showMessageDialog(this,
-						    "At least one talk must be active",
-						    "Invalid Action",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.35"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
 			else {
-				JOptionPane.showMessageDialog(this,
-					    "At least one contact must be selected",
-					    "Invalid Action",
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.17"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
 			}
 		}
@@ -164,9 +165,9 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 	
 	public class PeopleInAcionCommand {
 
-		public static final String INVITE = "invite";
+		public static final String INVITE = "invite"; //$NON-NLS-1$
 		
-		public static final String EXCLUDE = "exclude";
+		public static final String EXCLUDE = "exclude"; //$NON-NLS-1$
 		
 
 	}

@@ -6,6 +6,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 
@@ -21,16 +22,16 @@ public class ContactTreeCellRenderer extends DefaultTreeCellRenderer {
 	        String imgLocation = null;
 	        
 	        if (avail == SlimAvailabilityEnum.ONLINE) {
-	    		imgLocation = "accept.png";
-	            setToolTipText(avail.toString());
+	    		imgLocation = "accept.png"; //$NON-NLS-1$
+	            setToolTipText(Externalizer.getString("LANSLIM.35")); //$NON-NLS-1$
 	        } 
 	        else if (avail == SlimAvailabilityEnum.OFFLINE) {
-	    		imgLocation = "remove.png";
-	            setToolTipText(avail.toString());
+	    		imgLocation = "remove.png"; //$NON-NLS-1$
+	            setToolTipText(Externalizer.getString("LANSLIM.36")); //$NON-NLS-1$
 	        }
 	        else {
-	    		imgLocation = "info.png";
-	            setToolTipText("GROUP");
+	    		imgLocation = "info.png"; //$NON-NLS-1$
+	            setToolTipText(Externalizer.getString("LANSLIM.37")); //$NON-NLS-1$
 	        }
 			setIcon(new SlimIcon(imgLocation));
             setText(sc.getName());

@@ -14,39 +14,39 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimUpdateUserMessage;
 
 public class SlimContactList {
 	
-	private static final String SLIM_CONTACT_PROPS_PREFIX = "slim.contact.";
+	private static final String SLIM_CONTACT_PROPS_PREFIX = "slim.contact."; //$NON-NLS-1$
+	private static final String USERNAME_SUFFIX = ".username"; //$NON-NLS-1$
+	private static final String USERIP_SUFFIX =  ".userip"; //$NON-NLS-1$
+	private static final String USERPORT_SUFFIX =  ".userport"; //$NON-NLS-1$
+	private static final String GROUPNAME_SUFFIX = ".groupname"; //$NON-NLS-1$
+	private static final String MEMBERS_PREFIX = ".members."; //$NON-NLS-1$
+	private static final String CATEGORYNAME_SUFFIX = ".categoryname"; //$NON-NLS-1$
+	private static final String CATEGORYMEMBERS_PREFIX = ".categorymembers."; //$NON-NLS-1$
+	private static final String CATEGORYEXPANDED_SUFFIX = ".categoryexpanded"; //$NON-NLS-1$
 	
-	private static final String USERNAME_SUFFIX = ".username";
+	public static String CATEGORY_GROUP = "Groups"; //$NON-NLS-1$
+	public static String CATEGORY_UNDEFINED = "Undefined"; //$NON-NLS-1$
+
+	public static final String USER_HOST_SEPARATOR = "/"; //$NON-NLS-1$
+	public static final String TAG_START = "<"; //$NON-NLS-1$
+	public static final String TAG_END = ">"; //$NON-NLS-1$
 	
-	private static final String USERIP_SUFFIX =  ".userip";
+	public static final String IMPORT_COMMENT = "#"; //$NON-NLS-1$
+	public static final String IMPORT_SEPARATOR = ";"; //$NON-NLS-1$
+	public static final String IMPORT_USER = "USER"; //$NON-NLS-1$
+	public static final String IMPORT_GROUP = "GROUP"; //$NON-NLS-1$
+	public static final String IMPORT_OPTIONNAL_START = "["; //$NON-NLS-1$
+	public static final String IMPORT_OPTIONNAL_END = "]"; //$NON-NLS-1$
 
-	private static final String USERPORT_SUFFIX =  ".userport";
-
-	private static final String GROUPNAME_SUFFIX = ".groupname";
-
-	private static final String MEMBERS_PREFIX = ".members.";
-
-	private static final String CATEGORYNAME_SUFFIX = ".categoryname";
-
-	private static final String CATEGORYMEMBERS_PREFIX = ".categorymembers.";
-
-	private static final String CATEGORYEXPANDED_SUFFIX = ".categoryexpanded";
-
-	public static final String CATEGORY_GROUP = "Groups";
-
-	public static final String CATEGORY_UNDEFINED = "Undefined";
-
-	public static final String GROUP_CATEGORY_NAME = "Groups";
-
-	public static final String UNDEFINED_CATEGORY_NAME = "Undefined";
-	
 	private Map list = null;
 	private SlimContactListener listener = null;
 	private SlimCategoryListener catListener = null;
@@ -62,8 +62,13 @@ public class SlimContactList {
 		list.put(model.getSettings().getContactInfo().getName(), model.getSettings().getContactInfo());
 		categoryByContact = new HashMap();
 		categories = new HashMap();
+
+		CATEGORY_GROUP = Externalizer.getString("LANSLIM.181"); //$NON-NLS-1$
+		CATEGORY_UNDEFINED = Externalizer.getString("LANSLIM.182"); //$NON-NLS-1$
+		
 		categories.put(CATEGORY_GROUP, new Boolean(false));
 		categories.put(CATEGORY_UNDEFINED, new Boolean(false));
+		
 	}
 	
 	public SlimContactList(SlimModel pModel, Properties p) {
@@ -97,8 +102,7 @@ public class SlimContactList {
 							list.put(lName.trim(), suc);
 						}
 						catch (SlimException e) {
-							SlimLogger.log(e + ":" + e.getMessage() + " at SlimContactList()");
-
+							SlimLogger.logException("ContactList.constructor", e); //$NON-NLS-1$
 						}
 					}
 				}
@@ -152,14 +156,14 @@ public class SlimContactList {
 							list.put(g.getName(), g);
 						}
 						else {
-							SlimLogger.log("Unknown user " + lName + " in group " +  g.getName());
+							SlimLogger.log(Externalizer.getString("LANSLIM.180", lName, g.getName())); //$NON-NLS-1$
 						}
 					}
 					k = k + 1;
 				}					
 			}
 			catch (SlimException e) {
-				SlimLogger.log(e + ":" + e.getMessage() + " at SlimContactList()");
+				SlimLogger.logException("ContactList.constructor", e); //$NON-NLS-1$
 			}
 		}
 		
@@ -326,7 +330,7 @@ public class SlimContactList {
 				int j = 1;
 				for (Iterator it2 = gc.getMembers().iterator(); it2.hasNext();) {
 					SlimContact m = (SlimContact)it2.next();
-					p.put(SLIM_CONTACT_PROPS_PREFIX + i + MEMBERS_PREFIX + j  + USERNAME_SUFFIX, m.getName());
+					p.put(SLIM_CONTACT_PROPS_PREFIX + i + MEMBERS_PREFIX + j + USERNAME_SUFFIX, m.getName());
 					j = j + 1;
 				}					
 			}
@@ -347,16 +351,18 @@ public class SlimContactList {
 		
 		for (Iterator it = categories.keySet().iterator(); it.hasNext();) {
 			String cat = (String)it.next();
-			List members = (List)contactByCategory.get(cat);
-			p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYNAME_SUFFIX, cat);
-			p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYEXPANDED_SUFFIX, categories.get(cat).toString());
-			int j = 1; 
-			for (Iterator it2 = members.iterator(); it2.hasNext();) {
-				String uc = (String)it2.next();
-				p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYMEMBERS_PREFIX + j + USERNAME_SUFFIX, uc);
-				j = j + 1;
+			if (!CATEGORY_GROUP.equals(cat) && !CATEGORY_UNDEFINED.equals(cat)) {
+				List members = (List)contactByCategory.get(cat);
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYNAME_SUFFIX, cat);
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYEXPANDED_SUFFIX, categories.get(cat).toString());
+				int j = 1; 
+				for (Iterator it2 = members.iterator(); it2.hasNext();) {
+					String uc = (String)it2.next();
+					p.put(SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYMEMBERS_PREFIX + j + USERNAME_SUFFIX, uc);
+					j = j + 1;
+				}
+				i = i + 1;
 			}
-			i = i + 1;
 		}
 
 		return p;
@@ -452,11 +458,11 @@ public class SlimContactList {
 			lResult = addContact(pSuc);
 			if (!lResult) {
 				try {
-					pSuc.setName(lOrignalName + "(" + pSuc.getHost() + ")");
+					pSuc.setName(lOrignalName + USER_HOST_SEPARATOR + pSuc.getHost());
 					addContact(pSuc);
 				}
 				catch (SlimException se) {
-					SlimLogger.log("Can not add user " + pSuc.getName());
+					SlimLogger.log(Externalizer.getString("LANSLIM.183", pSuc.getName())); //$NON-NLS-1$
 				}
 			}
 		}
@@ -513,14 +519,18 @@ public class SlimContactList {
 		String lLine = reader.readLine();
 		Map nameTranslation = new HashMap();
 		while (lLine != null) {
-			if (lLine.trim().length() != 0 && !lLine.startsWith("#")) {
-				String[] splittedLine = lLine.split(";");
+			if (lLine.trim().length() != 0 && !lLine.startsWith(IMPORT_COMMENT)) {
+				String[] splittedLine = lLine.split(IMPORT_SEPARATOR);
 				if (splittedLine.length < 3) {
-					SlimLogger.log("Invalid line format " + lLine + " must be match pattern USER;<Name>;<host>[;<port>] or GROUP;<Name>;<user1Name>[;<user2Name>...]. Line ignored");
+					SlimLogger.log(Externalizer.getString("LANSLIM.184", lLine) //$NON-NLS-1$
+						+ StringConstants.SPACE	+ IMPORT_USER + Externalizer.getString("LANSLIM.191")  //$NON-NLS-1$
+						+ StringConstants.SPACE + Externalizer.getString("LANSLIM.69")  //$NON-NLS-1$
+						+ StringConstants.SPACE + IMPORT_GROUP + Externalizer.getString("LANSLIM.192")  //$NON-NLS-1$
+						+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$
 					lError = true;
 				}
 				else {
-					if (splittedLine[0].equalsIgnoreCase("USER")) {
+					if (splittedLine[0].equalsIgnoreCase(IMPORT_USER)) {
 						String lPort = SlimSettings.DEFAULT_PORT;
 						if (splittedLine.length == 4 && model.getSettings().isPortUnlocked()) {
 							lPort = splittedLine[3];
@@ -533,14 +543,16 @@ public class SlimContactList {
 							}
 						}
 						catch (SlimException se) {
-							SlimLogger.log("Invalid Contact on Line " + lLine + " details : " + se.getMessage() + ". Line ignored");
+							SlimLogger.log(Externalizer.getString("LANSLIM.194", lLine,  se.getMessage()) //$NON-NLS-1$
+									+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$ 
 							lError = true;
 						}
 					}
-					else if (splittedLine[0].equalsIgnoreCase("GROUP")) {
+					else if (splittedLine[0].equalsIgnoreCase(IMPORT_GROUP)) {
 						SlimContact sc = (SlimContact)list.get(splittedLine[1]);
 						if (sc != null && !sc.isGroup()) {
-							SlimLogger.log("Invalid group on Line " + lLine + " details : User with same name allready exists. Line ignored");
+							SlimLogger.log(Externalizer.getString("LANSLIM.186", lLine,  Externalizer.getString("LANSLIM.123"))//$NON-NLS-1$ //$NON-NLS-2$
+									+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$ 
 							lError = true;
 						}
 						else {
@@ -556,7 +568,8 @@ public class SlimContactList {
 									}
 									SlimContact scm = (SlimContact)list.get(lUserName);
 									if (scm == null || scm.isGroup()) {
-										SlimLogger.log("Invalid group member on Line " + lLine + " details : " + splittedLine[i] + " is either unknown or a group. Line ignored");
+										SlimLogger.log(Externalizer.getString("LANSLIM.188", lLine, splittedLine[i]) //$NON-NLS-1$
+												+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$
 										lError = true;
 									}
 									else {
@@ -564,21 +577,27 @@ public class SlimContactList {
 									}
 								}
 								if (((SlimGroupContact)sc).getMembers().size() == 0) {
-									SlimLogger.log("Invalid group on Line " + lLine + " details : no valid members. Line ignored");
-									lError = true;
+									SlimLogger.log(Externalizer.getString("LANSLIM.186", lLine, Externalizer.getString("LANSLIM.190")) //$NON-NLS-1$  //$NON-NLS-2$ 
+											+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$ 
+								lError = true;
 								}
 								else {
 									list.put(splittedLine[1].trim(), sc);
 								}
 							}
 							catch (SlimException se) {
-								SlimLogger.log("Invalid Contact on Line " + lLine + " details : " + se.getMessage() + ". Line ignored");
+								SlimLogger.log(Externalizer.getString("LANSLIM.186", lLine,  se.getMessage()) //$NON-NLS-1$
+										+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$ 
 								lError = true;
 							}
 						}
 					}
 					else  {
-						SlimLogger.log("Invalid line format " + lLine + " must be match pattern USER;<Name>;<host>[;<port>] or GROUP;<Name>;<user1Name>[;<user2Name>...]. Line ignored");
+						SlimLogger.log(Externalizer.getString("LANSLIM.184", lLine) //$NON-NLS-1$
+								+ StringConstants.SPACE	+ IMPORT_USER + Externalizer.getString("LANSLIM.191")  //$NON-NLS-1$
+								+ StringConstants.SPACE + Externalizer.getString("LANSLIM.69")  //$NON-NLS-1$
+								+ StringConstants.SPACE + IMPORT_GROUP + Externalizer.getString("LANSLIM.192")  //$NON-NLS-1$
+								+ StringConstants.SPACE + Externalizer.getString("LANSLIM.193")); //$NON-NLS-1$
 						lError = true;
 					}
 				}
@@ -592,25 +611,27 @@ public class SlimContactList {
 
 	public synchronized void exportContacts(File contactFile) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(contactFile));
-		writer.write("#Lanslim Contact file must match pattern defined below (without # of course)\n");
-		writer.write("#USER;<Name>;<host>[;<port>]\n");
-		writer.write("#GROUP;<Name>;<user1Name>[;<user2Name>...]\n");
-		writer.write("#Be careful to define users before defining group containing them\n\n");
+		writer.write(IMPORT_COMMENT + Externalizer.getString("LANSLIM.195", IMPORT_COMMENT) + StringConstants.LINE_SEPARATOR); //$NON-NLS-1$
+		writer.write(IMPORT_COMMENT + IMPORT_USER + Externalizer.getString("LANSLIM.191") + StringConstants.LINE_SEPARATOR); //$NON-NLS-1$
+		writer.write(IMPORT_COMMENT + IMPORT_GROUP + Externalizer.getString("LANSLIM.192") + StringConstants.LINE_SEPARATOR); //$NON-NLS-1$
+		writer.write(IMPORT_COMMENT + Externalizer.getString("LANSLIM.196") + StringConstants.LINE_SEPARATOR //$NON-NLS-1$
+				 + StringConstants.LINE_SEPARATOR);
 		
 		Iterator it = getAllUserContact().iterator();
 		while (it.hasNext()) {
 			SlimUserContact suc = (SlimUserContact)it.next();
-			writer.write("USER;" + suc.getName() + ";" + suc.getHost() + ";" + suc.getPort() + "\n");
+			writer.write(IMPORT_USER + IMPORT_SEPARATOR + suc.getName() + IMPORT_SEPARATOR 
+					+ suc.getHost() + IMPORT_SEPARATOR + suc.getPort() + StringConstants.LINE_SEPARATOR);
 		}
 		it = getAllGroupContact().iterator();
 		while (it.hasNext()) {
 			SlimGroupContact sgc = (SlimGroupContact)it.next();
-			writer.write("GROUP;" + sgc.getName() + ";");
+			writer.write(IMPORT_GROUP + IMPORT_SEPARATOR + sgc.getName() + IMPORT_SEPARATOR);
 			for (Iterator it2 = sgc.getMembers().iterator(); it2.hasNext();) {
 				SlimContact m = (SlimContact)it2.next();
-				writer.write(m.getName() + ";");
+				writer.write(m.getName() + IMPORT_SEPARATOR);
 			}
-			writer.write("\n");
+			writer.write(StringConstants.LINE_SEPARATOR);
 		}
 		writer.flush();
 		writer.close();
@@ -680,8 +701,8 @@ public class SlimContactList {
 	}
 
 	public synchronized boolean renameCategory(String pOldCat, String pNewCat) {
-		if (categories.containsKey(pNewCat) || pOldCat.equalsIgnoreCase(GROUP_CATEGORY_NAME) 
-				|| pOldCat.equalsIgnoreCase(UNDEFINED_CATEGORY_NAME)) {
+		if (categories.containsKey(pNewCat) || pOldCat.equalsIgnoreCase(CATEGORY_GROUP) 
+				|| pOldCat.equalsIgnoreCase(CATEGORY_UNDEFINED)) {
 			return false;
 		}
 		categories.put(pNewCat, categories.get(pOldCat));

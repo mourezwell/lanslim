@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import javax.swing.Box;
@@ -20,6 +19,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
@@ -55,65 +55,61 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 	private void init() {
 		
 		BorderLayout lLayout = new BorderLayout();
-		this.setLayout(lLayout);
-		this.setPreferredSize(new java.awt.Dimension(700, 400));
+		setLayout(lLayout);
+		setPreferredSize(new java.awt.Dimension(700, 400));
 		{
 			mainBar = new JToolBar();
 			mainBar.setFloatable(false);
 			mainBar.setRollover(true);
-			this.add(mainBar, BorderLayout.NORTH);
+			add(mainBar, BorderLayout.NORTH);
 			{
 				settingsButton = new JButton();
-				settingsButton.setIcon(new SlimIcon("process.png"));
-				settingsButton.setText("Settings");
-				settingsButton.setMnemonic(KeyEvent.VK_S);
+				settingsButton.setIcon(new SlimIcon("process.png")); //$NON-NLS-1$
+				settingsButton.setText(Externalizer.getString("LANSLIM.55")); //$NON-NLS-1$
 				settingsButton.setActionCommand(MainPaneActionCommand.SETTINGS);
 				settingsButton.addActionListener(this);
-				settingsButton.setToolTipText("Set settings");
+				settingsButton.setToolTipText(Externalizer.getString("LANSLIM.56")); //$NON-NLS-1$
 				mainBar.add(settingsButton);
 
 				newTalkButton = new JButton();
-				newTalkButton.setIcon(new SlimIcon("comments.png"));
-				newTalkButton.setText("New Talk");
-				settingsButton.setMnemonic(KeyEvent.VK_N);
+				newTalkButton.setIcon(new SlimIcon("comments.png")); //$NON-NLS-1$
+				newTalkButton.setText(Externalizer.getString("LANSLIM.57")); //$NON-NLS-1$
 				newTalkButton.setActionCommand(MainPaneActionCommand.NEW_TALK);
 				newTalkButton.addActionListener(this);
-				newTalkButton.setToolTipText("Start new Talk");
+				newTalkButton.setToolTipText(Externalizer.getString("LANSLIM.53")); //$NON-NLS-1$
 				mainBar.add(newTalkButton);
 				
 				mainBar.add(Box.createHorizontalGlue());
 
 				aboutButton = new JButton();
-				aboutButton.setIcon(new SlimIcon("help.png"));
-				aboutButton.setText("About");
-				aboutButton.setMnemonic(KeyEvent.VK_F1);
+				aboutButton.setIcon(new SlimIcon("help.png")); //$NON-NLS-1$
+				aboutButton.setText(Externalizer.getString("LANSLIM.59")); //$NON-NLS-1$
 				aboutButton.setActionCommand(MainPaneActionCommand.ABOUT);
 				aboutButton.addActionListener(this);
-				aboutButton.setToolTipText("About Dialog");
+				aboutButton.setToolTipText(Externalizer.getString("LANSLIM.60")); //$NON-NLS-1$
 				mainBar.add(aboutButton);
 				
 				minimizeButton = new JButton();
-				minimizeButton.setIcon(new SlimIcon("down.png"));
-				minimizeButton.setText("Minimize");
+				minimizeButton.setIcon(new SlimIcon("down.png")); //$NON-NLS-1$
+				minimizeButton.setText(Externalizer.getString("LANSLIM.61")); //$NON-NLS-1$
 				minimizeButton.setActionCommand(MainPaneActionCommand.MINIMIZE);
 				minimizeButton.addActionListener(this);
-				minimizeButton.setToolTipText("Minimize Application");
+				minimizeButton.setToolTipText(Externalizer.getString("LANSLIM.62")); //$NON-NLS-1$
 				mainBar.add(minimizeButton);
 				
 				exitButton = new JButton();
-				exitButton.setIcon(new SlimIcon("exit.png"));
-				exitButton.setText("Exit");
-				exitButton.setMnemonic(KeyEvent.VK_ESCAPE);
+				exitButton.setIcon(new SlimIcon("exit.png")); //$NON-NLS-1$
+				exitButton.setText(Externalizer.getString("LANSLIM.64")); //$NON-NLS-1$
 				exitButton.setActionCommand(MainPaneActionCommand.EXIT);
 				exitButton.addActionListener(this);
-				exitButton.setToolTipText("Exit Application");
+				exitButton.setToolTipText(Externalizer.getString("LANSLIM.65")); //$NON-NLS-1$
 				mainBar.add(exitButton);
 			}
 		}
 		{
 			mainSplitPane = new JSplitPane();
 			mainSplitPane.setDividerSize(5);
-			this.add(mainSplitPane);
+			add(mainSplitPane);
 			{
 				talkTabPanes = new JTabbedPane();
 				talkTabPanes.setUI(new TabbedPaneCloseButtonUI());
@@ -147,19 +143,21 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 		
 		if (e.getActionCommand() == MainPaneActionCommand.SETTINGS) {
 			if (model.getTalks().size() == 0) {
-				SettingsFrame lFrame = new SettingsFrame((Frame)this.getRootPane().getParent(), model, false);
+				SettingsFrame lFrame = new SettingsFrame((Frame)getRootPane().getParent(), 
+						model.getSettings(), false);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 			else {
-				JOptionPane.showMessageDialog(this,
-					    "Name and Host settings are locked while talks are opened",
-					    "Information",
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.66"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.55"), //$NON-NLS-1$
 					    JOptionPane.INFORMATION_MESSAGE);
-				SettingsFrame lFrame = new SettingsFrame((Frame)this.getRootPane().getParent(), model, true);
+				SettingsFrame lFrame = new SettingsFrame((Frame)getRootPane().getParent(), 
+						model.getSettings(), true);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 		}
@@ -168,10 +166,10 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 		}
 		else if (e.getActionCommand() == MainPaneActionCommand.MINIMIZE) {
 			if (model.getSettings().isTrayEnable() && model.getSettings().isCloseAsTray()) {
-				this.getRootPane().getParent().setVisible(false);
+				getRootPane().getParent().setVisible(false);
 			}
 			else {
-				((Frame)this.getRootPane().getParent()).setExtendedState(Frame.ICONIFIED);
+				((Frame)getRootPane().getParent()).setExtendedState(Frame.ICONIFIED);
 			}
 			
 		}
@@ -182,15 +180,15 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 			if (model.getSettings().areValidSettings()) {
 				if (e.getActionCommand() == MainPaneActionCommand.NEW_TALK) {
 					NewTalkFrame lFrame = new NewTalkFrame(
-							(Frame)this.getRootPane().getParent(), model, null, null);
+							(Frame)getRootPane().getParent(), model, null, null);
 					lFrame.pack();
-					lFrame.setLocationRelativeTo(this);
+					lFrame.setLocationRelativeTo(getRootPane().getParent());
 					lFrame.setVisible(true);
 				}
 				else {
-					JOptionPane.showMessageDialog(this,
-					    "All actions are disabled until you set properly your settings",
-					    "Invalid Action",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.50"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
 				}
 			}
@@ -206,9 +204,9 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 			model.getTalks().closeTalk(((TalkPane)e.getChild()).getTalk());
 		}
 		catch (SlimException se) {
-			JOptionPane.showMessageDialog(this,
-			    "Some users may not have received the notifiaction that you have left the talk",
-			    "Network Error",
+			JOptionPane.showMessageDialog(getRootPane().getParent(),
+			    Externalizer.getString("LANSLIM.58"), //$NON-NLS-1$
+			    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 			    JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -237,7 +235,7 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 			for (int i = 0; i < talkTabPanes.getComponents().length; i++) {
 				TalkPane tp = (TalkPane)talkTabPanes.getComponents()[i];
 				if (tp.getTalk() == pTalk) {
-					talkTabPanes.setIconAt(talkTabPanes.indexOfComponent(tp), new SlimIcon("favorite.png"));
+					talkTabPanes.setIconAt(talkTabPanes.indexOfComponent(tp), new SlimIcon("favorite.png")); //$NON-NLS-1$
 					talkTabPanes.setToolTipTextAt(talkTabPanes.indexOfComponent(tp), pTalk.getPeopleInListAsString()); 
 				}
 			}
@@ -258,15 +256,15 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 	
 	public class MainPaneActionCommand {
 		
-		public static final String ABOUT = "about";
+		public static final String ABOUT = "about"; //$NON-NLS-1$
 		
-		public static final String SETTINGS = "settings";
+		public static final String SETTINGS = "settings"; //$NON-NLS-1$
 
-		public static final String NEW_TALK = "newTalk";
+		public static final String NEW_TALK = "newTalk"; //$NON-NLS-1$
 
-		public static final String MINIMIZE = "minimize";
+		public static final String MINIMIZE = "minimize"; //$NON-NLS-1$
 		
-		public static final String EXIT = "exit";
+		public static final String EXIT = "exit"; //$NON-NLS-1$
 		
 	}
 

@@ -15,6 +15,8 @@ import javax.swing.plaf.basic.BasicTabbedPaneUI;
  
 class TabbedPaneCloseButtonUI extends BasicTabbedPaneUI {
 	
+	private static final String PROPERTY_CHANGE_NAME = "tabOpen"; //$NON-NLS-1$
+	
 	private static final int minimumTabWidth = 100;
 	
     public TabbedPaneCloseButtonUI() {
@@ -121,10 +123,10 @@ class TabbedPaneCloseButtonUI extends BasicTabbedPaneUI {
                     && (x <= tabRect.x + tabRect.width - 8)
                     && (y >= 5)
                     && (y <= 15)) {
-                	PropertyChangeListener[] pcla = tabPane.getComponentAt(tabIndex).getPropertyChangeListeners("tabOpen");
+                	PropertyChangeListener[] pcla = tabPane.getComponentAt(tabIndex).getPropertyChangeListeners(PROPERTY_CHANGE_NAME);
                 	if (pcla != null ) {
             			PropertyChangeEvent evt = new PropertyChangeEvent(tabPane.getComponentAt(tabIndex),
-            					"tabOpen", new Integer(0), new Integer(1));
+            					PROPERTY_CHANGE_NAME, new Integer(0), new Integer(1));
                 		for (int i = 0; i < pcla.length; i++) {
                 			pcla[i].propertyChange(evt);
                 		}

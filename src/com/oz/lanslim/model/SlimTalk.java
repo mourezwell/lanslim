@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.gui.SlimIcon;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
 import com.oz.lanslim.message.SlimExitTalkMessage;
@@ -16,14 +18,17 @@ import com.oz.lanslim.message.SlimUpdateTalkMessage;
 
 public class SlimTalk {
 
-	public static final String[] smileyText = new String[] {
-			":)", ":(", "=(", ":D", ";)", ":o", ":[", ":#", ":*", "<3" 
+	public static final String[] SMILEY_TEXT = new String[] {
+		":)", ":(", "=(", ":D", ";)", ":o", ":[", ":#", ":*", "<3"  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$
 	};
 
-	public static final String[] smileyTextRegExp = new String[] {
-			"\\:\\)", "\\:\\(", "\\=\\(", "\\:D", ";\\)", "\\:o", "\\:\\[", "\\:\\#", "\\:\\*", "<3" 
+	public static final String[] SMILEY_REG_EXP = new String[] {
+		"\\:\\)", "\\:\\(", "\\=\\(", "\\:D", ";\\)", "\\:o", "\\:\\[", "\\:\\#", "\\:\\*", "<3"  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$
 	};
 
+	public static final String NEW_LINE_REG_EXP = "\\n"; //$NON-NLS-1$
+
+	private static final String PEOPLE_SEPARATOR= ", "; //$NON-NLS-1$
 
 	private String title = null;
 	private String id = null;
@@ -42,7 +47,7 @@ public class SlimTalk {
 		id = pId;
 		messageFontColor = pModel.getSettings().getColor();
 		messageFontSize = String.valueOf(pModel.getSettings().getFontSize());
-		text = "";
+		text = StringConstants.EMPTY;
 	}
 
 	public SlimTalk(SlimModel pModel, String pTitle, List pPeople) {
@@ -65,7 +70,8 @@ public class SlimTalk {
 				sendNewTalkMessage(suc, newPeopleIn);
 				sendInviteTalkMessage(suc);
 				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-					+ suc.getName() + " has been invited to join the talk by you" 
+					+ Externalizer.getString("LANSLIM.175",	//$NON-NLS-1$
+							suc.getName(), model.getSettings().getContactInfo().getName())
 					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				if (listener !=  null) {
 					listener.notifyTextTalkUpdate(this);
@@ -89,7 +95,8 @@ public class SlimTalk {
 				newPeopleIn.remove(suc);
 				sendExcludeTalkMessage(suc);
 				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-					+ suc.getName() + " has been excluded from the talk by you"
+					+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
+						suc.getName(), model.getSettings().getContactInfo().getName())
 					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				if (listener !=  null) {
 					listener.notifyTextTalkUpdate(this);
@@ -107,10 +114,10 @@ public class SlimTalk {
 	}
 	
 	public synchronized String getPeopleInListAsString() {
-		String lResult = ""; 
+		String lResult = StringConstants.EMPTY; 
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
-			lResult = lResult + suc.getName() + ", ";
+			lResult = lResult + suc.getName() + PEOPLE_SEPARATOR;
 		}
 		return lResult;
 	}
@@ -144,8 +151,9 @@ public class SlimTalk {
 		if (!peopleIn.contains(knownSuc)) {
 			peopleIn.add(knownSuc);
 			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ pMessage.getNewContact().getName() + " has been invited to join the talk by " 
-				+ pMessage.getSender().getName() + HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+				+ Externalizer.getString("LANSLIM.175",	//$NON-NLS-1$
+						pMessage.getNewContact().getName(), pMessage.getSender().getName())
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (listener !=  null) {
 				listener.notifyTextTalkUpdate(this);
 			}
@@ -158,12 +166,13 @@ public class SlimTalk {
 		if (peopleIn.contains(knownSuc)) {
 			peopleIn.remove(knownSuc);
 			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ pMessage.getExcludedContact().getName() + " has been excluded from the talk by " 
-				+ pMessage.getSender().getName() + HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+				+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
+						pMessage.getExcludedContact().getName(), pMessage.getSender().getName())
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (model.getSettings().getContactInfo().equals(knownSuc)) {
 				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ "This talk tab won't be updated anymore even if you are invited back, which will appear as a new talk for you"
-				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+					+ Externalizer.getString("LANSLIM.178") //$NON-NLS-1$
+					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				peopleIn.clear();
 			}
 			if (listener !=  null) {
@@ -188,8 +197,8 @@ public class SlimTalk {
 		if (peopleIn.contains(knownSuc)) {
 			peopleIn.remove(knownSuc);
 			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ pMessage.getSender().getName() + " has left the talk " + HTMLConstants.ENDBOLD 
-				+ HTMLConstants.NEWLINE;
+				+ Externalizer.getString("LANSLIM.179", pMessage.getSender().getName()) //$NON-NLS-1$
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (listener !=  null) {
 				listener.notifyTextTalkUpdate(this);
 			}
@@ -272,7 +281,7 @@ public class SlimTalk {
 	private String prepareMessageBeforeSending(String pMessageArea) {
 		
 		String temp = pMessageArea ;
-		temp = temp.replaceAll("\\n", HTMLConstants.NEWLINE);
+		temp = temp.replaceAll(NEW_LINE_REG_EXP, HTMLConstants.NEWLINE);
 		
 		int bold = count(temp, HTMLConstants.BOLD);
 		int endbold = count(temp, HTMLConstants.ENDBOLD);
@@ -317,18 +326,18 @@ public class SlimTalk {
 
 
 		// add smilleys
-		for (int i = 0; i < smileyTextRegExp.length; i++) {
-			temp = temp.replaceAll(smileyTextRegExp[i], getSmileyImgTag(i));
+		for (int i = 0; i < SMILEY_REG_EXP.length; i++) {
+			temp = temp.replaceAll(SMILEY_REG_EXP[i], getSmileyImgTag(i));
 		}
 		
 		// add hyperlink
-		int s = temp.indexOf("http");
+		int s = temp.indexOf(HTMLConstants.HTTP);
 		while (s >= 0) {
 			if (s > 1 && temp.charAt(s-1) == '=') {
-				s = temp.indexOf("http", s + 1);
+				s = temp.indexOf(HTMLConstants.HTTP, s + 1);
 			}
 			else {
-				int e = temp.indexOf(" ", s + 1);
+				int e = temp.indexOf(StringConstants.SPACE, s + 1);
 				if (e == -1) {
 					e = temp.indexOf(HTMLConstants.ENDFONT + HTMLConstants.NEWLINE, s + 1);
 				}
@@ -336,7 +345,7 @@ public class SlimTalk {
 					temp = temp.substring(0, s) + HTMLConstants.LINK + temp.substring(s, e) + HTMLConstants.TAGEND 
 						+ temp.substring(s, e) + HTMLConstants.ENDLINK + temp.substring(e, temp.length());
 				}
-				s = temp.indexOf("http", s + 2*(e-s) + 14);
+				s = temp.indexOf(HTMLConstants.HTTP, s + 2*(e-s) + 14);
 			}
 		}
 		
@@ -344,11 +353,11 @@ public class SlimTalk {
 	}
 	
 	private String getSmileyImgTag(int smilNb) {
-		URL imageURL = ClassLoader.getSystemResource(SlimIcon.IMAGE_PACKAGE + smilNb + ".png");
+		URL imageURL = ClassLoader.getSystemResource(SlimIcon.IMAGE_PACKAGE + smilNb + SlimIcon.IMAGE_EXTENSION);
 		if (imageURL != null) {
 			return (HTMLConstants.IMAGE + imageURL + HTMLConstants.TAGEND + HTMLConstants.ENDIMAGE);
 		}
-		SlimLogger.log(smilNb + " is not valid Smiley");
+		SlimLogger.log(Externalizer.getString("LANSLIM.174", new Integer(smilNb))); //$NON-NLS-1$
 		return null;
 	}
 
@@ -363,6 +372,10 @@ public class SlimTalk {
 
 	public boolean isDefaultUndeline() {
 		return model.getSettings().isUnderline();
+	}
+
+	public String getShortcut(int i) {
+		return model.getSettings().getShortcuts()[i];
 	}
 
 }

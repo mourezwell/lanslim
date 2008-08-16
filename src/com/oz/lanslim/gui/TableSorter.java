@@ -125,8 +125,8 @@ public class TableSorter extends AbstractTableModel {
     private List sortingColumns = new ArrayList();
 
     public TableSorter() {
-        this.mouseListener = new MouseHandler();
-        this.tableModelListener = new TableModelHandler();
+        mouseListener = new MouseHandler();
+        tableModelListener = new TableModelHandler();
     }
 
     public TableSorter(TableModel tableModel) {
@@ -149,14 +149,14 @@ public class TableSorter extends AbstractTableModel {
         return tableModel;
     }
 
-    public void setTableModel(TableModel tableModel) {
-        if (this.tableModel != null) {
-            this.tableModel.removeTableModelListener(tableModelListener);
+    public void setTableModel(TableModel pTableModel) {
+        if (tableModel != null) {
+            tableModel.removeTableModelListener(tableModelListener);
         }
 
-        this.tableModel = tableModel;
-        if (this.tableModel != null) {
-            this.tableModel.addTableModelListener(tableModelListener);
+        tableModel = pTableModel;
+        if (tableModel != null) {
+            tableModel.addTableModelListener(tableModelListener);
         }
 
         clearSortingState();
@@ -167,19 +167,19 @@ public class TableSorter extends AbstractTableModel {
         return tableHeader;
     }
 
-    public void setTableHeader(JTableHeader tableHeader) {
-        if (this.tableHeader != null) {
-            this.tableHeader.removeMouseListener(mouseListener);
-            TableCellRenderer defaultRenderer = this.tableHeader.getDefaultRenderer();
+    public void setTableHeader(JTableHeader pTableHeader) {
+        if (tableHeader != null) {
+            tableHeader.removeMouseListener(mouseListener);
+            TableCellRenderer defaultRenderer = tableHeader.getDefaultRenderer();
             if (defaultRenderer instanceof SortableHeaderRenderer) {
-                this.tableHeader.setDefaultRenderer(((SortableHeaderRenderer) defaultRenderer).tableCellRenderer);
+                tableHeader.setDefaultRenderer(((SortableHeaderRenderer) defaultRenderer).tableCellRenderer);
             }
         }
-        this.tableHeader = tableHeader;
-        if (this.tableHeader != null) {
-            this.tableHeader.addMouseListener(mouseListener);
-            this.tableHeader.setDefaultRenderer(
-                    new SortableHeaderRenderer(this.tableHeader.getDefaultRenderer()));
+        tableHeader = pTableHeader;
+        if (tableHeader != null) {
+            tableHeader.addMouseListener(mouseListener);
+            tableHeader.setDefaultRenderer(
+                    new SortableHeaderRenderer(tableHeader.getDefaultRenderer()));
         }
     }
 
@@ -319,7 +319,7 @@ public class TableSorter extends AbstractTableModel {
         private int modelIndex;
 
         public Row(int index) {
-            this.modelIndex = index;
+            modelIndex = index;
         }
 
         public int compareTo(Object o) {
@@ -431,10 +431,10 @@ public class TableSorter extends AbstractTableModel {
         private int size;
         private int priority;
 
-        public Arrow(boolean descending, int size, int priority) {
-            this.descending = descending;
-            this.size = size;
-            this.priority = priority;
+        public Arrow(boolean pDescending, int pSize, int pPriority) {
+            descending = pDescending;
+            size = pSize;
+            priority = pPriority;
         }
 
         public void paintIcon(Component c, Graphics g, int x, int y) {
@@ -482,8 +482,8 @@ public class TableSorter extends AbstractTableModel {
     private class SortableHeaderRenderer implements TableCellRenderer {
         private TableCellRenderer tableCellRenderer;
 
-        public SortableHeaderRenderer(TableCellRenderer tableCellRenderer) {
-            this.tableCellRenderer = tableCellRenderer;
+        public SortableHeaderRenderer(TableCellRenderer pTableCellRenderer) {
+            tableCellRenderer = pTableCellRenderer;
         }
 
         public Component getTableCellRendererComponent(JTable table, 
@@ -508,9 +508,9 @@ public class TableSorter extends AbstractTableModel {
         private int column;
         private int direction;
 
-        public Directive(int column, int direction) {
-            this.column = column;
-            this.direction = direction;
+        public Directive(int pColumn, int pDirection) {
+            column = pColumn;
+            direction = pDirection;
         }
     }
 }

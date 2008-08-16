@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
@@ -24,6 +25,8 @@ import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimUserContact;
 
 public class ContactTransferHandler extends TransferHandler {
+	
+	private static final String humanRepresentationOfFlavor = "SlimContact"; //$NON-NLS-1$
 	
 	private SlimTalk talk;
 	private TalkSelector talkTabPane;
@@ -133,7 +136,7 @@ public class ContactTransferHandler extends TransferHandler {
         	}
         	if (st != null) {
             	try {
-            		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, "SlimContact"));
+            		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, humanRepresentationOfFlavor));
             		List onlinUserContactsList = new ArrayList();
             		for (int i = 0; i < contactsArray.length; i++) {
             			if (contactsArray[i].isGroup()) {
@@ -147,9 +150,9 @@ public class ContactTransferHandler extends TransferHandler {
             		return true;
             	}
             	catch (SlimException se) {
-            		JOptionPane.showMessageDialog(comp.getTopLevelAncestor(),
-						    "Unable to send Invitation message or notification",
-						    "Network Error",
+            		JOptionPane.showMessageDialog(comp.getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.25"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 						    JOptionPane.ERROR_MESSAGE);                	
         		}
             	catch (IOException ioe) {
@@ -173,7 +176,7 @@ public class ContactTransferHandler extends TransferHandler {
         			return false;
         		}
         		try {
-	        		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, "SlimContact"));
+	        		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, humanRepresentationOfFlavor));
 	        		for (int i = 0; i < contactsArray.length; i++) {
 	        			if (!contactsArray[i].isGroup()) {
 	                		model.getContacts().moveUserIntoCategory((SlimUserContact)contactsArray[i], lCatName);
@@ -208,7 +211,7 @@ public class ContactTransferHandler extends TransferHandler {
 		}
 
 		public DataFlavor[] getTransferDataFlavors() {
-			return new DataFlavor[] { new DataFlavor(SlimContact.class, "SlimContact") };
+			return new DataFlavor[] { new DataFlavor(SlimContact.class, humanRepresentationOfFlavor) };
 		}
 
 		public boolean isDataFlavorSupported(DataFlavor flavor) {

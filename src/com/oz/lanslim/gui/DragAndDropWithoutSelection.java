@@ -18,7 +18,7 @@ public class DragAndDropWithoutSelection {
 
         // the default dnd implemntation requires to first select node and then drag
         try{
-            Class clazz = Class.forName("javax.swing.plaf.basic.BasicDragGestureRecognizer");
+            Class clazz = Class.forName("javax.swing.plaf.basic.BasicDragGestureRecognizer"); //$NON-NLS-1$
             MouseListener[] mouseListeners = c.getMouseListeners();
             for(int i = 0; i<mouseListeners.length; i++){
                 if(clazz.isAssignableFrom(mouseListeners[i].getClass())){

@@ -7,7 +7,8 @@ import javax.swing.ImageIcon;
 
 public class SlimIcon extends ImageIcon {
 	
-	public final static String IMAGE_PACKAGE = "com/oz/lanslim/icons/"; 
+	public final static String IMAGE_PACKAGE = "com/oz/lanslim/icons/";  //$NON-NLS-1$
+	public final static String IMAGE_EXTENSION = ".png";  //$NON-NLS-1$
 
 	public SlimIcon(String value) {
 		super();

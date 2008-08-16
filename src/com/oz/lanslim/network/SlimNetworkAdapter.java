@@ -5,6 +5,7 @@ import java.net.SocketException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
@@ -38,7 +39,7 @@ public class SlimNetworkAdapter implements Runnable {
 		delayedTimer = new Timer();
 		delayedTimer.schedule(new TimerTask() {
 			public void run() {
-				Thread.currentThread().setName("Delayed Timer");
+				Thread.currentThread().setName("Delayed Timer"); //$NON-NLS-1$
 			}
 		}, 0);
 		iconListener = pIconListener;
@@ -56,16 +57,16 @@ public class SlimNetworkAdapter implements Runnable {
 				initOK = false;
 					socket = new SlimSocket(model.getSettings().getContactInfo().getHost(), 
 							model.getSettings().getContactInfo().getPort());
-					socketListener = new Thread(this, "Socket Listener");
+					socketListener = new Thread(this, "Socket Listener"); //$NON-NLS-1$
 					socketListener.start();
 					initOK = true;
 			}
 			else {
-				throw new SlimException("Unable to initialize network due to invalid Settings please check them");
+				throw new SlimException(Externalizer.getString("LANSLIM.41", Externalizer.getString("LANSLIM.40"))); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		catch (SocketException se) {
-			throw new SlimException("Unable to initialize network due to " + se + " :" + se.getMessage(), se);
+			throw new SlimException(Externalizer.getString("LANSLIM.41", SlimLogger.shortFormatException(se))); //$NON-NLS-1$
 		}
 	}
 
@@ -87,7 +88,7 @@ public class SlimNetworkAdapter implements Runnable {
 							SlimNewTalkMessage sntm = (SlimNewTalkMessage)sm;
 							boolean success = model.getTalks().receiveNewTalkMessage(sntm);
 							if (!success) {
-								SlimLogger.log("Unable to start new talk ");
+								SlimLogger.log(Externalizer.getString("LANSLIM.42")); //$NON-NLS-1$
 							}
 						} 
 						else if (SlimMessageTypeEnum.EXIT_TALK.equals(sm.getType())) {
@@ -97,7 +98,7 @@ public class SlimNetworkAdapter implements Runnable {
 								st.receiveExitTalkMessage(setm);
 							}
 							else {
-								SlimLogger.log("Received invalid talk id in message, message ignored " + setm);
+								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
 							}
 						} 
 						else if (SlimMessageTypeEnum.INVITE_TALK.equals(sm.getType())) {
@@ -107,7 +108,7 @@ public class SlimNetworkAdapter implements Runnable {
 								st.receiveInviteTalkMessage(sitm);
 							}
 							else {
-								SlimLogger.log("Received invalid talk id in message, message ignored " + sitm);
+								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
 							}
 						} 
 						else if (SlimMessageTypeEnum.UPDATE_TALK.equals(sm.getType())) {
@@ -118,7 +119,7 @@ public class SlimNetworkAdapter implements Runnable {
 								iconListener.startIconBlinking();
 							}
 							else {
-								SlimLogger.log("Received invalid talk id in message, message ignored " + sutm);
+								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
 							}
 						}
 						else if (SlimMessageTypeEnum.EXCLUDE_TALK.equals(sm.getType())) {
@@ -129,19 +130,19 @@ public class SlimNetworkAdapter implements Runnable {
 								iconListener.startIconBlinking();
 							}
 							else {
-								SlimLogger.log("Received invalid talk id in message, message ignored " + setm);
+								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
 							}
 						}				
 						else {
-							SlimLogger.log("Received invalid message or contacts not initailzed yet " + sm);
+							SlimLogger.log(Externalizer.getString("LANSLIM.44")); //$NON-NLS-1$
 						}
 					}
 					catch (RuntimeException re) {
-						SlimLogger.log(re + " caught when receiving message " + re.getMessage());
+						SlimLogger.logException("adapter.receive", re); //$NON-NLS-1$
 					}
 				}
 				else {
-					SlimLogger.log("Received invalid message or contacts not initailzed yet " + sm);
+					SlimLogger.log(Externalizer.getString("LANSLIM.44")); //$NON-NLS-1$
 				}
 			}
 		}
@@ -149,7 +150,7 @@ public class SlimNetworkAdapter implements Runnable {
 			// cas  nominal d'arret
 		}
 		catch (IOException ioe) {
-			SlimLogger.log(ioe + ":" + ioe.getMessage() + " at SlimNetworkAdapater.run()");
+			SlimLogger.logException("adapter.receive", ioe); //$NON-NLS-1$
 		}
 	}
 	
@@ -163,11 +164,11 @@ public class SlimNetworkAdapter implements Runnable {
 				socket.send(pMessage, pContact);
 			}
 			catch (IOException ioe) {
-				throw new SlimException("Unable to Send message due to " + ioe + ":" + ioe.getMessage(), ioe);
+				throw new SlimException(Externalizer.getString("LANSLIM.45", SlimLogger.shortFormatException(ioe))); //$NON-NLS-1$
 			}
 		}
 		else {
-			throw new SlimException("Unable to send message due to invalid settings please check them");
+			throw new SlimException(Externalizer.getString("LANSLIM.45", Externalizer.getString("LANSLIM.40"))); //$NON-NLS-1$  //$NON-NLS-2$
 		}
 	}
 
@@ -188,7 +189,7 @@ public class SlimNetworkAdapter implements Runnable {
 			delayedTimer.schedule(new DelayedMessageTask(pMessage, pContact), DELAY);		
 		}
 		else {
-			throw new SlimException("Unable to send message due to invalid settings please check them");
+			throw new SlimException(Externalizer.getString("LANSLIM.45", Externalizer.getString("LANSLIM.40"))); //$NON-NLS-1$  //$NON-NLS-2$
 		}
 	}
 	
@@ -206,7 +207,7 @@ public class SlimNetworkAdapter implements Runnable {
 				send(message, contact);
 			}
 			catch (SlimException se) {
-				SlimLogger.log(se + ":" + se.getMessage() + " at DelayedMessageTask.run()");
+				SlimLogger.logException("DelayedMessageTask", se); //$NON-NLS-1$
 			}
 		}
 	}

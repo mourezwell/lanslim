@@ -10,6 +10,7 @@ import java.util.TimerTask;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
@@ -17,7 +18,10 @@ import com.oz.lanslim.model.SlimGroupContact;
 import com.oz.lanslim.model.SlimModel;
 
 public class ContactViewMouseListener extends MouseAdapter {
-    private JPopupMenu popup;
+    
+	private static final String TALK_SEPARATOR = "-"; //$NON-NLS-1$
+	
+	private JPopupMenu popup;
     private ContactView contactView;
     private SlimModel model;
     private boolean doubleclick;
@@ -57,9 +61,9 @@ public class ContactViewMouseListener extends MouseAdapter {
 	    					cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
 	    				}
 	    				else {
-	    					JOptionPane.showMessageDialog(e.getComponent(),
-							    "Unable to start new Talk Message with group whose members are offline",
-							    "Invalid Action",
+	    					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+							    Externalizer.getString("LANSLIM.27"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 	    				}
 	    			}
@@ -68,9 +72,9 @@ public class ContactViewMouseListener extends MouseAdapter {
 	    					cl.add(sc);
 	    				}
 	    				else {
-	    					JOptionPane.showMessageDialog(e.getComponent(),
-							    "Unable to start new Talk Message with offline contact",
-							    "Invalid Action",
+	    					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+							    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 	    				}
 	    			}
@@ -78,12 +82,13 @@ public class ContactViewMouseListener extends MouseAdapter {
 	    			if (cl.size() > 0) {
 		        		try {
                             cl.add(model.getSettings().getContactInfo());
-		        			model.getTalks().addTalk(model.getSettings().getContactInfo().getName() + "-" + sc.getName(), cl);
+		        			model.getTalks().addTalk(model.getSettings().getContactInfo().getName() 
+		        					+ TALK_SEPARATOR + sc.getName(), cl);
 						}
 						catch (SlimException se) {
-							JOptionPane.showMessageDialog(e.getComponent(),
-							    "Unable to send new Talk Message please check your settings",
-							    "Network Error",
+							JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+							    Externalizer.getString("LANSLIM.30"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 							    JOptionPane.ERROR_MESSAGE);
 						}
 	    			}
@@ -92,16 +97,16 @@ public class ContactViewMouseListener extends MouseAdapter {
         			// nothing to do the tree will expand or collapse as usual
         		}
 	        	else {
-					JOptionPane.showMessageDialog(e.getComponent(),
-						    "One and only one contact must be selected in the table please select it first",
-						    "Invalid Action",
+					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+						    Externalizer.getString("LANSLIM.31"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 	        	}
 			}
 			else {
-				JOptionPane.showMessageDialog(e.getComponent(),
-				    "All actions are disabled until you set properly your settings",
-				    "Invalid Action",
+				JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+				    Externalizer.getString("LANSLIM.50"), //$NON-NLS-1$
+				    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 				    JOptionPane.WARNING_MESSAGE);
 			}
         	doubleTimer.schedule(new TimerTask() {

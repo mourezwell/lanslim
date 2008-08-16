@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimModel;
@@ -40,28 +41,27 @@ public class NewCategoryFrame extends JDialog implements ActionListener {
 	private void initGUI() {
 		try {
 			if (categoryName == null) {
-				setTitle("New Category Contact");
+				setTitle(Externalizer.getString("LANSLIM.67")); //$NON-NLS-1$
 			}
 			else {
-				setTitle("Edit Category Contact");
+				setTitle(Externalizer.getString("LANSLIM.68")); //$NON-NLS-1$
 			}
 			
 			FormLayout thisLayout = new FormLayout(
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)", 
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)");
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
-			//this.setPreferredSize(new java.awt.Dimension(250, 225));
-			this.setSize(250, 200);
-			this.setResizable(false);
+			setSize(250, 200);
+			setResizable(false);
 			{
 				nameLabel = new JLabel();
-				getContentPane().add(nameLabel, new CellConstraints("2, 2, 1, 1, default, default"));
-				nameLabel.setText("Name");
+				getContentPane().add(nameLabel, new CellConstraints("2, 2, 1, 1, default, default")); //$NON-NLS-1$
+				nameLabel.setText(Externalizer.getString("LANSLIM.7")); //$NON-NLS-1$
 				nameLabel.setPreferredSize(new java.awt.Dimension(30, 14));
 			}
 			{
 				nameField = new JTextField();
-				getContentPane().add(nameField, new CellConstraints("4, 2, 1, 1, default, default"));
+				getContentPane().add(nameField, new CellConstraints("4, 2, 1, 1, default, default")); //$NON-NLS-1$
 				nameField.setPreferredSize(new java.awt.Dimension(150, 20));
 				if (categoryName != null) {
 					nameField.setText(categoryName);
@@ -70,50 +70,50 @@ public class NewCategoryFrame extends JDialog implements ActionListener {
 			{
 				buttonPanel = new JPanel();
 				okButton = new JButton();
-				okButton.setText("OK");
-				okButton.setActionCommand("OK");
+				okButton.setText(Externalizer.getString("LANSLIM.15")); //$NON-NLS-1$
+				okButton.setActionCommand(NewCategoryActionCommand.OK);
 				okButton.addActionListener(this);
 				
 				cancelButton = new JButton();
-				cancelButton.setText("Cancel");
-				cancelButton.setActionCommand("Cancel");
+				cancelButton.setText(Externalizer.getString("LANSLIM.16")); //$NON-NLS-1$
+				cancelButton.setActionCommand(NewCategoryActionCommand.CANCEL);
 				cancelButton.addActionListener(this);
 
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("4, 4, 1, 1, default, default"));
+				getContentPane().add(buttonPanel, new CellConstraints("4, 4, 1, 1, default, default")); //$NON-NLS-1$
 			}
 		} catch(Exception e) {
-			SlimLogger.log(e + ":" + e.getMessage() + " at NewGroupFrame.initGUI");
+			SlimLogger.logException("NewGroupFrame.initGUI", e); //$NON-NLS-1$
 		}	
 	}
 	
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand().equals("OK")) {
+		if (e.getActionCommand().equals(NewCategoryActionCommand.OK)) {
 			
 			String lNewName = nameField.getText();
 			if (lNewName == null || lNewName.length() == 0) {
-				JOptionPane.showMessageDialog(this,
-					    "Name field must not empty",
-					    "Invalid Entries",
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.70"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
 			}
 			else {
 				if (lNewName.equals(SlimContactList.CATEGORY_GROUP) 
 						|| lNewName.equals(SlimContactList.CATEGORY_UNDEFINED)) {
-					JOptionPane.showMessageDialog(this,
-						    "Name field must filled with either of the two following reserved catgory names " 
-							+ SlimContactList.CATEGORY_GROUP + " or " + SlimContactList.CATEGORY_UNDEFINED,
-						    "Invalid Entries",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.71", //$NON-NLS-1$ 
+						    		SlimContactList.CATEGORY_GROUP, SlimContactList.CATEGORY_UNDEFINED),
+						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 				else {
 					if (model.getContacts().getAllCategories().contains(lNewName)) {
-						JOptionPane.showMessageDialog(this,
-							    "Name field must not contain already existing category name",
-							    "Invalid Entries",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.72"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
@@ -121,19 +121,34 @@ public class NewCategoryFrame extends JDialog implements ActionListener {
 							model.getContacts().addCategory(lNewName, new Boolean(true));
 						}
 						else {
-							model.getContacts().renameCategory(categoryName, lNewName);
+							if (categoryName.equals(SlimContactList.CATEGORY_GROUP) 
+									|| categoryName.equals(SlimContactList.CATEGORY_UNDEFINED)) {
+								JOptionPane.showMessageDialog(getRootPane().getParent(),
+										Externalizer.getString("LANSLIM.185",   //$NON-NLS-1$
+								    		SlimContactList.CATEGORY_GROUP, SlimContactList.CATEGORY_UNDEFINED),
+									    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
+									    JOptionPane.WARNING_MESSAGE);
+							}
+							else {
+								model.getContacts().renameCategory(categoryName, lNewName);
+							}
 						}
 						setVisible(false);
 					}
 				}
 			}
 		}
-		else if (e.getActionCommand().equals("Cancel")) {
+		else if (e.getActionCommand().equals(NewCategoryActionCommand.CANCEL)) {
 			setVisible(false);
 		}
 
 	}
 	
-
+	private class NewCategoryActionCommand {
+		
+		private static final String OK = "OK"; //$NON-NLS-1$
+		
+		private static final String CANCEL = "CANCEL"; //$NON-NLS-1$
+	}
 
 }

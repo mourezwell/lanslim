@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.model.SlimContactList;
@@ -56,47 +57,46 @@ public class NewUserFrame extends JDialog implements ActionListener {
 	private void initGUI() {
 		try {
 			if (contact == null) {
-				setTitle("New User Contact");
+				setTitle(Externalizer.getString("LANSLIM.126")); //$NON-NLS-1$
 			}
 			else {
-				setTitle("Edit User Contact");
+				setTitle(Externalizer.getString("LANSLIM.127")); //$NON-NLS-1$
 			}
 			FormLayout thisLayout = new FormLayout(
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu)", 
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)");
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
-			//this.setPreferredSize(new java.awt.Dimension(190, 160));
-			this.setSize(190, 160);
-			this.setResizable(false);
+			setSize(190, 160);
+			setResizable(false);
 			
 			{
 				nameLabel = new JLabel();
-				getContentPane().add(nameLabel, new CellConstraints("1, 1, 1, 1, default, default"));
-				nameLabel.setText("Name");
+				getContentPane().add(nameLabel, new CellConstraints("1, 1, 1, 1, default, default")); //$NON-NLS-1$
+				nameLabel.setText(Externalizer.getString("LANSLIM.7")); //$NON-NLS-1$
 				nameLabel.setPreferredSize(new java.awt.Dimension(30, 15));
 			}
 			{
 				nameField = new JTextField();
-				getContentPane().add(nameField, new CellConstraints("3, 1, 1, 1, default, default"));
+				getContentPane().add(nameField, new CellConstraints("3, 1, 1, 1, default, default")); //$NON-NLS-1$
 				nameField.setPreferredSize(new java.awt.Dimension(140, 20));
 			}
 			{
 				hostField = new JTextField();
-				getContentPane().add(hostField, new CellConstraints("3, 3, 1, 1, default, default"));
+				getContentPane().add(hostField, new CellConstraints("3, 3, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
 				hostLabel = new JLabel();
-				getContentPane().add(hostLabel, new CellConstraints("1, 3, 1, 1, default, default"));
-				hostLabel.setText("Host");
+				getContentPane().add(hostLabel, new CellConstraints("1, 3, 1, 1, default, default")); //$NON-NLS-1$
+				hostLabel.setText(Externalizer.getString("LANSLIM.129")); //$NON-NLS-1$
 			}
 			{
 				portLabel = new JLabel();
-				getContentPane().add(portLabel, new CellConstraints("1, 5, 1, 1, default, default"));
-				portLabel.setText("Port");
+				getContentPane().add(portLabel, new CellConstraints("1, 5, 1, 1, default, default")); //$NON-NLS-1$
+				portLabel.setText(Externalizer.getString("LANSLIM.130")); //$NON-NLS-1$
 			}
 			{
 				portField = new JTextField();
-				getContentPane().add(portField, new CellConstraints("3, 5, 1, 1, default, default"));
+				getContentPane().add(portField, new CellConstraints("3, 5, 1, 1, default, default")); //$NON-NLS-1$
 				portField.setText(Integer.toString(model.getSettings().getContactInfo().getPort()));
 				if (model.getSettings().isPortUnlocked()) {
 					portField.setEnabled(true);
@@ -107,8 +107,8 @@ public class NewUserFrame extends JDialog implements ActionListener {
 			}
 			{
 				categoryLabel = new JLabel();
-				getContentPane().add(categoryLabel, new CellConstraints("1, 7, 1, 1, default, default"));
-				categoryLabel.setText("Category");
+				getContentPane().add(categoryLabel, new CellConstraints("1, 7, 1, 1, default, default")); //$NON-NLS-1$
+				categoryLabel.setText(Externalizer.getString("LANSLIM.128")); //$NON-NLS-1$
 			}
 			Set lCategoryList = model.getContacts().getAllCategories();
 			int length = lCategoryList.size();
@@ -129,7 +129,7 @@ public class NewUserFrame extends JDialog implements ActionListener {
 				categoryComboBox.setModel(categoryComboBoxModel);
 				categoryComboBox.setMaximumSize(new Dimension(40, 20));
 				categoryComboBox.setSelectedIndex(0);
-				getContentPane().add(categoryComboBox, new CellConstraints("3, 7, 1, 1, default, default"));
+				getContentPane().add(categoryComboBox, new CellConstraints("3, 7, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			
             String lCat = SlimContactList.CATEGORY_UNDEFINED;
@@ -156,29 +156,29 @@ public class NewUserFrame extends JDialog implements ActionListener {
 			{
 				buttonPanel = new JPanel();
 				okButton = new JButton();
-				okButton.setText("OK");
-				okButton.setActionCommand("OK");
+				okButton.setText(Externalizer.getString("LANSLIM.15")); //$NON-NLS-1$
+				okButton.setActionCommand(NewUserActionCommand.OK);
 				okButton.addActionListener(this);
 				
 				cancelButton = new JButton();
-				cancelButton.setText("Cancel");
-				cancelButton.setActionCommand("Cancel");
+				cancelButton.setText(Externalizer.getString("LANSLIM.16")); //$NON-NLS-1$
+				cancelButton.setActionCommand(NewUserActionCommand.CANCEL);
 				cancelButton.addActionListener(this);
 
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("3, 9, 1, 1, default, default"));
+				getContentPane().add(buttonPanel, new CellConstraints("3, 9, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			
 		} catch(Exception e) {
-			SlimLogger.log(e + ":" + e.getMessage() + " at NewUserFrame.initGUI");
+			SlimLogger.logException("NewUserFrame.initGUI", e); //$NON-NLS-1$
 		}	
 	}
 	
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand().equals("OK")) {
+		if (e.getActionCommand().equals(NewUserActionCommand.OK)) {
 			
 			
 			if (contact == null) {
@@ -188,9 +188,9 @@ public class NewUserFrame extends JDialog implements ActionListener {
 					boolean lAdded = model.getContacts().addContact(contact);
 					if (!lAdded) {
 						contact = null;
-						JOptionPane.showMessageDialog(this,
-							    "User already declared please remove it first",
-							    "Invalid Entries",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
@@ -200,9 +200,9 @@ public class NewUserFrame extends JDialog implements ActionListener {
 					}
 				}
 				catch (SlimException se) {
-					JOptionPane.showMessageDialog(this,
-						    "At least one parametrs is invalid : " + se.getMessage(),
-						    "Invalid Entries",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.124", se.getMessage()), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
@@ -213,33 +213,40 @@ public class NewUserFrame extends JDialog implements ActionListener {
 
 					boolean lAdded = model.getContacts().updateContact(contact, newContact);
 					if (!lAdded) {
-						JOptionPane.showMessageDialog(this,
-							    "UserName already declared please remove it first or choose another one",
-							    "Invalid Entries",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
 						model.getContacts().moveUserIntoCategory(newContact, 
 								(String)categoryComboBox.getSelectedItem());
-						JOptionPane.showMessageDialog(this,
-							    "User updated successfully but changes will take effect only on new talks",
-							    "Update Info",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.125"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.122"), //$NON-NLS-1$
 							    JOptionPane.INFORMATION_MESSAGE);
 						setVisible(false);
 					}
 				}
 				catch (SlimException se) {
-					JOptionPane.showMessageDialog(this,
-						    "At least one parametrs is invalid : " + se.getMessage(),
-						    "Invalid Entries",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.124", se.getMessage()), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		}
-		else if (e.getActionCommand().equals("Cancel")) {
+		else if (e.getActionCommand().equals(NewUserActionCommand.CANCEL)) {
 			setVisible(false);
 		}
 
+	}
+
+	private class NewUserActionCommand {
+		
+		private static final String OK = "OK"; //$NON-NLS-1$
+		
+		private static final String CANCEL = "CANCEL"; //$NON-NLS-1$
 	}
 
 }

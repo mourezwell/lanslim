@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.model.SlimContact;
@@ -54,22 +55,21 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 	private void initGUI() {
 		try {
 			if (group == null) {
-				setTitle("New Group Contact");
+				setTitle(Externalizer.getString("LANSLIM.119")); //$NON-NLS-1$
 			}
 			else {
-				setTitle("Edit Group Contact");
+				setTitle(Externalizer.getString("LANSLIM.120")); //$NON-NLS-1$
 			}
 			
 			FormLayout thisLayout = new FormLayout(
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu)", 
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)");
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
-			//this.setPreferredSize(new java.awt.Dimension(250, 225));
-			this.setSize(250, 225);
-			this.setResizable(false);
+			setSize(250, 225);
+			setResizable(false);
 			{
 				nameField = new JTextField();
-				getContentPane().add(nameField, new CellConstraints("3, 1, 1, 1, default, default"));
+				getContentPane().add(nameField, new CellConstraints("3, 1, 1, 1, default, default")); //$NON-NLS-1$
 				nameField.setPreferredSize(new java.awt.Dimension(140, 20));
 				if (group != null) {
 					nameField.setText(group.getName());
@@ -78,12 +78,12 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 			}
 			{
 				membersLabel = new JLabel();
-				getContentPane().add(membersLabel, new CellConstraints("1, 3, 1, 1, default, default"));
-				membersLabel.setText("Members");
+				getContentPane().add(membersLabel, new CellConstraints("1, 3, 1, 1, default, default")); //$NON-NLS-1$
+				membersLabel.setText(Externalizer.getString("LANSLIM.121")); //$NON-NLS-1$
 			}
 			{
 				membersScrollPane = new JScrollPane();
-				getContentPane().add(membersScrollPane, new CellConstraints("3, 3, 1, 1, default, default"));
+				getContentPane().add(membersScrollPane, new CellConstraints("3, 3, 1, 1, default, default")); //$NON-NLS-1$
 				{
 					membersCheckPanel = new JPanel();
 					membersScrollPane.setViewportView(membersCheckPanel);
@@ -110,35 +110,35 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 			}
 			{
 				nameLabel = new JLabel();
-				getContentPane().add(nameLabel, new CellConstraints("1, 1, 1, 1, default, default"));
-				nameLabel.setText("Name");
+				getContentPane().add(nameLabel, new CellConstraints("1, 1, 1, 1, default, default")); //$NON-NLS-1$
+				nameLabel.setText(Externalizer.getString("LANSLIM.7")); //$NON-NLS-1$
 				nameLabel.setPreferredSize(new java.awt.Dimension(20, 14));
 			}
 			{
 				buttonPanel = new JPanel();
 				okButton = new JButton();
-				okButton.setText("OK");
-				okButton.setActionCommand("OK");
+				okButton.setText(Externalizer.getString("LANSLIM.15")); //$NON-NLS-1$
+				okButton.setActionCommand(NewGroupActionCommand.OK);
 				okButton.addActionListener(this);
 				
 				cancelButton = new JButton();
-				cancelButton.setText("Cancel");
-				cancelButton.setActionCommand("Cancel");
+				cancelButton.setText(Externalizer.getString("LANSLIM.16")); //$NON-NLS-1$
+				cancelButton.setActionCommand(NewGroupActionCommand.CANCEL);
 				cancelButton.addActionListener(this);
 
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("3, 5, 1, 1, default, default"));
+				getContentPane().add(buttonPanel, new CellConstraints("3, 5, 1, 1, default, default")); //$NON-NLS-1$
 			}
 		} catch(Exception e) {
-			SlimLogger.log(e + ":" + e.getMessage() + " at NewGroupFrame.initGUI");
+			SlimLogger.logException("NewGroupFrame.initGUI", e); //$NON-NLS-1$
 		}	
 	}
 	
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand().equals("OK")) {
+		if (e.getActionCommand().equals(NewGroupActionCommand.OK)) {
 			
 			List list = new ArrayList();
 			for (Iterator it = membersCheckBoxList.iterator(); it.hasNext();) {
@@ -148,9 +148,9 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 				}
 			}
 			if (list.size() == 0) {
-				JOptionPane.showMessageDialog(this,
-					    "At least one user must be selected as member",
-					    "Invalid Entries",
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.17"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
 			}
 			else {
@@ -160,9 +160,9 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 						boolean lAdded = model.getContacts().addContact(group);
 						if (!lAdded) {
 							group = null;
-							JOptionPane.showMessageDialog(this,
-								    "Group already declared please remove it first",
-								    "Invalid Entries",
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 								    JOptionPane.WARNING_MESSAGE);
 						}
 						else {
@@ -170,9 +170,9 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 						}
 					}
 					catch (SlimException se) {
-						JOptionPane.showMessageDialog(this,
-							    "At least one parameters is invalid : " + se.getMessage(),
-							    "Invalid Entries",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.124", se.getMessage()), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 				}
@@ -181,34 +181,41 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 						SlimGroupContact sgc = new SlimGroupContact(nameField.getText(), list);
 						boolean lUpdated = model.getContacts().updateContact(group, sgc);
 						if (!lUpdated) {
-							JOptionPane.showMessageDialog(this,
-								    "GroupName already declared please remove it first or choose another One",
-								    "Invalid Entries",
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 								    JOptionPane.WARNING_MESSAGE);
 						}
 						else {
-							JOptionPane.showMessageDialog(this,
-								    "Group updated successfully but changes will take effect only on new talks",
-								    "Update Info",
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.125"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.122"), //$NON-NLS-1$
 								    JOptionPane.INFORMATION_MESSAGE);
 							setVisible(false);
 						}
 					}
 					catch (SlimException se) {
-						JOptionPane.showMessageDialog(this,
-							    "At least one parameters is invalid : " + se.getMessage(),
-							    "Invalid Entries",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.124", se.getMessage()), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 				}
 			}
 		}
-		else if (e.getActionCommand().equals("Cancel")) {
+		else if (e.getActionCommand().equals(NewGroupActionCommand.CANCEL)) {
 			setVisible(false);
 		}
 
 	}
 	
+	private class NewGroupActionCommand {
+		
+		private static final String OK = "OK"; //$NON-NLS-1$
+		
+		private static final String CANCEL = "CANCEL"; //$NON-NLS-1$
+	}
+
 
 
 }

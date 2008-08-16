@@ -37,13 +37,19 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.html.HTMLEditorKit;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.HTMLConstants;
 import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimTalkListener;
 
 public class TalkPane extends JSplitPane 
 	implements ActionListener, SlimTalkListener, KeyListener, CaretListener {
+
+	private static final String COLOR_BUTTON_SIZE = "5"; //$NON-NLS-1$
+	private static final String COLOR_BUTTON_TEXT = "A"; //$NON-NLS-1$
+	private static final String COMMENT_PREFIX = "#"; //$NON-NLS-1$
 	
 	private JEditorPane talkArea;
 	private JTextArea newMessageArea;
@@ -91,10 +97,10 @@ public class TalkPane extends JSplitPane
 
 	private void init() {
 
-		this.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		setOrientation(JSplitPane.VERTICAL_SPLIT);
 		{
 			talkAreaPane = new JScrollPane();
-			this.add(talkAreaPane, JSplitPane.TOP);
+			add(talkAreaPane, JSplitPane.TOP);
 			{
 				talkArea = new JEditorPane();
 				talkArea.setEditorKit(new HTMLEditorKit());
@@ -108,7 +114,7 @@ public class TalkPane extends JSplitPane
 		}
 		{
 			newMessagePane = new JPanel();
-			this.add(newMessagePane, JSplitPane.BOTTOM);
+			add(newMessagePane, JSplitPane.BOTTOM);
 			BorderLayout lLayout = new BorderLayout();
 			newMessagePane.setLayout(lLayout);
 			{
@@ -118,30 +124,30 @@ public class TalkPane extends JSplitPane
 				newMessagePane.add(messageToolbar, BorderLayout.NORTH);
 				{
 					boldButton = new JButton();
-					boldButton.setIcon(new SlimIcon("bold.png"));
+					boldButton.setIcon(new SlimIcon("bold.png")); //$NON-NLS-1$
 					boldButton.addActionListener(this);
 					boldButton.setActionCommand(TalkPaneActionCommand.BOLD);
-					boldButton.setToolTipText("Bold");
+					boldButton.setToolTipText(Externalizer.getString("LANSLIM.91")); //$NON-NLS-1$
 					boldButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultBold()));
 			        messageToolbar.addSeparator();
 					messageToolbar.add(boldButton);
 				}
 				{
 					italicButton = new JButton();
-					italicButton.setIcon(new SlimIcon("italic.png"));
+					italicButton.setIcon(new SlimIcon("italic.png")); //$NON-NLS-1$
 					italicButton.addActionListener(this);
 					italicButton.setActionCommand(TalkPaneActionCommand.ITALIC);
-					italicButton.setToolTipText("Italic");
+					italicButton.setToolTipText(Externalizer.getString("LANSLIM.92")); //$NON-NLS-1$
 					italicButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultItalic()));
 			        messageToolbar.addSeparator();
 					messageToolbar.add(italicButton);
 				}
 				{
 					underlineButton = new JButton();
-					underlineButton.setIcon(new SlimIcon("underline.png"));
+					underlineButton.setIcon(new SlimIcon("underline.png")); //$NON-NLS-1$
 					underlineButton.addActionListener(this);
 					underlineButton.setActionCommand(TalkPaneActionCommand.UNDERLINE);
-					underlineButton.setToolTipText("Underline");
+					underlineButton.setToolTipText(Externalizer.getString("LANSLIM.93")); //$NON-NLS-1$
 					underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultUndeline()));
 			        messageToolbar.addSeparator();
 					messageToolbar.add(underlineButton);
@@ -150,13 +156,13 @@ public class TalkPane extends JSplitPane
 					colorButton = new JButton();
 					colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
 						+ talkModel.getMessageFontColor() + HTMLConstants.FONTSIZE 
-						+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+						+ COLOR_BUTTON_SIZE + HTMLConstants.TAGEND + HTMLConstants.BOLD + COLOR_BUTTON_TEXT
 						+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 					colorButton.setMaximumSize(new Dimension(20, 20));
 					colorButton.setMinimumSize(new Dimension(20, 20));
 					colorButton.addActionListener(this); 
 					colorButton.setActionCommand(TalkPaneActionCommand.COLOR);
-					colorButton.setToolTipText("Color");
+					colorButton.setToolTipText(Externalizer.getString("LANSLIM.94")); //$NON-NLS-1$
 					colorButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
 					messageToolbar.addSeparator();
 					messageToolbar.add(colorButton);
@@ -164,20 +170,20 @@ public class TalkPane extends JSplitPane
 				{
 					ComboBoxModel sizeComboBoxModel = 
 						new DefaultComboBoxModel(
-								new String[] { "1", "2", "3", "4", "5", "6", "7" });
+								new String[] { "1", "2", "3", "4", "5", "6", "7" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 					sizeComboBox = new JComboBox();
 					sizeComboBox.setModel(sizeComboBoxModel);
 					sizeComboBox.setSelectedIndex(Integer.parseInt(talkModel.getMessageFontSize()) -1);
 					sizeComboBox.setMaximumSize(new Dimension(40, 20));
 					sizeComboBox.addActionListener(this);
 					sizeComboBox.setActionCommand(TalkPaneActionCommand.SIZE);
-					sizeComboBox.setToolTipText("Size (Html style, default is 4)");
+					sizeComboBox.setToolTipText(Externalizer.getString("LANSLIM.95")); //$NON-NLS-1$
 			        messageToolbar.addSeparator();
 					messageToolbar.add(sizeComboBox);
 				}
 				{
-					Integer[] intArray = new Integer[SlimTalk.smileyText.length];
-					for (int i = 0; i < SlimTalk.smileyText.length; i++) {
+					Integer[] intArray = new Integer[SlimTalk.SMILEY_TEXT.length];
+					for (int i = 0; i < SlimTalk.SMILEY_TEXT.length; i++) {
 						intArray[i] = new Integer(i);
 					}
 					smileyCBox = new JComboBox(intArray);
@@ -186,16 +192,16 @@ public class TalkPane extends JSplitPane
 			        smileyCBox.setMaximumSize(new Dimension(80, 24));
 			        smileyCBox.addActionListener(this);
 			        smileyCBox.setActionCommand(TalkPaneActionCommand.SMILEY);
-			        smileyCBox.setToolTipText("Smileys");
+			        smileyCBox.setToolTipText(Externalizer.getString("LANSLIM.96")); //$NON-NLS-1$
 			        messageToolbar.addSeparator();
 					messageToolbar.add(smileyCBox);
 				}
 				{
 					sendButton = new JButton();
-					sendButton.setIcon(new SlimIcon("next.png"));
+					sendButton.setIcon(new SlimIcon("next.png")); //$NON-NLS-1$
 					sendButton.addActionListener(this);
 					sendButton.setActionCommand(TalkPaneActionCommand.SEND);
-					sendButton.setToolTipText("Send Message (Enter)");
+					sendButton.setToolTipText(Externalizer.getString("LANSLIM.97")); //$NON-NLS-1$
 					messageToolbar.add(Box.createHorizontalGlue());
 					messageToolbar.add(sendButton);
 				}
@@ -206,11 +212,11 @@ public class TalkPane extends JSplitPane
 				{
 					newMessageArea = new JTextArea();
 					messageAreaPane.setViewportView(newMessageArea);
-					newMessageArea.setToolTipText("Enter to send message, Alt+Enter to insert newline, Shift+Up (+Down) To browse your message history");
+					newMessageArea.setToolTipText(Externalizer.getString("LANSLIM.98")); //$NON-NLS-1$
 					newMessageArea.addKeyListener(this);
 					newMessageArea.setLineWrap(true);
 					newMessageArea.setWrapStyleWord(true);
-					newMessageArea.setText("");
+					newMessageArea.setText(StringConstants.EMPTY);
 					newMessageArea.addCaretListener(this);
 					if (talkModel.isDefaultBold()) {
 						newMessageArea.setText(newMessageArea.getText() + HTMLConstants.BOLD);
@@ -232,7 +238,7 @@ public class TalkPane extends JSplitPane
 		if (e.getActionCommand() == TalkPaneActionCommand.COLOR) {
 		    Color newColor = JColorChooser.showDialog(
 		    		TalkPane.this,
-		            "Choose Text Color",
+		            Externalizer.getString("LANSLIM.99"), //$NON-NLS-1$
 		            Color.black);
 			 if (newColor != null) {
 				 talkModel.setMessageFontColor(toDoubleHex(newColor.getRed()) 
@@ -240,7 +246,7 @@ public class TalkPane extends JSplitPane
 						 + toDoubleHex(newColor.getBlue()));
 				 colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
 							+ talkModel.getMessageFontColor() + HTMLConstants.FONTSIZE 
-							+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+							+ COLOR_BUTTON_SIZE + HTMLConstants.TAGEND + HTMLConstants.BOLD + COLOR_BUTTON_TEXT
 							+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 			 }
 	    	 newMessageArea.requestFocus();
@@ -274,9 +280,9 @@ public class TalkPane extends JSplitPane
     		int lPos = newMessageArea.getSelectionStart();
 			String before = newMessageArea.getText().substring(0, lPos);
 			String after = newMessageArea.getText().substring(lPos);
-    		newMessageArea.setText(before + SlimTalk.smileyText[smileyCBox.getSelectedIndex()] + after);
+    		newMessageArea.setText(before + SlimTalk.SMILEY_TEXT[smileyCBox.getSelectedIndex()] + after);
     		newMessageArea.setCaretPosition(lPos 
-    				+ SlimTalk.smileyText[smileyCBox.getSelectedIndex()].length());
+    				+ SlimTalk.SMILEY_TEXT[smileyCBox.getSelectedIndex()].length());
     		newMessageArea.requestFocus();
 		}
 
@@ -285,7 +291,7 @@ public class TalkPane extends JSplitPane
 	protected static String toDoubleHex(int i) {
 		String result = Integer.toHexString(i);
 		if (result.length() == 1) {
-			return ("0" + result);
+			return ("0" + result); //$NON-NLS-1$
 		}
 		return result.toUpperCase();
 	}
@@ -305,7 +311,7 @@ public class TalkPane extends JSplitPane
 				historyIndex = 0;
 			}
 			historyCallIndex = historyIndex;
-			newMessageArea.setText("");
+			newMessageArea.setText(StringConstants.EMPTY);
 			if (talkModel.isDefaultBold()) {
 				newMessageArea.setText(newMessageArea.getText() + HTMLConstants.BOLD);
 			}
@@ -317,9 +323,9 @@ public class TalkPane extends JSplitPane
 			}
 		}
 		catch (SlimException se) {
-			JOptionPane.showMessageDialog(this,
-			    "Message could not be sent  please check your settings",
-			    "Network Error",
+			JOptionPane.showMessageDialog(getRootPane().getParent(),
+			    Externalizer.getString("LANSLIM.45", Externalizer.getString("LANSLIM.40")), //$NON-NLS-1$ //$NON-NLS-2$
+			    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 			    JOptionPane.ERROR_MESSAGE);
 		}
 		newMessageArea.requestFocus();
@@ -336,7 +342,7 @@ public class TalkPane extends JSplitPane
 			colorButton.setEnabled(false);
 			colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
 					+ HTMLConstants.GREY + HTMLConstants.FONTSIZE 
-					+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+					+ COLOR_BUTTON_SIZE + HTMLConstants.TAGEND + HTMLConstants.BOLD + COLOR_BUTTON_TEXT
 					+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 			underlineButton.setEnabled(false);
 			italicButton.setEnabled(false);
@@ -351,7 +357,7 @@ public class TalkPane extends JSplitPane
 			colorButton.setEnabled(true);
 			colorButton.setText(HTMLConstants.HTML + HTMLConstants.FONTCOLOR 
 					+ talkModel.getMessageFontColor() + HTMLConstants.FONTSIZE 
-					+ "5" + HTMLConstants.TAGEND + HTMLConstants.BOLD + "A" 
+					+ COLOR_BUTTON_SIZE + HTMLConstants.TAGEND + HTMLConstants.BOLD + COLOR_BUTTON_TEXT
 					+ HTMLConstants.ENDBOLD + HTMLConstants.ENDFONT + HTMLConstants.ENDHTML);
 			underlineButton.setEnabled(true);
 			italicButton.setEnabled(true);
@@ -362,24 +368,6 @@ public class TalkPane extends JSplitPane
 		}
 	}
 
-	private class TalkPaneActionCommand {
-
-		public static final String COLOR = "color";
-		
-		public static final String BOLD = "bold";
-
-		public static final String ITALIC = "italic";
-
-		public static final String UNDERLINE = "underline";
-		
-		public static final String SEND = "send";
-		
-		public static final String SMILEY = "smiley";
-
-		public static final String SIZE = "size";
-
-	}
-
 	public void keyPressed(KeyEvent e) {
 		
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -387,7 +375,7 @@ public class TalkPane extends JSplitPane
         		int lPos = newMessageArea.getSelectionStart();
 				String before = newMessageArea.getText().substring(0, lPos);
 				String after = newMessageArea.getText().substring(lPos);
-				newMessageArea.setText(before + "\n" + after);
+				newMessageArea.setText(before + StringConstants.NEW_LINE + after);
 				newMessageArea.setCaretPosition(before.length());
 	        }
 	        else {
@@ -414,13 +402,78 @@ public class TalkPane extends JSplitPane
 			}
 			newMessageArea.setText(history[historyCallIndex]);
 		}
-
+		else if (e.getKeyCode() == KeyEvent.VK_B
+				&& ((e.getModifiers() & InputEvent.CTRL_MASK) != 0)) {
+			styleButtonAction(bold, HTMLConstants.BOLD, HTMLConstants.ENDBOLD);
+			bold = !bold;
+			boldButton.setBorder(SlimButtonBorder.getSelectedBorder(bold));
+			newMessageArea.requestFocus();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_I
+				&& ((e.getModifiers() & InputEvent.CTRL_MASK) != 0)) {
+			styleButtonAction(italic, HTMLConstants.ITALIC, HTMLConstants.ENDITALIC);
+			italic = !italic;
+			italicButton.setBorder(SlimButtonBorder.getSelectedBorder(italic));
+			newMessageArea.requestFocus();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_U
+				&& ((e.getModifiers() & InputEvent.CTRL_MASK) != 0)) {
+			styleButtonAction(underline, HTMLConstants.UNDERLINE, HTMLConstants.ENDUNDERLINE);
+			underline = !underline;
+			underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(underline));
+			newMessageArea.requestFocus();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F1) {
+			insertShortcut(0);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F2) {
+			insertShortcut(1);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F3) {
+			insertShortcut(2);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F4) {
+			insertShortcut(3);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F5) {
+			insertShortcut(4);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F6) {
+			insertShortcut(5);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F7) {
+			insertShortcut(6);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F8) {
+			insertShortcut(7);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F9) {
+			insertShortcut(8);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F10) {
+			insertShortcut(9);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F11) {
+			insertShortcut(10);
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_F12) {
+			insertShortcut(11);
+		}
 	}
 
-	public void keyReleased(KeyEvent e) {
+	
+	private void insertShortcut(int i) {
+		int lPos = newMessageArea.getSelectionStart();
+		String before = newMessageArea.getText().substring(0, lPos);
+		String after = newMessageArea.getText().substring(lPos);
+		newMessageArea.setText(before + talkModel.getShortcut(i) + after);
+		newMessageArea.setCaretPosition(lPos + talkModel.getShortcut(i).length());
+	}
+	
+ 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			if ((e.getModifiers() & InputEvent.ALT_MASK) == 0) {
-				newMessageArea.setText("");
+				newMessageArea.setText(StringConstants.EMPTY);
 			}
 		}
 	}
@@ -431,12 +484,18 @@ public class TalkPane extends JSplitPane
 
 	protected void export(File pFile) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(pFile));
-		writer.write("#Lanslim Talk Export \n");
-		writer.write("#Date : " + new Date() + "\n");
-		writer.write("#Talk Title : " + talkModel.getTitle() + "\n");
-		writer.write("#People In : " + talkModel.getPeopleInListAsString() + "\n");
-		writer.write("#Talk Text :\n");
-		Clipboard cb = new Clipboard("Lanslim");
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.99")); //$NON-NLS-1$
+		writer.write(StringConstants.LINE_SEPARATOR);
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.100", new Date())); //$NON-NLS-1$
+		writer.write(StringConstants.LINE_SEPARATOR);
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.101", talkModel.getTitle())); //$NON-NLS-1$
+		writer.write(StringConstants.LINE_SEPARATOR);
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.102", talkModel.getPeopleInListAsString())); //$NON-NLS-1$
+		writer.write(StringConstants.LINE_SEPARATOR);
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.103")); //$NON-NLS-1$
+		writer.write(StringConstants.LINE_SEPARATOR);
+		
+		Clipboard cb = new Clipboard("Lanslim"); //$NON-NLS-1$
 		talkArea.select(0, talkArea.getSelectionEnd()); // select All
 		talkArea.getTransferHandler().exportToClipboard(talkArea, cb, TransferHandler.COPY);
 		Transferable t = cb.getContents(this);
@@ -447,14 +506,14 @@ public class TalkPane extends JSplitPane
             while (c > 0) {
 	            int start = str.substring(0, c-1).lastIndexOf(' ');
 	            if (start >= 0) {
-	                writer.write(str.substring(last+1, start) + "\n");
+	                writer.write(str.substring(last+1, start) + StringConstants.LINE_SEPARATOR);
 	            	last = start;
 	            }
 	            c = str.indexOf('[', c+1);
             }
-            writer.write(str.substring(last+1) + "\n");
-            
-        } catch (UnsupportedFlavorException ufe) {
+            writer.write(str.substring(last+1) + StringConstants.LINE_SEPARATOR);
+        } 
+        catch (UnsupportedFlavorException ufe) {
         	 writer.write(ufe.getMessage());
         }
 		writer.flush();
@@ -503,4 +562,23 @@ public class TalkPane extends JSplitPane
 		}
 	}
 	
+	private class TalkPaneActionCommand {
+
+		public static final String COLOR = "color"; //$NON-NLS-1$
+		
+		public static final String BOLD = "bold"; //$NON-NLS-1$
+
+		public static final String ITALIC = "italic"; //$NON-NLS-1$
+
+		public static final String UNDERLINE = "underline"; //$NON-NLS-1$
+		
+		public static final String SEND = "send"; //$NON-NLS-1$
+		
+		public static final String SMILEY = "smiley"; //$NON-NLS-1$
+
+		public static final String SIZE = "size"; //$NON-NLS-1$
+
+	}
+
+
 }

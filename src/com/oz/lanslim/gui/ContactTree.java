@@ -60,10 +60,12 @@ public class ContactTree extends JTree implements ContactView,
 		
 		TreePath[] tps = getSelectionPaths();
 		List lContacts = new ArrayList();
-		for (int i = 0; i < tps.length; i++) {
-			DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
-			if (tn.getUserObject() instanceof SlimContact) {
-				lContacts.add(tn.getUserObject());
+		if (tps != null) {
+			for (int i = 0; i < tps.length; i++) {
+				DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
+				if (tn.getUserObject() instanceof SlimContact) {
+					lContacts.add(tn.getUserObject());
+				}
 			}
 		}
 		return (SlimContact[])lContacts.toArray(new SlimContact[lContacts.size()]);
@@ -73,10 +75,12 @@ public class ContactTree extends JTree implements ContactView,
 		
 		TreePath[] tps = getSelectionPaths();
 		List lCategories = new ArrayList();
-		for (int i = 0; i < tps.length; i++) {
-			DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
-			if (tn.getUserObject() instanceof String) {
-				lCategories.add(tn.getUserObject());
+		if (tps != null) {
+			for (int i = 0; i < tps.length; i++) {
+				DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
+				if (tn.getUserObject() instanceof String) {
+					lCategories.add(tn.getUserObject());
+				}
 			}
 		}
 		return (String[])lCategories.toArray(new String[lCategories.size()]);

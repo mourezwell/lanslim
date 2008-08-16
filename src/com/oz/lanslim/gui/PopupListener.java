@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
@@ -55,9 +56,9 @@ public class PopupListener extends MouseAdapter {
     					cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
     				}
     				else {
-    					JOptionPane.showMessageDialog(e.getComponent(),
-						    "Unable to start new Talk Message with group whose members are offline",
-						    "Invalid Action",
+    					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+						    Externalizer.getString("LANSLIM.27"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
     				}
     			}
@@ -66,27 +67,27 @@ public class PopupListener extends MouseAdapter {
     					cl.add(sc);
     				}
     				else {
-    					JOptionPane.showMessageDialog(e.getComponent(),
-						    "Unable to start new Talk Message with offline contact",
-						    "Invalid Action",
+    					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+						    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
     				}
     			}
         		try {
                     cl.add(model.getSettings().getContactInfo());
-        			model.getTalks().addTalk("New", cl);
+        			model.getTalks().addTalk(Externalizer.getString("LANSLIM.12"), cl); //$NON-NLS-1$
 				}
 				catch (SlimException se) {
-					JOptionPane.showMessageDialog(e.getComponent(),
-					    "Unable to send new Talk Message please check your settings",
-					    "Network Error",
+					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+					    Externalizer.getString("LANSLIM.30"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 					    JOptionPane.ERROR_MESSAGE);
 				}
     		}
         	else {
-				JOptionPane.showMessageDialog(e.getComponent(),
-					    "One and only one contact must be selected in the table please select it first",
-					    "Invalid Action",
+				JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
+					    Externalizer.getString("LANSLIM.31"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
         	}
         	doubleTimer.schedule(new TimerTask() {

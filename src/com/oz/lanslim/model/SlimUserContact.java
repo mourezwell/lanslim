@@ -5,13 +5,14 @@ import java.net.InetSocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 
 public class SlimUserContact extends SlimContact implements Serializable {
 
 	private static final Pattern USER_PATTERN = Pattern.compile(
-			"([^" + HOST_SEPARATOR + "]*)" + HOST_SEPARATOR + 
-			"([^\\" + PORT_SEPARATOR + "]*)" + PORT_SEPARATOR + "([0-9]{1,6})");  
+			"([^" + HOST_SEPARATOR + "]*)" + HOST_SEPARATOR +  //$NON-NLS-1$ //$NON-NLS-2$
+			"([^\\" + PORT_SEPARATOR + "]*)" + PORT_SEPARATOR + "([0-9]{1,6})");   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	private String host = null;
 
@@ -39,23 +40,23 @@ public class SlimUserContact extends SlimContact implements Serializable {
 	public void setHost(String pIp) throws SlimException {
 		InetSocketAddress address = new InetSocketAddress(pIp, port);
 		if (address.getAddress() == null) {
-			throw new SlimException(pIp + " can't be resolved");
+			throw new SlimException(Externalizer.getString("LANSLIM.161", pIp)); //$NON-NLS-1$
 		}
 		else if (address.getAddress().isMulticastAddress()) {
-			throw new SlimException(pIp + " must not be multicast address");
+			throw new SlimException(Externalizer.getString("LANSLIM.162", pIp)); //$NON-NLS-1$
 		}
 		else if (address.getAddress().isLoopbackAddress() 
-				&& !Boolean.getBoolean(SlimSettings.UNLOCK_PORT_SYTEM_PROPERTY_KEY)) {
-			throw new SlimException(pIp + " must not be loopback address");
+				&& !Boolean.getBoolean(SlimSettings.UNLOCK_PORT_SYSTEM_PROPERTY_KEY)) {
+			throw new SlimException(Externalizer.getString("LANSLIM.163", pIp)); //$NON-NLS-1$
 		} 
 		else if (address.getAddress().isAnyLocalAddress()) {
-			throw new SlimException(pIp + " must not be wildcard address");
+			throw new SlimException(Externalizer.getString("LANSLIM.164", pIp)); //$NON-NLS-1$
 		}
 		else if (pIp.indexOf(PORT_SEPARATOR) > 0) {
-			throw new SlimException(pIp + " must not contain character " + PORT_SEPARATOR );
+			throw new SlimException(Externalizer.getString("LANSLIM.165", pIp, PORT_SEPARATOR)); //$NON-NLS-1$
 		}
 		else if (pIp.indexOf(FORMIDDEN_CHAR) > 0) {
-			throw new SlimException(pIp + " must not contain character " + FORMIDDEN_CHAR );
+			throw new SlimException(Externalizer.getString("LANSLIM.165", pIp, FORMIDDEN_CHAR)); //$NON-NLS-1$
 		}
 		host = pIp;
 	}
@@ -67,11 +68,11 @@ public class SlimUserContact extends SlimContact implements Serializable {
 				port = lPort;
 			} 
 			else {
-				throw new SlimException(pPort + " is not valid port");
+				throw new SlimException(Externalizer.getString("LANSLIM.166", pPort)); //$NON-NLS-1$
 			}
 		}
 		catch (NumberFormatException nfe) {
-			throw new SlimException(pPort + " is not valid port");
+			throw new SlimException(Externalizer.getString("LANSLIM.166", pPort)); //$NON-NLS-1$
 		}
 	}
 
@@ -103,7 +104,7 @@ public class SlimUserContact extends SlimContact implements Serializable {
 		if (lMatch.matches()) {
 			return new SlimUserContact(lMatch.group(1), lMatch.group(2), lMatch.group(3));
 		}
-		throw new SlimException(pString + " does not match user pattern ");
+		throw new SlimException(Externalizer.getString("LANSLIM.49", pString)); //$NON-NLS-1$
 	}
 
 }

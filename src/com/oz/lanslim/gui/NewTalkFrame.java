@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.model.SlimContact;
@@ -58,33 +59,32 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 	private void initGUI( List pPreSelcetdContacts) {
 		try {
 			if (talk == null) {
-				setTitle("New Talk");
+				setTitle(Externalizer.getString("LANSLIM.10")); //$NON-NLS-1$
 			}
 			else {
-				setTitle("Edit/Invite to Talk");
+				setTitle(Externalizer.getString("LANSLIM.11")); //$NON-NLS-1$
 			}
 			
 			FormLayout thisLayout = new FormLayout(
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu)", 
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)");
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
-			//this.setPreferredSize(new java.awt.Dimension(250, 225));
-			this.setSize(250, 225);
-			this.setResizable(false);
+			setSize(250, 225);
+			setResizable(false);
 			{
 				titleField = new JTextField();
-				getContentPane().add(titleField, new CellConstraints("3, 1, 1, 1, default, default"));
+				getContentPane().add(titleField, new CellConstraints("3, 1, 1, 1, default, default")); //$NON-NLS-1$
 				titleField.setPreferredSize(new java.awt.Dimension(140, 20));
-				titleField.setText("New");
+				titleField.setText(Externalizer.getString("LANSLIM.12")); //$NON-NLS-1$
 			}
 			{
 				contactLabel = new JLabel();
-				getContentPane().add(contactLabel, new CellConstraints("1, 3, 1, 1, default, default"));
-				contactLabel.setText("Contacts");
+				getContentPane().add(contactLabel, new CellConstraints("1, 3, 1, 1, default, default")); //$NON-NLS-1$
+				contactLabel.setText(Externalizer.getString("LANSLIM.13")); //$NON-NLS-1$
 			}
 			{
 				contactScrollPane = new JScrollPane();
-				getContentPane().add(contactScrollPane, new CellConstraints("3, 3, 1, 1, default, default"));
+				getContentPane().add(contactScrollPane, new CellConstraints("3, 3, 1, 1, default, default")); //$NON-NLS-1$
 				{
 					contactCheckPanel = new JPanel();
 					contactScrollPane.setViewportView(contactCheckPanel);
@@ -98,10 +98,10 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 						cb.addActionListener(this);
 						cb.setText(c.getName());
 						if (c.isGroup()) {
-							cb.setFont(new Font("Default", Font.ITALIC, 11));
+							cb.setFont(new Font("Default", Font.ITALIC, 11)); //$NON-NLS-1$
 						}
 						else {
-							cb.setFont(new Font("Default", Font.PLAIN, 11));
+							cb.setFont(new Font("Default", Font.PLAIN, 11)); //$NON-NLS-1$
 						}
 						contactCheckBoxList.add(cb);
 						if (pPreSelcetdContacts != null && pPreSelcetdContacts.contains(c)) {
@@ -116,38 +116,38 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 			}
 			{
 				titleLabel = new JLabel();
-				getContentPane().add(titleLabel, new CellConstraints("1, 1, 1, 1, default, default"));
-				titleLabel.setText("Title");
+				getContentPane().add(titleLabel, new CellConstraints("1, 1, 1, 1, default, default")); //$NON-NLS-1$
+				titleLabel.setText(Externalizer.getString("LANSLIM.14")); //$NON-NLS-1$
 				titleLabel.setPreferredSize(new java.awt.Dimension(20, 14));
 			}
 			{
 				buttonPanel = new JPanel();
 				okButton = new JButton();
-				okButton.setText("OK");
-				okButton.setActionCommand("OK");
+				okButton.setText(Externalizer.getString("LANSLIM.15")); //$NON-NLS-1$
+				okButton.setActionCommand(NewTalkActionCommand.OK);
 				okButton.addActionListener(this);
 				
 				cancelButton = new JButton();
-				cancelButton.setText("Cancel");
-				cancelButton.setActionCommand("Cancel");
+				cancelButton.setText(Externalizer.getString("LANSLIM.16")); //$NON-NLS-1$
+				cancelButton.setActionCommand(NewTalkActionCommand.CANCEL);
 				cancelButton.addActionListener(this);
 
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("3, 5, 1, 1, default, default"));
+				getContentPane().add(buttonPanel, new CellConstraints("3, 5, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			if (talk != null) {
 				titleField.setText(talk.getTitle());
 			}
 		} catch(Exception e) {
-			SlimLogger.log(e + ":" + e.getMessage() + " at NewTalkFrame.initGUI");
+			SlimLogger.logException("NewTalkFrame.initGUI", e); //$NON-NLS-1$
 		}	
 	}
 	
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand().equals("OK")) {
+		if (e.getActionCommand().equals(NewTalkActionCommand.OK)) {
 			
 			if (talk == null) { // cas new Talk
 				
@@ -159,9 +159,9 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 					}
 				}
 				if (l.size() < 1) {
-					JOptionPane.showMessageDialog(this,
-						    "At least one contact must be selected",
-						    "Invalid Entries",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.17"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 				else {
@@ -177,9 +177,9 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 						}
 					}
 					if (cl.size() == 0) {
-						JOptionPane.showMessageDialog(this,
-						    "Unable to start new Talk with no online contact",
-						    "Invalid Entries",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
@@ -188,9 +188,9 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 							model.getTalks().addTalk(titleField.getText(), new ArrayList(cl));
 						}
 						catch (SlimException se) {
-							JOptionPane.showMessageDialog(this,
-							    "Unable to send new Talk Invitation please check your settings",
-							    "Network Error",
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.21"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 							    JOptionPane.ERROR_MESSAGE);
 						}
 						setVisible(false);
@@ -209,9 +209,9 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 					}
 				}
 				if (l.size() < 1) {
-					JOptionPane.showMessageDialog(this,
-						    "At least one contact must be selected",
-						    "Invalid Entries",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.17"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 				else {
@@ -230,21 +230,27 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 						talk.addPeople(cl);
 					}
 					catch (SlimException se) {
-						JOptionPane.showMessageDialog(this,
-						    "Unable to send Invitation message or notification",
-						    "Network Error",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.20"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 						    JOptionPane.ERROR_MESSAGE);
 					}
 					setVisible(false);
 				}
 			}
 		}
-		else if (e.getActionCommand().equals("Cancel")) {
+		else if (e.getActionCommand().equals(NewTalkActionCommand.CANCEL)) {
 			setVisible(false);
 		}
 
 	}
 	
+	private class NewTalkActionCommand {
+		
+		private static final String OK = "OK"; //$NON-NLS-1$
+		
+		private static final String CANCEL = "CANCEL"; //$NON-NLS-1$
+	}
 
 
 }

@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 
 public class ContactTableAvailabilityCellRenderer extends JLabel implements TableCellRenderer {
@@ -22,16 +23,16 @@ public class ContactTableAvailabilityCellRenderer extends JLabel implements Tabl
         String imgLocation = null;
         
         if (avail == SlimAvailabilityEnum.ONLINE) {
-    		imgLocation = "accept.png";
-            setToolTipText(avail.toString());
+    		imgLocation = "accept.png"; //$NON-NLS-1$
+            setToolTipText(Externalizer.getString("LANSLIM.35")); //$NON-NLS-1$
         } 
         else if (avail == SlimAvailabilityEnum.OFFLINE) {
-    		imgLocation = "remove.png";
-            setToolTipText(avail.toString());
+    		imgLocation = "remove.png"; //$NON-NLS-1$
+            setToolTipText(Externalizer.getString("LANSLIM.36")); //$NON-NLS-1$
         }
         else {
-    		imgLocation = "info.png";
-            setToolTipText("GROUP");
+    		imgLocation = "info.png"; //$NON-NLS-1$
+            setToolTipText(Externalizer.getString("LANSLIM.37")); //$NON-NLS-1$
         }
 		setIcon(new SlimIcon(imgLocation));
 		

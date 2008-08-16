@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimCategoryListener;
 import com.oz.lanslim.model.SlimContact;
@@ -29,7 +29,7 @@ public class ContactTreeModel extends DefaultTreeModel
 	private DefaultMutableTreeNode groupNode = null;
 	private CategoryExpander expander = null;
 	
-	protected static final String ROOT_NAME = "Lanslim";
+	protected static final String ROOT_NAME = "Lanslim"; //$NON-NLS-1$
 	
 	public ContactTreeModel(SlimContactList pList, boolean pHideGroup, boolean pHideOffline) {
 		
@@ -37,7 +37,7 @@ public class ContactTreeModel extends DefaultTreeModel
 		list = pList;
 		list.addContactListener(this);
 		list.addCategoryListener(this);
-		prefixNameFilter = "";
+		prefixNameFilter = StringConstants.EMPTY;
 		hideGroupFilter = pHideGroup;
 		hideOfflineFilter = pHideOffline;
 		
@@ -52,15 +52,15 @@ public class ContactTreeModel extends DefaultTreeModel
 			String cat = (String)it1.next();
 			addCategoryNode(new DefaultMutableTreeNode(cat, true), list.isExpanded(cat));
 		}
-		undefinedNode = getCategoryNode(SlimContactList.UNDEFINED_CATEGORY_NAME);
-		groupNode = getCategoryNode(SlimContactList.GROUP_CATEGORY_NAME);
+		undefinedNode = getCategoryNode(SlimContactList.CATEGORY_UNDEFINED);
+		groupNode = getCategoryNode(SlimContactList.CATEGORY_GROUP);
 		if (!hideGroupFilter) {
 			List groups = list.getAllGroupContact();
 			Iterator it2 = groups.iterator();
 			while (it2.hasNext()) {
 				SlimGroupContact group = (SlimGroupContact)it2.next();
 				if (group.getName().startsWith(prefixNameFilter)) {
-					addContactInCategoryNode(group, getCategoryNode(SlimContactList.GROUP_CATEGORY_NAME));
+					addContactInCategoryNode(group, getCategoryNode(SlimContactList.CATEGORY_GROUP));
 				}
 			}
 		}
@@ -140,14 +140,6 @@ public class ContactTreeModel extends DefaultTreeModel
 		}
 	}
 
-
-	public void notifyContactError(String pMessage) {
-		JOptionPane.showMessageDialog(null,
-		    pMessage,
-		    "Contact Update Error",
-		    JOptionPane.WARNING_MESSAGE);
-    }
-
 	public void updateContacts() {
 		reset();
 		build();
@@ -185,7 +177,7 @@ public class ContactTreeModel extends DefaultTreeModel
 			while (it1.hasNext()) {
 				hideOfflineUserFromCat((String)it1.next());
 			}
-			hideOfflineUserFromCat(SlimContactList.UNDEFINED_CATEGORY_NAME);
+			hideOfflineUserFromCat(SlimContactList.CATEGORY_UNDEFINED);
 		}
 		else if (!prefixNameFilter.equals(pPrefix)) {
 			prefixNameFilter = pPrefix;
@@ -231,13 +223,13 @@ public class ContactTreeModel extends DefaultTreeModel
 	public void removeCategory(String pCat) {
 		DefaultMutableTreeNode lNode = getCategoryNode(pCat);
 		Enumeration existingContacts = lNode.children();
-		boolean removed = false;
-		while (existingContacts.hasMoreElements() && !removed) {
+		while (existingContacts.hasMoreElements()) {
 			DefaultMutableTreeNode lCatNode = (DefaultMutableTreeNode)existingContacts.nextElement();
 			SlimContact lContact = (SlimContact)lCatNode.getUserObject();
-			addContactInCategoryNode(lContact, 
-					getCategoryNode(SlimContactList.UNDEFINED_CATEGORY_NAME));
+			removeNodeFromParent(lCatNode);
+			addContactInCategoryNode(lContact, getCategoryNode(SlimContactList.CATEGORY_UNDEFINED));
 		}
+		removeNodeFromParent(lNode);
 	}
 
 	public void renameCategory(String pOldCat, String pNewCat) {

@@ -4,18 +4,20 @@ import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.SlimLogger;
 
 public class SlimAvailabilityEnum implements Serializable {
 	
 	private int id = 0;
 	private String text = null;
 	
-	public static final SlimAvailabilityEnum ONLINE = new SlimAvailabilityEnum(0, "ONLINE");
+	public static final SlimAvailabilityEnum ONLINE = new SlimAvailabilityEnum(0, "ONLINE"); //$NON-NLS-1$
 
-	public static final SlimAvailabilityEnum OFFLINE = new SlimAvailabilityEnum(1, "OFFLINE");
+	public static final SlimAvailabilityEnum OFFLINE = new SlimAvailabilityEnum(1, "OFFLINE"); //$NON-NLS-1$
 	
-	public static final SlimAvailabilityEnum UNKNOWN = new SlimAvailabilityEnum(2, "UNKNOWN");
+	public static final SlimAvailabilityEnum UNKNOWN = new SlimAvailabilityEnum(2, "UNKNOWN"); //$NON-NLS-1$
 	
 	private SlimAvailabilityEnum(int i, String s) {
 		id = i;
@@ -41,7 +43,7 @@ public class SlimAvailabilityEnum implements Serializable {
 		if (UNKNOWN.toString().equals(pType)) {
 			return UNKNOWN;
 		}
-		throw new SlimException("Invalid Availability " + pType);
+		throw new SlimException(Externalizer.getString("LANSLIM.169", pType)); //$NON-NLS-1$
 	}
 
 	public static SlimAvailabilityEnum fromInt(int pType) throws SlimException {
@@ -53,7 +55,7 @@ public class SlimAvailabilityEnum implements Serializable {
 			case 2:
 				return UNKNOWN;
 			default:
-				throw new SlimException("Invalid Availability " + pType);
+				throw new SlimException(Externalizer.getString("LANSLIM.169", new Integer(pType))); //$NON-NLS-1$
 		}
 	}
 
@@ -62,7 +64,7 @@ public class SlimAvailabilityEnum implements Serializable {
 			return fromInt(toInt());
 		}
 		catch (SlimException se) {
-			throw new InvalidObjectException("Unable to unserialize Availabity due to : " + se.getMessage());
+			throw new InvalidObjectException(Externalizer.getString("LANSLIM.170", SlimLogger.shortFormatException(se))); //$NON-NLS-1$
 		}
 	}
 }

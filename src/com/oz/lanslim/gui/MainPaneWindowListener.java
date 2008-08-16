@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.model.SlimModel;
 
 public class MainPaneWindowListener extends WindowAdapter {
@@ -28,8 +29,8 @@ public class MainPaneWindowListener extends WindowAdapter {
 		}
 		else { // close As tray and tray diasabled
 			int a = JOptionPane.showConfirmDialog(mainFrame,
-				    "Tray icon is disabled, please check that systray native library (dll or so) is in the same directory as jar (exe). Are you sure you want to exit ?",
-				    "Close confirmation",
+				    Externalizer.getString("LANSLIM.105"), //$NON-NLS-1$
+				    Externalizer.getString("LANSLIM.106"), //$NON-NLS-1$
 				    JOptionPane.YES_NO_OPTION,
 				    JOptionPane.WARNING_MESSAGE);
 			

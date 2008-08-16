@@ -1,8 +1,9 @@
 package com.oz.lanslim.gui;
 
-import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
+import com.oz.lanslim.Externalizer;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimContactListener;
@@ -10,7 +11,7 @@ import com.oz.lanslim.model.SlimContactListener;
 public class ContactTableModel extends AbstractTableModel implements SlimContactListener {
 	
 	private static final Class[] columnTypes = new Class[] { String.class, SlimAvailabilityEnum.class};
-	private static final String[] columnNames = new String[] { "Name", "S" };
+	private static final String[] columnNames = new String[] { Externalizer.getString("LANSLIM.7"), Externalizer.getString("LANSLIM.104") }; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final int nameColumnIndex = 0;
 	private static final int statusColumnIndex = 1;
 
@@ -25,7 +26,7 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 		contactObjectArrayModel = list.getTableModelData();
 		list.addContactListener(this);
 		list.addCategoryListener(null);
-		prefixNameFilter = "";
+		prefixNameFilter = StringConstants.EMPTY;
 		hideGroupFilter = pHideGroup;
 		hideOfflineFilter = pHideOffline;
 	}
@@ -42,7 +43,6 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
     	return columnNames[columnIndex];
     }
 
-    
     public synchronized void updateContacts() {
 		contactObjectArrayModel = list.getTableModelData();
     	fireTableDataChanged();
@@ -98,12 +98,4 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 		hideOfflineFilter = pHideOffline;
 		fireTableDataChanged();
 	}
-	
-	public void notifyContactError(String pMessage) {
-		JOptionPane.showMessageDialog(null,
-		    pMessage,
-		    "Contact Update Error",
-		    JOptionPane.WARNING_MESSAGE);
-    }
-
 }

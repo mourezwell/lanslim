@@ -1,16 +1,13 @@
 package com.oz.lanslim.network;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Map;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
@@ -26,7 +23,7 @@ import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimSocket {
 
-	private static final int MAX_MESSAGE_SIZE = 32768;
+	private static final int MAX_MESSAGE_SIZE = 32767;
 	private DatagramSocket socket;
 	
 	public SlimSocket(String pHost, int pPort) throws SocketException {
@@ -50,16 +47,16 @@ public class SlimSocket {
 				return sm;
 			}
 			catch (ClassNotFoundException chfe){
-				SlimLogger.log(chfe + ":" + chfe.getMessage() + " at SlimSocket.receive()");
+				SlimLogger.logException("socket.receive", chfe);
 				return null;
 			}
 			catch (ClassCastException cce){
-				SlimLogger.log(cce + ":" + cce.getMessage() + " at SlimSocket.receive()");
+				SlimLogger.logException("socket.receive", cce);
 				return null;
 			}
 		}
 		catch (IOException ioe) {
-			SlimLogger.log(ioe + ":" + ioe.getMessage() + " at SlimSocket.receive()");
+			SlimLogger.logException("socket.receive", ioe);
 			return null;
 		}
 	}
@@ -106,12 +103,12 @@ public class SlimSocket {
 				return SlimUpdateTalkMessage.fromStringItems(lItems);
 			}				
 			else {
-				SlimLogger.log("Received Unknown Type : " + type);
+				SlimLogger.log(Externalizer.getString("LANSLIM.38", type)); //$NON-NLS-1$
 				return null;
 			}
 		}
 		catch (SlimException se) {
-			SlimLogger.log("Received Unrecognized datagram : " + lMessage);
+			SlimLogger.log(Externalizer.getString("LANSLIM.39", lMessage)); //$NON-NLS-1$
 			return null;
 		}
 	}
