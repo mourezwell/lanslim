@@ -2,6 +2,8 @@ package com.oz.lanslim.model;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.io.File;
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -9,36 +11,46 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.StringConstants;
 
 public class SlimSettings {
-	
-	protected static final String UNLOCK_PORT_SYTEM_PROPERTY_KEY = "unlockPort";
-	
-	private static final String SLIM_SETTINGS_PROPS_PREFIX = "slim.settings.";
-	private static final String NAME_PROP = SLIM_SETTINGS_PROPS_PREFIX + "name";
-	private static final String HOST_PROP = SLIM_SETTINGS_PROPS_PREFIX + "host";
-	private static final String PORT_PROP = SLIM_SETTINGS_PROPS_PREFIX + "port";
-	private static final String COLOR_PROP = SLIM_SETTINGS_PROPS_PREFIX + "color";
-	private static final String UNDERLINE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "underline";
-	private static final String ITALIC_PROP = SLIM_SETTINGS_PROPS_PREFIX + "italic";
-	private static final String BOLD_PROP = SLIM_SETTINGS_PROPS_PREFIX + "bold";
-	private static final String SIZE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "size";
-	private static final String START_PROP = SLIM_SETTINGS_PROPS_PREFIX + "startAsTray";
-	private static final String CLOSE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "closeAsTray";
-	private static final String HIDEGRP_PROP = SLIM_SETTINGS_PROPS_PREFIX + "hideGroup";
-	private static final String HIDEOFF_PROP = SLIM_SETTINGS_PROPS_PREFIX + "hideOffline";
-	private static final String CONTACT_TREE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "contactTree";
-	private static final String CONTACT_QUICK_DND = SLIM_SETTINGS_PROPS_PREFIX + "quickDND";
-	private static final String FRAME_X = SLIM_SETTINGS_PROPS_PREFIX + "x";
-	private static final String FRAME_Y = SLIM_SETTINGS_PROPS_PREFIX + "x";
-	private static final String FRAME_W = SLIM_SETTINGS_PROPS_PREFIX + "w";
-	private static final String FRAME_H = SLIM_SETTINGS_PROPS_PREFIX + "h";
 
-	public static final String DEFAULT_PORT = "17000";
+	protected static final String[] AVAILABLE_LANGUAGE = new String[] {
+		"EN", "FR" //$NON-NLS-1$ //$NON-NLS-2$
+	};
 	
-	private static final String DEFAULT_NAME = "yourAlias";
-	private static final String DEFAULT_COLOR = "000000";
+	protected static final String UNLOCK_PORT_SYSTEM_PROPERTY_KEY = "unlockPort"; //$NON-NLS-1$
+	
+	private static final String SLIM_SETTINGS_PROPS_PREFIX = "slim.settings."; //$NON-NLS-1$
+	private static final String LANGUAGE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "language"; //$NON-NLS-1$
+	private static final String NAME_PROP = SLIM_SETTINGS_PROPS_PREFIX + "name"; //$NON-NLS-1$
+	private static final String HOST_PROP = SLIM_SETTINGS_PROPS_PREFIX + "host"; //$NON-NLS-1$
+	private static final String PORT_PROP = SLIM_SETTINGS_PROPS_PREFIX + "port"; //$NON-NLS-1$
+	private static final String COLOR_PROP = SLIM_SETTINGS_PROPS_PREFIX + "color"; //$NON-NLS-1$
+	private static final String UNDERLINE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "underline"; //$NON-NLS-1$
+	private static final String ITALIC_PROP = SLIM_SETTINGS_PROPS_PREFIX + "italic"; //$NON-NLS-1$
+	private static final String BOLD_PROP = SLIM_SETTINGS_PROPS_PREFIX + "bold"; //$NON-NLS-1$
+	private static final String SIZE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "size"; //$NON-NLS-1$
+	private static final String START_PROP = SLIM_SETTINGS_PROPS_PREFIX + "startAsTray"; //$NON-NLS-1$
+	private static final String CLOSE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "closeAsTray"; //$NON-NLS-1$
+	private static final String HIDEGRP_PROP = SLIM_SETTINGS_PROPS_PREFIX + "hideGroup"; //$NON-NLS-1$
+	private static final String HIDEOFF_PROP = SLIM_SETTINGS_PROPS_PREFIX + "hideOffline"; //$NON-NLS-1$
+	private static final String CONTACT_TREE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "contactTree"; //$NON-NLS-1$
+	private static final String CONTACT_QUICK_DND = SLIM_SETTINGS_PROPS_PREFIX + "quickDND"; //$NON-NLS-1$
+	private static final String FRAME_X = SLIM_SETTINGS_PROPS_PREFIX + "x"; //$NON-NLS-1$
+	private static final String FRAME_Y = SLIM_SETTINGS_PROPS_PREFIX + "y"; //$NON-NLS-1$
+	private static final String FRAME_W = SLIM_SETTINGS_PROPS_PREFIX + "w"; //$NON-NLS-1$
+	private static final String FRAME_H = SLIM_SETTINGS_PROPS_PREFIX + "h"; //$NON-NLS-1$
+	private static final String SHORTCUT_PROP_PREFIX = SLIM_SETTINGS_PROPS_PREFIX + "shortcut."; //$NON-NLS-1$
+	
+	public static final String DEFAULT_LANGUAGE = "EN"; //$NON-NLS-1$
+	public static final String DEFAULT_PORT = "17000"; //$NON-NLS-1$
+	private static final String DEFAULT_NAME = "yourAlias"; //$NON-NLS-1$
+	private static final String DEFAULT_COLOR = "000000"; //$NON-NLS-1$
+	private static final String COLOR_PATTERN = "[0-9A-F]{6}";  //$NON-NLS-1$
 	private static final int DEFAULT_SIZE = 4;
 	private static final boolean DEFAULT_BOLD = false;
 	private static final boolean DEFAULT_ITALIC = false;
@@ -56,8 +68,13 @@ public class SlimSettings {
 	private static final int DEFAULT_Y = 200;
 	private static final int DEFAULT_W = 600;
 	private static final int DEFAULT_H = 400;
-	
+	private static final String DEFAULT_SHORCUT = StringConstants.EMPTY;
+	public static final int SHORTCUT_NUMBER = 12;
+
+
 	private  SlimModel model = null;
+	private  String language = DEFAULT_LANGUAGE;
+	
 	private  String color = DEFAULT_COLOR;
 	private  int size = DEFAULT_SIZE;
 	private  boolean underline = DEFAULT_UNDERLINE;
@@ -66,7 +83,6 @@ public class SlimSettings {
 	
 	private  boolean networkValid = DEFAULT_NETWORK_VALID;
 	private  boolean unlockPort = DEFAULT_UNLOCK_PORT;
-	
 	private  boolean trayEnable = DEFAULT_TRAY_ENABLE;
 	private  boolean startAsTray = DEFAULT_START;
 	private  boolean closeAsTray = DEFAULT_STOP;
@@ -78,6 +94,7 @@ public class SlimSettings {
 	private  int y = DEFAULT_Y;
 	private  int w = DEFAULT_W;
 	private  int h = DEFAULT_H;
+	private  String[] shortcuts = null;
 	
 	private SlimUserContact contactInfo = null;
 
@@ -86,6 +103,8 @@ public class SlimSettings {
 	private boolean initOk = false;
 	
 	public SlimSettings(SlimModel pModel) throws SlimException, UnknownHostException {
+		language = DEFAULT_LANGUAGE;
+		Externalizer.setLanguage(language);
 		
 		contactInfo = new SlimUserContact(DEFAULT_NAME, InetAddress.getLocalHost().getHostName(), DEFAULT_PORT);
 		contactInfo.setAvailability(SlimAvailabilityEnum.OFFLINE);
@@ -97,7 +116,7 @@ public class SlimSettings {
 		
 		model = pModel;
 		networkValid = DEFAULT_NETWORK_VALID;
-		unlockPort = Boolean.getBoolean(UNLOCK_PORT_SYTEM_PROPERTY_KEY);
+		unlockPort = Boolean.getBoolean(UNLOCK_PORT_SYSTEM_PROPERTY_KEY);
 		trayEnable = DEFAULT_TRAY_ENABLE;
 		startAsTray = DEFAULT_START;
 		closeAsTray = DEFAULT_STOP;
@@ -109,6 +128,10 @@ public class SlimSettings {
 		y = DEFAULT_Y;
 		w = DEFAULT_W;
 		h = DEFAULT_H;
+		shortcuts = new String[SHORTCUT_NUMBER];
+		for (int i = 0; i < SHORTCUT_NUMBER; i++) {
+			shortcuts[i] = DEFAULT_SHORCUT;
+		};
 		
 		initOk = true;
 	}
@@ -117,7 +140,13 @@ public class SlimSettings {
 		this(pModel);
 		initOk = false;
 		
-		String lTemp = p.getProperty(NAME_PROP);
+		String lTemp = p.getProperty(LANGUAGE_PROP);
+		if (lTemp != null) {
+			setLanguage(lTemp);
+			Externalizer.setLanguage(lTemp);
+		}
+
+		lTemp = p.getProperty(NAME_PROP);
 		try {
 			contactInfo.setName(lTemp);
 		}
@@ -224,6 +253,15 @@ public class SlimSettings {
 		if (lTemp != null) {
 			setY(Integer.parseInt(lTemp));
 		}
+
+		String[] lTemps = new String[SHORTCUT_NUMBER];
+		for (int i = 0; i < 12; i++) {
+			lTemps[i] = p.getProperty(SHORTCUT_PROP_PREFIX + i);
+			if (lTemps[i] == null) {
+				lTemps[i] = DEFAULT_SHORCUT;
+			}
+		}
+		setShortcuts(lTemps);
 		
 		initOk = true;
 		saveSettings();
@@ -243,17 +281,17 @@ public class SlimSettings {
 				boolean lUpdated = model.getContacts().updateContact(contactInfo, pContact);
 				  
 				if (!lUpdated) {
-					throw new SlimException("UserName already declared please remove it first or choose another one");
+					throw new SlimException(Externalizer.getString("LANSLIM.123")); //$NON-NLS-1$
 				}
 				model.getContacts().sendUpdateUserMessage(pOld);
 				model.storeSettings();
 			}
 			else {
-				throw new SlimException("Invalid Name you should not use default");
+				throw new SlimException(Externalizer.getString("LANSLIM.172")); //$NON-NLS-1$
 			}
 		}
 		catch (SocketException se) {
-			throw new SlimException("Unbale to connect socket due to " + se.getMessage(), se);
+			throw new SlimException(Externalizer.getString("LANSLIM.173", SlimLogger.shortFormatException(se))); //$NON-NLS-1$
 		}
 	}
 	
@@ -276,10 +314,11 @@ public class SlimSettings {
 		}
 		return (!pContact.getName().equals(DEFAULT_NAME)); 
 	}
-	
+
 	public Properties toProperties() {
 		
 		Properties p = new Properties();
+		p.put(LANGUAGE_PROP, language);
 		p.put(NAME_PROP, contactInfo.getName());
 		p.put(PORT_PROP, Integer.toString(contactInfo.getPort()));
 		p.put(HOST_PROP, contactInfo.getHost());
@@ -298,6 +337,9 @@ public class SlimSettings {
 		p.put(FRAME_W, Integer.toString(getW()));
 		p.put(FRAME_X, Integer.toString(getX()));
 		p.put(FRAME_Y, Integer.toString(getY()));
+		for (int i = 0; i < 12; i++) {
+			p.put(SHORTCUT_PROP_PREFIX + i, getShortcuts()[i]);
+		}
 
 		return p;
 	}
@@ -307,12 +349,12 @@ public class SlimSettings {
 	}
 
 	public void setColor(String pColor) throws SlimException {
-		if (pColor.matches("[0-9A-F]{6}")) {
+		if (pColor.matches(COLOR_PATTERN)) {
 			color = pColor;
 			saveSettings();
 		}
 		else {
-			throw new SlimException("Color does not match pattern [0-9A-F]{6} : "  + pColor);
+			throw new SlimException(Externalizer.getString("LANSLIM.49", pColor)); //$NON-NLS-1$
 		}
 	}
 
@@ -329,8 +371,8 @@ public class SlimSettings {
 		return startAsTray;
 	}
 
-	public void setStartAsTray(boolean startAsTray) {
-		this.startAsTray = startAsTray;
+	public void setStartAsTray(boolean pStartAsTray) {
+		startAsTray = pStartAsTray;
 		saveSettings();
 	}
 
@@ -338,16 +380,16 @@ public class SlimSettings {
 		return trayEnable;
 	}
 
-	public void setTrayEnable(boolean trayEnable) {
-		this.trayEnable = trayEnable;
+	public void setTrayEnable(boolean pTrayEnable) {
+		trayEnable = pTrayEnable;
 	}
 
 	public boolean isGroupHidden() {
 		return groupHidden;
 	}
 
-	public void setGroupHidden(boolean groupHidden) {
-		this.groupHidden = groupHidden;
+	public void setGroupHidden(boolean pGroupHidden) {
+		groupHidden = pGroupHidden;
 		saveSettings();
 	}
 
@@ -464,28 +506,28 @@ public class SlimSettings {
 		return bold;
 	}
 
-	public void setBold(boolean bold) {
-		this.bold = bold;
+	public void setBold(boolean pBold) {
+		bold = pBold;
 	}
 
 	public boolean isItalic() {
 		return italic;
 	}
 
-	public void setItalic(boolean italic) {
-		this.italic = italic;
+	public void setItalic(boolean pItalic) {
+		italic = pItalic;
 	}
 
 	public int getFontSize() {
 		return size;
 	}
 
-	public void setFontSize(int size) throws SlimException {
+	public void setFontSize(int pSize) throws SlimException {
 		if (size > 0  && size < 8) {
-			this.size = size;
+			size = pSize;
 		}
 		else {
-			throw new SlimException("Invalid font size must be between 1 and 7");
+			throw new SlimException(Externalizer.getString("LANSLIM.171", new Integer(size))); //$NON-NLS-1$
 		}
 	}
 
@@ -493,7 +535,36 @@ public class SlimSettings {
 		return underline;
 	}
 
-	public void setUnderline(boolean underline) {
-		this.underline = underline;
+	public void setUnderline(boolean pUnderline) {
+		underline = pUnderline;
 	}
+
+	public String[] getShortcuts() {
+		return shortcuts;
+	}
+
+	public void setShortcuts(String[] pShortcuts) {
+		shortcuts = pShortcuts;
+	}
+
+	public void exportContacts(File pFile) throws IOException {
+		model.getContacts().exportContacts(pFile);
+	}
+	
+	public boolean importContacts(File pFile) throws IOException {
+		return model.getContacts().importContacts(pFile);
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String pLanguage) {
+		language = pLanguage;
+	}
+
+	public String[] getAvailableLanguage() {
+		return AVAILABLE_LANGUAGE;
+	}
+	
 }
