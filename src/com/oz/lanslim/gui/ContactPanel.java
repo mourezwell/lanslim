@@ -22,10 +22,13 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.ContactViewListener;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
+import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimGroupContact;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
@@ -74,50 +77,50 @@ public class ContactPanel extends JPanel
 		add(contactBar, BorderLayout.NORTH);
 		{
 			newContactButton = new JButton();
-			newContactButton.setIcon(new SlimIcon("user_add.png"));
+			newContactButton.setIcon(new SlimIcon("user_add.png")); //$NON-NLS-1$
 			newContactButton.setActionCommand(ContactPaneActionCommand.USER_ADD);
 			newContactButton.addActionListener(this);
-			newContactButton.setToolTipText("Add User");
+			newContactButton.setToolTipText(Externalizer.getString("LANSLIM.77")); //$NON-NLS-1$
 			contactBar.add(newContactButton);
 		}
 		{
 			newGroupButton = new JButton();
-			newGroupButton.setIcon(new SlimIcon("users.png"));
+			newGroupButton.setIcon(new SlimIcon("users.png")); //$NON-NLS-1$
 			newGroupButton.setActionCommand(ContactPaneActionCommand.GROUP_ADD);
 			newGroupButton.addActionListener(this);
-			newGroupButton.setToolTipText("Add Group");
+			newGroupButton.setToolTipText(Externalizer.getString("LANSLIM.78")); //$NON-NLS-1$
 			contactBar.add(newGroupButton);
 		}
 		{
 			deleteButton = new JButton();
-			deleteButton.setIcon(new SlimIcon("user_remove.png"));
+			deleteButton.setIcon(new SlimIcon("user_remove.png")); //$NON-NLS-1$
 			deleteButton.setActionCommand(ContactPaneActionCommand.USER_DEL);
 			deleteButton.addActionListener(this);
-			deleteButton.setToolTipText("Delete Selected Contact(s)");
+			deleteButton.setToolTipText(Externalizer.getString("LANSLIM.79")); //$NON-NLS-1$
 			contactBar.add(deleteButton);
 		}
 		{
 			editButton = new JButton();
-			editButton.setIcon(new SlimIcon("note_edit.png"));
+			editButton.setIcon(new SlimIcon("note_edit.png")); //$NON-NLS-1$
 			editButton.setActionCommand(ContactPaneActionCommand.USER_EDIT);
 			editButton.addActionListener(this);
-			editButton.setToolTipText("Edit Selected Contact");
+			editButton.setToolTipText(Externalizer.getString("LANSLIM.80")); //$NON-NLS-1$
 			contactBar.add(editButton);
 		}
 		{
 			refreshButton = new JButton();
-			refreshButton.setIcon(new SlimIcon("refresh.png"));
+			refreshButton.setIcon(new SlimIcon("refresh.png")); //$NON-NLS-1$
 			refreshButton.setActionCommand(ContactPaneActionCommand.ALL_REFRESH);
 			refreshButton.addActionListener(this);
-			refreshButton.setToolTipText("Resfresh All Availability");
+			refreshButton.setToolTipText(Externalizer.getString("LANSLIM.81")); //$NON-NLS-1$
 			contactBar.add(refreshButton);
 		}
 		{
 			newCatButton = new JButton();
-			newCatButton.setIcon(new SlimIcon("folder_add.png"));
+			newCatButton.setIcon(new SlimIcon("folder_add.png")); //$NON-NLS-1$
 			newCatButton.setActionCommand(ContactPaneActionCommand.CATEGORY_NEW);
 			newCatButton.addActionListener(this);
-			newCatButton.setToolTipText("Add Category (Contact Folder)");
+			newCatButton.setToolTipText(Externalizer.getString("LANSLIM.82")); //$NON-NLS-1$
 			contactBar.add(newCatButton);
 		}
 		{
@@ -144,21 +147,21 @@ public class ContactPanel extends JPanel
 			filterPane.setLayout(new GridLayout(2, 2));
 			add(filterPane, BorderLayout.SOUTH);
 			{
-				hideGroupCheckBox = new JCheckBox("Hide Groups");
+				hideGroupCheckBox = new JCheckBox(Externalizer.getString("LANSLIM.83")); //$NON-NLS-1$
 				hideGroupCheckBox.addActionListener(this);
 				hideGroupCheckBox.setActionCommand(ContactPaneActionCommand.HIDE_GROUPS);
 				hideGroupCheckBox.setSelected(model.getSettings().isGroupHidden());
 				filterPane.add(hideGroupCheckBox);
 			}
 			{
-				hideOfflineCheckBox = new JCheckBox("Hide Offline");
+				hideOfflineCheckBox = new JCheckBox(Externalizer.getString("LANSLIM.84")); //$NON-NLS-1$
 				hideOfflineCheckBox.addActionListener(this);
 				hideOfflineCheckBox.setActionCommand(ContactPaneActionCommand.HIDE_OFFLINE);
 				hideOfflineCheckBox.setSelected(model.getSettings().isOfflineHidden());
 				filterPane.add(hideOfflineCheckBox);
 			}
 			{
-				filterLabel = new JLabel("Filter Name", new SlimIcon("search.png"), SwingConstants.LEADING);
+				filterLabel = new JLabel(Externalizer.getString("LANSLIM.85"), new SlimIcon("search.png"), SwingConstants.LEADING); //$NON-NLS-1$ //$NON-NLS-2$
 				filterPane.add(filterLabel);
 				filterField = new JTextField();
 				filterField.setColumns(15);
@@ -219,10 +222,10 @@ public class ContactPanel extends JPanel
 				for (int j = 0 ; j < lSelectedContacts.length; j++) {
 					lContactsToTalkWith.add(lSelectedContacts[j]);
 				}
-				NewTalkFrame lFrame = new NewTalkFrame((Frame)this.getRootPane().getParent(), 
+				NewTalkFrame lFrame = new NewTalkFrame((Frame)getRootPane().getParent(), 
 						model, lContactsToTalkWith, null);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.INVITE_POPUP) {
@@ -246,38 +249,38 @@ public class ContactPanel extends JPanel
 							st.addPeople(cl);
 						}
 						catch (SlimException se) {
-							JOptionPane.showMessageDialog(this,
-								    "Unable to send Invitation message or notification",
-								    "Network Error",
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.25"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 								    JOptionPane.ERROR_MESSAGE);
 						}
 					}
 					else {
-						JOptionPane.showMessageDialog(this,
-							    "At least one talk must be started",
-							    "Invalid Action",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.23"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 				}
 				else {
-					JOptionPane.showMessageDialog(this,
-					    "At least one contact must be selected",
-					    "Invalid Action",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+					    Externalizer.getString("LANSLIM.17"), //$NON-NLS-1$
+					    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 					    JOptionPane.WARNING_MESSAGE);
 				}
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.USER_ADD) {
-				NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
+				NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
 						model, null);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.GROUP_ADD) {
-				NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
+				NewGroupFrame lFrame = new NewGroupFrame((Frame)getRootPane().getParent(), 
 						model, null);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.ALL_REFRESH) {
@@ -288,34 +291,34 @@ public class ContactPanel extends JPanel
 				if (lSelectedContacts.length == 1) {
 					SlimContact sc = lSelectedContacts[0];
 					if (sc.isGroup()) {
-						NewGroupFrame lFrame = new NewGroupFrame((Frame)this.getRootPane().getParent(), 
+						NewGroupFrame lFrame = new NewGroupFrame((Frame)getRootPane().getParent(), 
 								model, (SlimGroupContact)sc);
 						lFrame.pack();
-						lFrame.setLocationRelativeTo(this);
+						lFrame.setLocationRelativeTo(getRootPane().getParent());
 						lFrame.setVisible(true);
 						
 					}
 					else {
-						NewUserFrame lFrame = new NewUserFrame((Frame)this.getRootPane().getParent(), 
+						NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
 								model, (SlimUserContact)sc);
 						lFrame.pack();
-						lFrame.setLocationRelativeTo(this);
+						lFrame.setLocationRelativeTo(getRootPane().getParent());
 						lFrame.setVisible(true);
 					}
 				}
 				else {
 					String[] lSelectedCategories = contactTable.getSelectedCategories();
 					if (lSelectedCategories.length == 1) {
-						NewCategoryFrame lFrame = new NewCategoryFrame((Frame)this.getRootPane().getParent(), 
+						NewCategoryFrame lFrame = new NewCategoryFrame((Frame)getRootPane().getParent(), 
 								model, lSelectedCategories[0]);
 						lFrame.pack();
-						lFrame.setLocationRelativeTo(this);
+						lFrame.setLocationRelativeTo(getRootPane().getParent());
 						lFrame.setVisible(true);
 					}
 					else {
-						JOptionPane.showMessageDialog(this,
-						    "One and only one user/group/category must be selected please select it first",
-						    "Invalid Action",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.86"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 					}
 				}
@@ -326,35 +329,45 @@ public class ContactPanel extends JPanel
 					model.getContacts().refresh(lSelectedContacts[0]);
 				}
 				else {
-					JOptionPane.showMessageDialog(this,
-						    "One and only one contact must be selected please select it first",
-						    "Invalid Action",
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.31"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.USER_DEL) {
 				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
-				String lToDel = "";
+				String lToDel = StringConstants.EMPTY;
 				if (lSelectedContacts.length < 1) {
 					String[] lSelectedCategories = contactTable.getSelectedCategories();
 					if (lSelectedCategories.length < 1) {
-						JOptionPane.showMessageDialog(this,
-							    "At least one Group/User/Category must be selected",
-							    "Invalid Action",
+						JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.87"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 							    JOptionPane.WARNING_MESSAGE);
 					}
 					else {
 						for (int j = 0 ; j < lSelectedCategories.length; j++) {
-							lToDel = lToDel + "\n-" + lSelectedCategories[j];
+							lToDel = lToDel + StringConstants.NEW_LINE + lSelectedCategories[j];
 						}
-						int a = JOptionPane.showConfirmDialog(this,
-							    "Are you sure you want to delete categorie(s) listed here below" + lToDel,
-							    "Delete confirmation",
+						int a = JOptionPane.showConfirmDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.88", lToDel), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.89"), //$NON-NLS-1$
 							    JOptionPane.YES_NO_OPTION,
 							    JOptionPane.WARNING_MESSAGE);
 						if (a == JOptionPane.YES_OPTION) {
 							for (int j = 0 ; j < lSelectedCategories.length; j++) {
-								model.getContacts().removeCategory(lSelectedCategories[j]);
+								if (lSelectedCategories[j].equals(SlimContactList.CATEGORY_GROUP) 
+										|| lSelectedCategories[j].equals(SlimContactList.CATEGORY_UNDEFINED)) {
+									JOptionPane.showMessageDialog(getRootPane().getParent(),
+										    Externalizer.getString("LANSLIM.185", //$NON-NLS-1$
+										    		SlimContactList.CATEGORY_GROUP, SlimContactList.CATEGORY_UNDEFINED),
+										    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
+										    JOptionPane.WARNING_MESSAGE);
+								}
+								else {
+									model.getContacts().removeCategory(lSelectedCategories[j]);
+								}
 							}
 		                }
 					}
@@ -362,11 +375,11 @@ public class ContactPanel extends JPanel
 				else {
 					
 					for (int j = 0 ; j < lSelectedContacts.length; j++) {
-						lToDel = lToDel + "\n-" + lSelectedContacts[j].getName();
+						lToDel = lToDel + StringConstants.NEW_LINE + lSelectedContacts[j].getName();
 					}
-					int a = JOptionPane.showConfirmDialog(this,
-						    "Are you sure you want to delete contact(s) listed here below" + lToDel,
-						    "Delete confirmation",
+					int a = JOptionPane.showConfirmDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.90", lToDel), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.89"), //$NON-NLS-1$
 						    JOptionPane.YES_NO_OPTION,
 						    JOptionPane.WARNING_MESSAGE);
 					if (a == JOptionPane.YES_OPTION) {
@@ -377,44 +390,44 @@ public class ContactPanel extends JPanel
 				}
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.CATEGORY_NEW) {
-				Frame mainFrame = JOptionPane.getFrameForComponent(this);
-				NewCategoryFrame lFrame = new NewCategoryFrame(mainFrame, model, null);
+				NewCategoryFrame lFrame = new NewCategoryFrame((Frame)getRootPane().getParent(), 
+						model, null);
 				lFrame.pack();
-				lFrame.setLocationRelativeTo(this);
+				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
 			}
 		}
 		else {
-			JOptionPane.showMessageDialog(this,
-				    "All actions are disabled until you set properly your settings",
-				    "Invalid Action",
+			JOptionPane.showMessageDialog(getRootPane().getParent(),
+				    Externalizer.getString("LANSLIM.50"), //$NON-NLS-1$
+				    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
 				    JOptionPane.WARNING_MESSAGE);
 		}
 	}
 	
 	public class ContactPaneActionCommand {
 
-		public static final String USER_DEL = "userDel";
+		public static final String USER_DEL = "userDel"; //$NON-NLS-1$
 		
-		public static final String USER_ADD = "userAdd";
+		public static final String USER_ADD = "userAdd"; //$NON-NLS-1$
 		
-		public static final String USER_EDIT = "userEdit";
+		public static final String USER_EDIT = "userEdit"; //$NON-NLS-1$
 		
-		public static final String GROUP_ADD = "groupAdd";
+		public static final String GROUP_ADD = "groupAdd"; //$NON-NLS-1$
 
-		public static final String NEW_TALK_POPUP = "newTalkPopup";
+		public static final String NEW_TALK_POPUP = "newTalkPopup"; //$NON-NLS-1$
 
-		public static final String INVITE_POPUP = "invitePopup";
+		public static final String INVITE_POPUP = "invitePopup"; //$NON-NLS-1$
 		
-		public static final String USER_REFRESH_POPUP = "userRefresh";
+		public static final String USER_REFRESH_POPUP = "userRefresh"; //$NON-NLS-1$
 
-		public static final String CATEGORY_NEW = "categoryNew";
+		public static final String CATEGORY_NEW = "categoryNew"; //$NON-NLS-1$
 
-		public static final String ALL_REFRESH = "allRefresh";
+		public static final String ALL_REFRESH = "allRefresh"; //$NON-NLS-1$
 
-		public static final String HIDE_GROUPS = "hideGroups";
+		public static final String HIDE_GROUPS = "hideGroups"; //$NON-NLS-1$
 
-		public static final String HIDE_OFFLINE = "hideOffline";
+		public static final String HIDE_OFFLINE = "hideOffline"; //$NON-NLS-1$
 	}
 	
 }

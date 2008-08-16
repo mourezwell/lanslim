@@ -8,7 +8,7 @@ import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimUpdateUserMessage extends SlimMessage implements Serializable {
 
-	private static final String SETTINGS_ITEM = "OldSettings"; 
+	private static final String SETTINGS_ITEM = "OldSettings";  //$NON-NLS-1$
 
 	private SlimUserContact oldSettings; 
 	

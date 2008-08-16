@@ -9,7 +9,7 @@ import com.oz.lanslim.model.SlimUserContact;
 public class SlimInviteTalkMessage extends SlimTalkMessage implements Serializable {
 
 	private SlimUserContact newContact;
-	private static final String CONTACT_ITEM = "Contact";
+	private static final String CONTACT_ITEM = "Contact"; //$NON-NLS-1$
 	
 	public SlimInviteTalkMessage(SlimUserContact pSender, String pTalkId, SlimUserContact pNewContact) {
 		super(pSender, SlimMessageTypeEnum.INVITE_TALK, pTalkId);

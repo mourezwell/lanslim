@@ -9,7 +9,7 @@ import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimAvailabilityUserMessage extends SlimMessage implements Serializable {
 
-	private static final String AVAILIBITY_ITEM = "Availability"; 
+	private static final String AVAILIBITY_ITEM = "Availability";  //$NON-NLS-1$
 
 	private SlimAvailabilityEnum availability; 
 	

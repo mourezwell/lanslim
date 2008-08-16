@@ -8,7 +8,7 @@ import com.oz.lanslim.model.SlimUserContact;
 public class SlimExcludeTalkMessage extends SlimTalkMessage {
 	
 	private SlimUserContact excludedContact;
-	private static final String CONTACT_ITEM = "Contact";
+	private static final String CONTACT_ITEM = "Contact"; //$NON-NLS-1$
 	
 	public SlimExcludeTalkMessage(SlimUserContact pSender, String pTalkId, SlimUserContact pExcludedContact) {
 		super(pSender, SlimMessageTypeEnum.EXCLUDE_TALK, pTalkId);

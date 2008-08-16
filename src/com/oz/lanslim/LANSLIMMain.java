@@ -40,15 +40,15 @@ public class LANSLIMMain extends JFrame
 	implements WindowFocusListener, SlimIconListener, ActionListener, ComponentListener {
 
 	
-	public static final String VERSION = "0.7";
+	private static final String TITLE = "LANSLIM"; //$NON-NLS-1$
+	private static final String DEBUG_FLAG = "debug"; //$NON-NLS-1$
 	
 	{
-		
 		//Set Look & Feel
 		try {
-			javax.swing.UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
+			javax.swing.UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel"); //$NON-NLS-1$
 		} catch(Exception e) {
-			SlimLogger.log(e + ":" + e.getMessage() + " when setting Look&Feel");
+			SlimLogger.logException("Look&Feel setting", e); //$NON-NLS-1$
 		}
 	}
 
@@ -74,7 +74,7 @@ public class LANSLIMMain extends JFrame
 					new LANSLIMMain();
 				} 
 				catch (Throwable t) {
-					SlimLogger.log(t + ":" + t.getMessage() + " at main");
+					SlimLogger.logException("main", t); //$NON-NLS-1$
 					System.exit(0);
 				}
 			}
@@ -83,28 +83,28 @@ public class LANSLIMMain extends JFrame
 	
 	public LANSLIMMain() throws IOException, SlimException {
 		super();
-		if (System.getProperty("debug") == null) {
+		if (System.getProperty(DEBUG_FLAG) == null) {
 			PrintStream lErrStream = new PrintStream(
-					new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.err", true), true);
+					new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.err", true), true); //$NON-NLS-1$ //$NON-NLS-2$
 			System.setErr(lErrStream);
 			PrintStream lOutStream = new PrintStream(
-					new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.out", true), true);
+					new FileOutputStream(System.getProperty("user.home") +  File.separator + "lanslim.out", true), true); //$NON-NLS-1$ //$NON-NLS-2$
 			System.setOut(lOutStream);
 		}
 		iconTimer = new Timer();
 		iconTimer.schedule(new TimerTask() {
 			public void run() {
-				Thread.currentThread().setName("Icon Timer");
+				Thread.currentThread().setName("Icon Timer"); //$NON-NLS-1$
 			}
 		}, 0);
 		model = new SlimModel(this);
-		Thread shutdowHook = new Thread("ShutdownHook") {
+		Thread shutdowHook = new Thread("Shutdown") { //$NON-NLS-1$
 			public void run() {
 				try {
 					model.exit();
 				}
 				catch (SlimException se) {
-					SlimLogger.log(se + ":" + se.getMessage() + " at windowClosing");
+					SlimLogger.logException("Shutdown", se); //$NON-NLS-1$
 				}
 			}
 		};
@@ -116,8 +116,8 @@ public class LANSLIMMain extends JFrame
 		try {
 			setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 			setLocationRelativeTo(null);
-			setTitle("LANSLIM");
-			setIconImage(new SlimIcon("comment_edit.png").getImage());
+			setTitle(TITLE);
+			setIconImage(new SlimIcon("comment_edit.png").getImage()); //$NON-NLS-1$
 			addWindowFocusListener(this);
 
 			mainPanel = new MainPane(model);
@@ -129,17 +129,19 @@ public class LANSLIMMain extends JFrame
 					    
 		    try {
 		    	systemTray = SystemTray.getDefaultSystemTray();
-			    trayMenu = new JPopupMenu("Lanslim Menu");
-			    JMenuItem showItem = new JMenuItem("Show");
+			    trayMenu = new JPopupMenu();
+			    JMenuItem showItem = new JMenuItem();
+			    showItem.setText(Externalizer.getString("LANSLIM.0")); //$NON-NLS-1$
 			    showItem.addActionListener(this);
-			    showItem.setActionCommand("SHOW");
+			    showItem.setActionCommand(LANSLIMMainActionCommand.SHOW);
 			    trayMenu.add(showItem);
 			    trayMenu.addSeparator();
-			    JMenuItem quitItem = new JMenuItem("Quit");
+			    JMenuItem quitItem = new JMenuItem();
+			    quitItem.setText(Externalizer.getString("LANSLIM.1")); //$NON-NLS-1$
 			    quitItem.addActionListener(this);
-			    quitItem.setActionCommand("QUIT");
+			    quitItem.setActionCommand(LANSLIMMainActionCommand.QUIT);
 			    trayMenu.add(quitItem);
-			    trayIcon = new TrayIcon(new SlimIcon("comment_edit.png"), "Lanslim", trayMenu);
+			    trayIcon = new TrayIcon(new SlimIcon("comment_edit.png"), TITLE, trayMenu); //$NON-NLS-1$
 				trayIcon.addBalloonActionListener(this);
 				trayIcon.addActionListener(this);
 			    systemTray.addTrayIcon(trayIcon);
@@ -154,10 +156,11 @@ public class LANSLIMMain extends JFrame
 			    GraphicsConfiguration gc = gd.getDefaultConfiguration();
 			    Rectangle vb = gc.getBounds();
 			    newMessageWindow.setBounds(vb.x + vb.width - 120, vb.y +  vb.height - 60, 120, 30);
-			    JButton label = new JButton(HTMLConstants.HTML + HTMLConstants.UNDERLINE 
-			    		+ "New Message" + HTMLConstants.ENDUNDERLINE + HTMLConstants.ENDHTML, 
-			    		new SlimIcon("comments.png"));
-			    label.setActionCommand("SHOW");
+			    JButton label = new JButton();
+			    label.setText(HTMLConstants.HTML + HTMLConstants.UNDERLINE 
+			    		+ "New Message" + HTMLConstants.ENDUNDERLINE + HTMLConstants.ENDHTML); //$NON-NLS-1$
+			    label.setIcon(new SlimIcon("comments.png")); //$NON-NLS-1$
+			    label.setActionCommand(LANSLIMMainActionCommand.SHOW);
 			    label.addActionListener(this);
 			    newMessageWindow.getContentPane().add(label);
 			    newMessageWindow.setVisible(true);
@@ -165,7 +168,7 @@ public class LANSLIMMain extends JFrame
 			}
 		}
 		catch (Exception e) {
-			SlimLogger.log(e + ":" + e.getMessage() + " at LANSLIMMain.initGUI()");
+			SlimLogger.logException("LANSLIMMain.initGUI", e); //$NON-NLS-1$
 		}
 		
 		if (!model.getSettings().isTrayEnable() || !model.getSettings().isStartAsTray()) {
@@ -193,16 +196,16 @@ public class LANSLIMMain extends JFrame
 							iconTimerTask = new TimerTask() {
 								public void run() {
 									if (negativeIcon) {
-										setIconImage(new SlimIcon("comment_edit.png").getImage());
+										setIconImage(new SlimIcon("comment_edit.png").getImage()); //$NON-NLS-1$
 										if (trayIcon != null) {
-											trayIcon.setIcon(new SlimIcon("comment_edit.png"));
+											trayIcon.setIcon(new SlimIcon("comment_edit.png")); //$NON-NLS-1$
 										}
 										negativeIcon = false;
 									}
 									else {
-										setIconImage(new SlimIcon("comment_edit_neg.png").getImage());
+										setIconImage(new SlimIcon("comment_edit_neg.png").getImage()); //$NON-NLS-1$
 										if (trayIcon != null) {
-											trayIcon.setIcon(new SlimIcon("comment_edit_neg.png"));
+											trayIcon.setIcon(new SlimIcon("comment_edit_neg.png")); //$NON-NLS-1$
 										}
 										negativeIcon = true;
 									}
@@ -222,14 +225,12 @@ public class LANSLIMMain extends JFrame
 						iconTimer.schedule(newMessageWindowTask, 3000);
 					}
 					else if (trayIcon != null) {
-						trayIcon.displayMessage("Lanslim", 
-								"New Message or Talk", 
-								TrayIcon.INFO_MESSAGE_TYPE);
+						trayIcon.displayMessage(TITLE, Externalizer.getString("LANSLIM.2"), TrayIcon.INFO_MESSAGE_TYPE); //$NON-NLS-1$
 					}
 					// else should not happen since at least one solution should work 
 				} 
 				catch (Exception e) {
-					SlimLogger.log(e + ":" + e.getMessage() + " at main");
+					SlimLogger.logException("IconBlinking",e); //$NON-NLS-1$
 				}
 			}
 		});
@@ -245,26 +246,24 @@ public class LANSLIMMain extends JFrame
 						iconTimerTask = null;
 					}
 					negativeIcon =  false;
-					setIconImage(new SlimIcon("comment_edit.png").getImage());
+					setIconImage(new SlimIcon("comment_edit.png").getImage()); //$NON-NLS-1$
 					if (trayIcon != null) {
-						trayIcon.setIcon(new SlimIcon("comment_edit.png"));
+						trayIcon.setIcon(new SlimIcon("comment_edit.png")); //$NON-NLS-1$
 					}
 				} 
 				catch (Exception e) {
-					SlimLogger.log(e + ":" + e.getMessage() + " at main");
+					SlimLogger.logException("main", e); //$NON-NLS-1$
 				}
 			}
 		});
 	}
 
 	public synchronized void actionPerformed(ActionEvent e) {
-		
-		
-		if (e.getActionCommand().equals("QUIT")) {
+		if (e.getActionCommand().equals(LANSLIMMainActionCommand.QUIT)) {
 			System.exit(0);	
 		}
-		else { // SHOW
-			SwingUtilities.invokeLater(new Runnable()  {
+		else if (e.getActionCommand().equals(LANSLIMMainActionCommand.SHOW)) {
+ 			SwingUtilities.invokeLater(new Runnable()  {
 				public void run() {
 					try {
 						setVisible(true);
@@ -273,7 +272,7 @@ public class LANSLIMMain extends JFrame
 						}
 					} 
 					catch (Exception ex) {
-						SlimLogger.log(ex + ":" + ex.getMessage() + " at main");
+						SlimLogger.logException("TrayShow", ex); //$NON-NLS-1$
 					
 					}
 				}
@@ -289,7 +288,7 @@ public class LANSLIMMain extends JFrame
 					newMessageWindow.setVisible(false);
 				} 
 				catch (Exception e) {
-					SlimLogger.log(e + ":" + e.getMessage() + " at main");
+					SlimLogger.logException("hideNewMessageWindow", e); //$NON-NLS-1$
 				
 				}
 			}
@@ -314,6 +313,12 @@ public class LANSLIMMain extends JFrame
 
 	public void componentShown(ComponentEvent e) {
 		// Nothing to do
+	}
+	
+	private class LANSLIMMainActionCommand {
+		
+		private static final String SHOW = "SHOW"; //$NON-NLS-1$
+		private static final String QUIT = "QUIT"; //$NON-NLS-1$
 	}
 	
 }

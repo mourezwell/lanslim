@@ -12,8 +12,8 @@ public class SlimNewTalkMessage extends SlimTalkMessage implements Serializable 
 	
 	private String title;
 	private List participants;
-	private static final String TITLE_ITEM = "Title";
-	private static final String PARTICIPANTS_ITEM = "Participants";
+	private static final String TITLE_ITEM = "Title"; //$NON-NLS-1$
+	private static final String PARTICIPANTS_ITEM = "Participants"; //$NON-NLS-1$
 	
 	public SlimNewTalkMessage(SlimUserContact pSender, String pId, String pTitle, List pAttendees) {
 		super(pSender, SlimMessageTypeEnum.NEW_TALK, pId);

@@ -4,6 +4,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 
 public class SlimMessageTypeEnum implements Serializable {
@@ -11,19 +12,19 @@ public class SlimMessageTypeEnum implements Serializable {
 	private int id = 0;
 	private String text = null;
 	
-	public static final SlimMessageTypeEnum UPDATE_USER = new SlimMessageTypeEnum(0, "UPDATE_USER");
+	public static final SlimMessageTypeEnum UPDATE_USER = new SlimMessageTypeEnum(0, "UPDATE_USER"); //$NON-NLS-1$
 
-	public static final SlimMessageTypeEnum AVAILABILITY = new SlimMessageTypeEnum(1, "AVAILABILITY");
+	public static final SlimMessageTypeEnum AVAILABILITY = new SlimMessageTypeEnum(1, "AVAILABILITY"); //$NON-NLS-1$
 	
-	public static final SlimMessageTypeEnum NEW_TALK = new SlimMessageTypeEnum(2, "NEW_TALK");
+	public static final SlimMessageTypeEnum NEW_TALK = new SlimMessageTypeEnum(2, "NEW_TALK"); //$NON-NLS-1$
 
-	public static final SlimMessageTypeEnum EXIT_TALK = new SlimMessageTypeEnum(3, "EXIT_TALK");
+	public static final SlimMessageTypeEnum EXIT_TALK = new SlimMessageTypeEnum(3, "EXIT_TALK"); //$NON-NLS-1$
 
-	public static final SlimMessageTypeEnum INVITE_TALK = new SlimMessageTypeEnum(4, "INVITE_TALK");
+	public static final SlimMessageTypeEnum INVITE_TALK = new SlimMessageTypeEnum(4, "INVITE_TALK"); //$NON-NLS-1$
 
-	public static final SlimMessageTypeEnum UPDATE_TALK = new SlimMessageTypeEnum(5, "UPDATE_TALK");
+	public static final SlimMessageTypeEnum UPDATE_TALK = new SlimMessageTypeEnum(5, "UPDATE_TALK"); //$NON-NLS-1$
 
-	public static final SlimMessageTypeEnum EXCLUDE_TALK = new SlimMessageTypeEnum(6, "EXCLUDE_TALK");
+	public static final SlimMessageTypeEnum EXCLUDE_TALK = new SlimMessageTypeEnum(6, "EXCLUDE_TALK"); //$NON-NLS-1$
 	
 	private SlimMessageTypeEnum(int i, String s) {
 		id = i;
@@ -56,7 +57,7 @@ public class SlimMessageTypeEnum implements Serializable {
 		if (EXCLUDE_TALK.toString().equals(pType)) {
 			return EXCLUDE_TALK;
 		}
-		throw new SlimException("Invald Message type " + pType);
+		throw new SlimException(Externalizer.getString("LANSLIM.47", pType)); //$NON-NLS-1$
 	}
 	public int toInt() {
 		return id;
@@ -79,7 +80,7 @@ public class SlimMessageTypeEnum implements Serializable {
 			case 6: 
 				return EXCLUDE_TALK;
 			default:
-				throw new SlimException("Invald Message type " + pType);
+				throw new SlimException(Externalizer.getString("LANSLIM.47", new Integer(pType))); //$NON-NLS-1$
 		}
 	}
 
@@ -88,7 +89,7 @@ public class SlimMessageTypeEnum implements Serializable {
 			return fromInt(toInt());
 		}
 		catch (SlimException se) {
-			throw new InvalidObjectException("Unable to unserialize MessageType due to : " + se.getMessage());
+			throw new InvalidObjectException(Externalizer.getString("LANSLIM.48", se.getMessage())); //$NON-NLS-1$
 		}
 	}
 

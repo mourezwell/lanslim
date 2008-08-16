@@ -8,7 +8,7 @@ import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimUpdateTalkMessage extends SlimTalkMessage implements Serializable {
 
-	private static final String MESSAGE_ITEM = "Message";
+	private static final String MESSAGE_ITEM = "Message"; //$NON-NLS-1$
 	private String message;
 	
 	public SlimUpdateTalkMessage(SlimUserContact pSender, String pTalkId, String pNewMessage) {

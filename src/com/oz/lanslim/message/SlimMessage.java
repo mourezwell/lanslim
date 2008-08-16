@@ -8,27 +8,29 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.SlimUserContact;
 
 public abstract class SlimMessage implements Serializable {
 	
-	private static final String ITEM_START = "[";
-	private static final String ITEM_END = "]";
-	private static final String ITEM_VALUE_SEPARATOR = "=";
-	protected static final String LIST_SEPARATOR = ";";
+	private static final String ITEM_START = "["; //$NON-NLS-1$
+	private static final String ITEM_END = "]"; //$NON-NLS-1$
+	private static final String ITEM_VALUE_SEPARATOR = "="; //$NON-NLS-1$
+	protected static final String LIST_SEPARATOR = ";"; //$NON-NLS-1$
 	
 	private static final Pattern MESSAGE_PATTERN = Pattern.compile(
-			"(\\" + ITEM_START + "([^\\" + ITEM_VALUE_SEPARATOR + "]*)\\" + ITEM_VALUE_SEPARATOR
-			+ "([^\\" + ITEM_END + "]*)\\" + ITEM_END + ")+[\\s\\S]*"); 
+			"(\\" + ITEM_START + "([^\\" + ITEM_VALUE_SEPARATOR + "]*)\\" + ITEM_VALUE_SEPARATOR //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			+ "([^\\" + ITEM_END + "]*)\\" + ITEM_END + ")+[\\s\\S]*");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			// stuff at teh end is to accept ITEM_END inside message text
 	
 	private static final int MESSAGE_ITEM_GROUPINDEX = 1;
 	private static final int MESSAGE_ITEMNAME_GROUPINDEX = 2;
 	private static final int MESSAGE_ITEMVALUE_GROUPINDEX = 3;
 
-	protected static final String SENDER_ITEM = "Sender"; 
-	protected static final String TYPE_ITEM = "Type"; 
+	protected static final String SENDER_ITEM = "Sender";  //$NON-NLS-1$
+	protected static final String TYPE_ITEM = "Type";  //$NON-NLS-1$
 	
 	private SlimUserContact sender;
 	
@@ -59,7 +61,7 @@ public abstract class SlimMessage implements Serializable {
 	}
 	
 	protected String listToString(List pList) {
-		String s = "";
+		String s = StringConstants.EMPTY;
 		for (Iterator it = pList.iterator(); it.hasNext();) {
 			Object suc = it.next();
 			s = s + suc.toString() + LIST_SEPARATOR;
@@ -84,7 +86,7 @@ public abstract class SlimMessage implements Serializable {
 			}
 			return lItems;
 		}
-		throw new SlimException(pString + " does not match pattern for message ");	
+		throw new SlimException(Externalizer.getString("LANSLIM.49", pString));	 //$NON-NLS-1$
 	}
 
 	public static SlimMessageTypeEnum getType(Map lItems) throws SlimException {
