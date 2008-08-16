@@ -4,6 +4,4 @@ public interface SlimContactListener {
 
 	public void updateContacts();
 
-	public void notifyContactError(String pMessage);
-
 }
