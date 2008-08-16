@@ -12,9 +12,10 @@ import com.oz.lanslim.network.SlimNetworkAdapter;
 
 public class SlimModel {
 	
-	private static final String INI_FILE_COMMENTS = "LANSLIM settings File";
+	private static final String INI_FILE_HEADER = "LANSLIM settings File"; //$NON-NLS-1$
 
-	private static final String INI_FILE_NAME = "lanslim.ini";
+	private static final String INI_FILE_NAME = "lanslim.ini"; //$NON-NLS-1$
+	private static final String INI_FILE_BAK = "lanslim.ini.bak"; //$NON-NLS-1$
 	
 	private SlimContactList contacts = null;
 	private SlimTalkList talks = null;
@@ -27,7 +28,7 @@ public class SlimModel {
 		settingsLoaded = false;
 		
 		File iniFile = new File(
-				System.getProperty("user.home") +  File.separator + INI_FILE_NAME);
+				System.getProperty("user.home") +  File.separator + INI_FILE_NAME); //$NON-NLS-1$
 		if (iniFile.exists() && iniFile.isFile()) {
 			loadSettings(iniFile, pIconListener);
 		}
@@ -59,7 +60,7 @@ public class SlimModel {
 		save();
 	}
 	
-	public void save() {
+	public synchronized void save() {
 		
 		if (settingsLoaded) {
     		try {
@@ -67,15 +68,25 @@ public class SlimModel {
 				p.putAll(settings.toProperties());
 				p.putAll(contacts.toProperties());
 				
-				String path = System.getProperty("user.home") +  File.separator + INI_FILE_NAME;
+				String path = System.getProperty("user.home") +  File.separator + INI_FILE_NAME; //$NON-NLS-1$
+				File ini = new File(path);
+				String pathBak = System.getProperty("user.home") +  File.separator + INI_FILE_BAK; //$NON-NLS-1$
+				File bak = new File(pathBak);
+				if (bak.exists()) {
+					bak.delete();
+				}
+				if (ini.exists()) {
+					ini.renameTo(new File(pathBak));
+				}
+				
 				FileOutputStream fos = new FileOutputStream(new File(path));
-				p.store(fos, INI_FILE_COMMENTS);
+				p.store(fos, INI_FILE_HEADER);
 				
 				fos.flush();
 				fos.close();
     		}
     		catch (IOException ex) {
-    			SlimLogger.log(ex + ":" + ex.getMessage() + " when storing settings");
+    			SlimLogger.logException("model.save", ex); //$NON-NLS-1$
     		}
 		}
 	}
