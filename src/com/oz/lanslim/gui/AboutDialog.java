@@ -11,7 +11,7 @@ public class AboutDialog extends JOptionPane {
 	
 	public static final String VERSION = "1.0"; //$NON-NLS-1$
 	private static final String AUTHOR_NAME = "Olivier Mourez"; //$NON-NLS-1$
-	private static final String AUTHOR_ADDRESS = "mourezwell@users.sourceforge.net"; //$NON-NLS-1$
+	private static final String AUTHOR_ADDRESS = "mourezwell@lanslim.sourceforge.net"; //$NON-NLS-1$
 	private static final String PROJECT_HOME = "http://sourceforge.net/projects/lanslim/"; //$NON-NLS-1$
 	
 	public static void showDialog(Component parentComponent) {
