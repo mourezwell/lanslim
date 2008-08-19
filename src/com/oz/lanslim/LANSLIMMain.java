@@ -262,7 +262,7 @@ public class LANSLIMMain extends JFrame
 		if (e.getActionCommand().equals(LANSLIMMainActionCommand.QUIT)) {
 			System.exit(0);	
 		}
-		else if (e.getActionCommand().equals(LANSLIMMainActionCommand.SHOW)) {
+		else {
  			SwingUtilities.invokeLater(new Runnable()  {
 				public void run() {
 					try {
