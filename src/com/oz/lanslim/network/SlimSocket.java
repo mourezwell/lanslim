@@ -8,7 +8,6 @@ import java.net.SocketException;
 import java.util.Map;
 
 import com.oz.lanslim.Externalizer;
-import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
@@ -76,8 +75,9 @@ public class SlimSocket {
 	public SlimMessage receive() throws IOException {
 		DatagramPacket dp = new DatagramPacket(new byte[MAX_MESSAGE_SIZE], MAX_MESSAGE_SIZE);
 		socket.receive(dp);
-		String lMessage = new String(dp.getData(), 0, dp.getLength());
+		String lMessage = null;
 		try {
+			lMessage = new String(dp.getData(), 0, dp.getLength(), "ISO-8859-1");
 			Map lItems = SlimMessage.itemsFromString(lMessage);
 			SlimMessageTypeEnum type = SlimMessage.getType(lItems);
 			
@@ -107,15 +107,18 @@ public class SlimSocket {
 				return null;
 			}
 		}
-		catch (SlimException se) {
-			SlimLogger.log(Externalizer.getString("LANSLIM.39", lMessage)); //$NON-NLS-1$
+		catch (Throwable e) {
+			SlimLogger.logException(Externalizer.getString("LANSLIM.39", lMessage), e); //$NON-NLS-1$
 			return null;
 		}
 	}
 
 	public void send(SlimMessage pMessage, SlimUserContact pContact) throws IOException {
 		String lMessageAstring = pMessage.toString();
-		byte[] ba = lMessageAstring.getBytes();
+		byte[] ba = lMessageAstring.getBytes("ISO-8859-1");
+		if (ba.length > MAX_MESSAGE_SIZE) {
+			throw new IOException(Externalizer.getString("LANSLIM.29"));
+		}
 		DatagramPacket dp = new DatagramPacket(ba, ba.length);
 		dp.setSocketAddress(new InetSocketAddress(pContact.getHost(), pContact.getPort()));
 		socket.send(dp);
