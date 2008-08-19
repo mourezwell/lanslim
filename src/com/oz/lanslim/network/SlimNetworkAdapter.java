@@ -24,8 +24,6 @@ import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimNetworkAdapter implements Runnable {
 
-	private static final long DELAY = 500;
-
 	private SlimSocket socket;
 	private SlimModel model;
 	private Thread socketListener;
@@ -181,35 +179,6 @@ public class SlimNetworkAdapter implements Runnable {
 			// nothing to do
 		}
 		initSocket();
-	}
-	
-	public void sendDelayedMessage(SlimMessage pMessage, SlimUserContact pContact) throws SlimException {
-		
-		if (initOK) {
-			delayedTimer.schedule(new DelayedMessageTask(pMessage, pContact), DELAY);		
-		}
-		else {
-			throw new SlimException(Externalizer.getString("LANSLIM.45", Externalizer.getString("LANSLIM.40"))); //$NON-NLS-1$  //$NON-NLS-2$
-		}
-	}
-	
-	private class DelayedMessageTask extends TimerTask {
-		private SlimMessage message;
-		private SlimUserContact contact;
-		
-		public DelayedMessageTask(SlimMessage pMessage, SlimUserContact pContact) {
-			message = pMessage;
-			contact = pContact; 
-		}
-		
-		public void run() {
-			try {
-				send(message, contact);
-			}
-			catch (SlimException se) {
-				SlimLogger.logException("DelayedMessageTask", se); //$NON-NLS-1$
-			}
-		}
 	}
 
 	public void stop() {
