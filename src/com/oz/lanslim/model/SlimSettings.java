@@ -107,7 +107,7 @@ public class SlimSettings {
 		Externalizer.setLanguage(language);
 		
 		contactInfo = new SlimUserContact(DEFAULT_NAME, InetAddress.getLocalHost().getHostName(), DEFAULT_PORT);
-		contactInfo.setAvailability(SlimAvailabilityEnum.OFFLINE);
+		contactInfo.setAvailability(SlimAvailabilityEnum.ONLINE);
 		color = DEFAULT_COLOR;
 		size = DEFAULT_SIZE;
 		underline = DEFAULT_UNDERLINE;

@@ -53,6 +53,9 @@ public class SlimTalkList {
 			// on recherche dans notre carnet d'adresse les membre ou on les ajoute
 			SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(suc);
 			attendees.add(knownSuc);
+			if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+				model.getContacts().sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.ONLINE);
+			}
 		}
 
 		SlimTalk lTalk = new SlimTalk(model, pMessage.getTitle(), pMessage.getTalkId(), attendees);

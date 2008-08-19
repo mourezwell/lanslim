@@ -383,7 +383,7 @@ public class SlimContactList {
 	}
 	
 
-	private void sendAvailabiltyMessage(SlimUserContact pContact, SlimAvailabilityEnum pStatus) {
+	protected void sendAvailabiltyMessage(SlimUserContact pContact, SlimAvailabilityEnum pStatus) {
 		
 		try {
 			SlimUserContact sender = model.getSettings().getContactInfo();
@@ -435,7 +435,11 @@ public class SlimContactList {
 		
 		SlimUserContact oldSuc = getOrAddUserByAddress(pMessage.getOldSettings());
 		
-		sendAvailabiltyMessage(oldSuc, SlimAvailabilityEnum.ONLINE);
+		boolean lUpdated = updateContact(oldSuc, pMessage.getSender());
+		
+		if (lUpdated) {
+			sendAvailabiltyMessage(oldSuc, SlimAvailabilityEnum.ONLINE);
+		}
 	}
 
 	
@@ -467,12 +471,8 @@ public class SlimContactList {
 			}
 		}
 		else {
-			SlimContact existingContactWithSameName = (SlimContact)list.get(pSuc.getName());
-			if (existingContactWithSameName != null 
-					&& !existingContactWithSameName.equals(knownUserByAdress)) {
-				if (existingContactWithSameName.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					addContact(knownUserByAdress);
-				}
+			if (!knownUserByAdress.getName().equals(pSuc.getName())) {
+				updateContact(knownUserByAdress, pSuc);
 			}
 		}
 		return knownUserByAdress;

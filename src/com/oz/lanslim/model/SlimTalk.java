@@ -148,6 +148,11 @@ public class SlimTalk {
 	public synchronized void receiveInviteTalkMessage(SlimInviteTalkMessage pMessage) {
 		
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getNewContact());
+		
+		if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+			model.getContacts().sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.ONLINE);
+		}
+		
 		if (!peopleIn.contains(knownSuc)) {
 			peopleIn.add(knownSuc);
 			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
