@@ -299,11 +299,19 @@ public class ContactPanel extends JPanel
 						
 					}
 					else {
-						NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
-								model, (SlimUserContact)sc);
-						lFrame.pack();
-						lFrame.setLocationRelativeTo(getRootPane().getParent());
-						lFrame.setVisible(true);
+						if (sc.getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
+							NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
+									model, (SlimUserContact)sc);
+							lFrame.pack();
+							lFrame.setLocationRelativeTo(getRootPane().getParent());
+							lFrame.setVisible(true);
+						}
+						else {
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.176"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
+								    JOptionPane.WARNING_MESSAGE);
+						}
 					}
 				}
 				else {
