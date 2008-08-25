@@ -1,8 +1,10 @@
 package com.oz.lanslim;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,6 +65,8 @@ public class LANSLIMMain extends JFrame
 	private SystemTray systemTray = null;
 	private TrayIcon trayIcon = null;
 	private JPopupMenu trayMenu = null;
+	private TimerTask saveLocationTask = null;
+	private Component frameComponent = null;
 	
 	/**
 	* Auto-generated main method to display this JFrame
@@ -300,8 +304,15 @@ public class LANSLIMMain extends JFrame
 	}
 
 	public void componentMoved(ComponentEvent e) {
-		if (model != null) {
-			model.getSettings().setLocation(e.getComponent().getLocation());
+		if (saveLocationTask == null) {
+			frameComponent = e.getComponent();
+			saveLocationTask = new TimerTask() {
+				public void run() {
+					model.getSettings().setLocation(frameComponent.getLocation());
+					saveLocationTask = null;
+				}
+			};
+			iconTimer.schedule(saveLocationTask, 5000);
 		}
 	}
 
