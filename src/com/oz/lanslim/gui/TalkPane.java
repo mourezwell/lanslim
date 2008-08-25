@@ -376,7 +376,7 @@ public class TalkPane extends JSplitPane
 				String before = newMessageArea.getText().substring(0, lPos);
 				String after = newMessageArea.getText().substring(lPos);
 				newMessageArea.setText(before + StringConstants.NEW_LINE + after);
-				newMessageArea.setCaretPosition(before.length());
+				newMessageArea.setCaretPosition(lPos + StringConstants.NEW_LINE.length());
 	        }
 	        else {
 	        	send();		        
@@ -474,6 +474,15 @@ public class TalkPane extends JSplitPane
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			if ((e.getModifiers() & InputEvent.ALT_MASK) == 0) {
 				newMessageArea.setText(StringConstants.EMPTY);
+				if (talkModel.isDefaultBold()) {
+					newMessageArea.setText(newMessageArea.getText() + HTMLConstants.BOLD);
+				}
+				if (talkModel.isDefaultItalic()) {
+					newMessageArea.setText(newMessageArea.getText() + HTMLConstants.ITALIC);
+				}
+				if (talkModel.isDefaultUndeline()) {
+					newMessageArea.setText(newMessageArea.getText() + HTMLConstants.UNDERLINE);
+				}
 			}
 		}
 	}
@@ -484,11 +493,11 @@ public class TalkPane extends JSplitPane
 
 	protected void export(File pFile) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(pFile));
-		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.99")); //$NON-NLS-1$
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.100")); //$NON-NLS-1$
 		writer.write(StringConstants.LINE_SEPARATOR);
-		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.100", new Date())); //$NON-NLS-1$
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.101", new Date())); //$NON-NLS-1$
 		writer.write(StringConstants.LINE_SEPARATOR);
-		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.101", talkModel.getTitle())); //$NON-NLS-1$
+		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.46", talkModel.getTitle())); //$NON-NLS-1$
 		writer.write(StringConstants.LINE_SEPARATOR);
 		writer.write(COMMENT_PREFIX + Externalizer.getString("LANSLIM.102", talkModel.getPeopleInListAsString())); //$NON-NLS-1$
 		writer.write(StringConstants.LINE_SEPARATOR);
