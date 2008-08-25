@@ -59,7 +59,7 @@ public class ContactTreeModel extends DefaultTreeModel
 			Iterator it2 = groups.iterator();
 			while (it2.hasNext()) {
 				SlimGroupContact group = (SlimGroupContact)it2.next();
-				if (group.getName().startsWith(prefixNameFilter)) {
+				if (group.getName().toLowerCase().startsWith(prefixNameFilter)) {
 					addContactInCategoryNode(group, getCategoryNode(SlimContactList.CATEGORY_GROUP));
 				}
 			}
@@ -74,7 +74,7 @@ public class ContactTreeModel extends DefaultTreeModel
 			SlimUserContact user = (SlimUserContact)it3.next();
 			if (!user.equals(list.getSettingsUser())) {
 				if (user.getAvailability() != SlimAvailabilityEnum.OFFLINE || !hideOfflineFilter) {
-					if (user.getName().startsWith(prefixNameFilter)) {
+					if (user.getName().toLowerCase().startsWith(prefixNameFilter)) {
 						addContactInCategoryNode(user, getCategoryNode(list.getCategory(user)));
 					}
 				}
@@ -163,7 +163,7 @@ public class ContactTreeModel extends DefaultTreeModel
 				SlimUserContact user = (SlimUserContact)it3.next();
 				if (!user.equals(list.getSettingsUser())) {
 					if (user.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-						if (user.getName().toLowerCase().startsWith(prefixNameFilter.toLowerCase())) {
+						if (user.getName().toLowerCase().startsWith(prefixNameFilter)) {
 							addContactInCategoryNode(user, getCategoryNode(list.getCategory(user)));
 						}
 					}
@@ -179,8 +179,8 @@ public class ContactTreeModel extends DefaultTreeModel
 			}
 			hideOfflineUserFromCat(SlimContactList.CATEGORY_UNDEFINED);
 		}
-		else if (!prefixNameFilter.equals(pPrefix)) {
-			prefixNameFilter = pPrefix;
+		else if (!prefixNameFilter.equalsIgnoreCase(pPrefix)) {
+			prefixNameFilter = pPrefix.toLowerCase();
 			reset();
 			build();
 		}
