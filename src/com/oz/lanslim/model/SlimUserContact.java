@@ -85,7 +85,7 @@ public class SlimUserContact extends SlimContact implements Serializable {
 		if (pCompareTo instanceof SlimUserContact) {
 			SlimUserContact suc = (SlimUserContact)pCompareTo;
 			boolean lResult = super.equals(pCompareTo);
-			return lResult && (port == suc.port) && host.equals(suc.host);
+			return lResult && (port == suc.port) && host.equalsIgnoreCase(suc.host);
 		}
 		return false;
 	}
