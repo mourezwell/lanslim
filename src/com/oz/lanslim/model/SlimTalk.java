@@ -98,8 +98,12 @@ public class SlimTalk {
 					+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
 						suc.getName(), model.getSettings().getContactInfo().getName())
 					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
-				if (listener !=  null) {
-					listener.notifyTextTalkUpdate(this);
+				if (model.getSettings().getContactInfo().equals(suc)) {
+					text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
+						+ Externalizer.getString("LANSLIM.178") //$NON-NLS-1$
+						+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+					newPeopleIn.clear();
+					break;
 				}
 			}
 		}
@@ -168,7 +172,7 @@ public class SlimTalk {
 	public synchronized void receiveExcludeTalkMessage(SlimExcludeTalkMessage pMessage) {
 		
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getExcludedContact());
-		if (peopleIn.contains(knownSuc)) {
+		if (peopleIn.contains(knownSuc) || model.getSettings().getContactInfo().equals(knownSuc)) {
 			peopleIn.remove(knownSuc);
 			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
 				+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
