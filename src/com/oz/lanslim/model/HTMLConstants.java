@@ -40,10 +40,12 @@ public class HTMLConstants {
 	public static final  String DEFAULT_COLOR = BLACK;
 
 	private static final DateFormat myFormat = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
-	public static String DATE = " [" + myFormat.format(new Date()) + "]>"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static String DATE_START = " ["; //$NON-NLS-1$
+	public static String DATE_END = "]>"; //$NON-NLS-1$
 	
 	public static String getHeader(String pSender) {
 		return FONTCOLOR + DEFAULT_SIZE + FONTSIZE + DEFAULT_SIZE 
-			+ TAGEND + BOLD + pSender + DATE + ENDBOLD + ENDFONT ;
+			+ TAGEND + BOLD + pSender + DATE_START + myFormat.format(new Date()) + DATE_END 
+			+ ENDBOLD + ENDFONT ;
 	}
 }
