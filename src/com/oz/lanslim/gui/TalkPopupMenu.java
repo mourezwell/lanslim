@@ -45,15 +45,15 @@ public class TalkPopupMenu extends JPopupMenu implements ActionListener {
 		if (e.getActionCommand() == TalkActionCommand.TALK_EDIT) {
 			TalkPane tp = (TalkPane)talkDisplay.getSelectedComponent();
 			SlimTalk st = tp.getTalk();
-			NewTalkFrame lFrame = new NewTalkFrame((Frame)getRootPane().getParent(), 
+			NewTalkFrame lFrame = new NewTalkFrame((Frame)tp.getRootPane().getParent(), 
 					model, null, st);
 			lFrame.pack();
-			lFrame.setLocationRelativeTo(getRootPane().getParent());
+			lFrame.setLocationRelativeTo(tp.getRootPane().getParent());
 			lFrame.setVisible(true);
 		}
 		else if (e.getActionCommand() == TalkActionCommand.EXPORT_TALK) {
 			TalkPane tp = (TalkPane)talkDisplay.getSelectedComponent();
-			FileDialog fileChooser = new FileDialog((Frame)getRootPane().getParent(), Externalizer.getString("LANSLIM.108"), FileDialog.SAVE); //$NON-NLS-1$
+			FileDialog fileChooser = new FileDialog((Frame)tp.getRootPane().getParent(), Externalizer.getString("LANSLIM.108"), FileDialog.SAVE); //$NON-NLS-1$
 			fileChooser.show();
             String lFileName = fileChooser.getFile();
             if (lFileName != null) {
@@ -62,7 +62,7 @@ public class TalkPopupMenu extends JPopupMenu implements ActionListener {
                 	tp.export(file);
                 }
                 catch (IOException ioe) {
-    				JOptionPane.showMessageDialog(getRootPane().getParent(),
+    				JOptionPane.showMessageDialog(tp.getRootPane().getParent(),
 					    Externalizer.getString("LANSLIM.109", SlimLogger.shortFormatException(ioe)), //$NON-NLS-1$
 					    Externalizer.getString("LANSLIM.110"), //$NON-NLS-1$
 					    JOptionPane.ERROR_MESSAGE);
