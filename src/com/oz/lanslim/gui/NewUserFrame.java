@@ -13,7 +13,6 @@ import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimModel;
-import com.oz.lanslim.model.SlimSettings;
 import com.oz.lanslim.model.SlimUserContact;
 
 import javax.swing.JButton;
@@ -46,11 +45,13 @@ public class NewUserFrame extends JDialog implements ActionListener {
 
 	private SlimModel model;
 	private SlimUserContact contact;
+	private boolean lock;
 	
-	public NewUserFrame(Frame pParent, SlimModel pModel, SlimUserContact pContact) {
+	public NewUserFrame(Frame pParent, SlimModel pModel, SlimUserContact pContact, boolean pLocked) {
 		super(pParent, true);
 		contact = pContact;
 		model = pModel;
+		lock = pLocked;
 		initGUI();
 	}
 
@@ -136,12 +137,14 @@ public class NewUserFrame extends JDialog implements ActionListener {
 			if (contact != null) {
 				nameField.setText(contact.getName());
 				hostField.setText(contact.getHost());
-				if (model.getSettings().isPortUnlocked()) {
-					portField.setText(Integer.toString(contact.getPort()));
+				portField.setText(Integer.toString(contact.getPort()));
+				
+				if (lock) {
+					nameField.setEnabled(false);
+					hostField.setEnabled(false);
+					portField.setEnabled(false);
 				}
-				else {
-					portField.setText(SlimSettings.DEFAULT_PORT);
-				}
+				
 				String lUserCat = model.getContacts().getCategory(contact); 
 				if (model.getContacts().getCategory(contact) != null) {
                     lCat = lUserCat;

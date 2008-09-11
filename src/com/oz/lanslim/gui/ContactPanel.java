@@ -271,7 +271,7 @@ public class ContactPanel extends JPanel
 			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.USER_ADD) {
 				NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
-						model, null);
+						model, null, false);
 				lFrame.pack();
 				lFrame.setLocationRelativeTo(getRootPane().getParent());
 				lFrame.setVisible(true);
@@ -301,16 +301,17 @@ public class ContactPanel extends JPanel
 					else {
 						if (sc.getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
 							NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
-									model, (SlimUserContact)sc);
+									model, (SlimUserContact)sc, false);
 							lFrame.pack();
 							lFrame.setLocationRelativeTo(getRootPane().getParent());
 							lFrame.setVisible(true);
 						}
 						else {
-							JOptionPane.showMessageDialog(getRootPane().getParent(),
-								    Externalizer.getString("LANSLIM.176"), //$NON-NLS-1$
-								    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
-								    JOptionPane.WARNING_MESSAGE);
+							NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
+									model, (SlimUserContact)sc, true);
+							lFrame.pack();
+							lFrame.setLocationRelativeTo(getRootPane().getParent());
+							lFrame.setVisible(true);
 						}
 					}
 				}
