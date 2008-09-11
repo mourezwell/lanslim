@@ -314,7 +314,7 @@ public class SlimContactList {
 	}
 
 	
-	public Properties toProperties() {
+	public synchronized Properties toProperties() {
 		Map contactByCategory = new HashMap();
 		for (Iterator it = categories.keySet().iterator(); it.hasNext();) {
 			contactByCategory.put(it.next(), new ArrayList());
@@ -368,7 +368,7 @@ public class SlimContactList {
 		return p;
 	}
 
-	public void updateListener() {
+	public synchronized void updateListener() {
 		if (listener != null) {
 			listener.updateContacts();
 		}
