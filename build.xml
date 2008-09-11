@@ -43,7 +43,7 @@
     	<tstamp/>	
         <jar destfile="liv/lanslim.jar" basedir="classes">
             <manifest>
-              	<attribute name="Manifest-Version" value="1.02"/>
+              	<attribute name="Manifest-Version" value="1.03"/>
               	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
               	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
               	<attribute name="Implementation-Version" value="1.02"/>
