@@ -2,8 +2,8 @@ package com.oz.lanslim.network;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import javax.swing.SwingUtilities;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
@@ -19,7 +19,6 @@ import com.oz.lanslim.message.SlimUpdateTalkMessage;
 import com.oz.lanslim.message.SlimUpdateUserMessage;
 import com.oz.lanslim.model.SlimIconListener;
 import com.oz.lanslim.model.SlimModel;
-import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimUserContact;
 
 public class SlimNetworkAdapter implements Runnable {
@@ -27,19 +26,12 @@ public class SlimNetworkAdapter implements Runnable {
 	private SlimSocket socket;
 	private SlimModel model;
 	private Thread socketListener;
-	private Timer delayedTimer;
 	private boolean initOK = false;
 	private SlimIconListener iconListener = null;
 	
 	public SlimNetworkAdapter(SlimModel pModel, SlimIconListener pIconListener) {
 		
 		model = pModel;
-		delayedTimer = new Timer();
-		delayedTimer.schedule(new TimerTask() {
-			public void run() {
-				Thread.currentThread().setName("Delayed Timer"); //$NON-NLS-1$
-			}
-		}, 0);
 		iconListener = pIconListener;
 		try {
 			initSocket();
@@ -76,60 +68,32 @@ public class SlimNetworkAdapter implements Runnable {
 					try {
 						if (SlimMessageTypeEnum.AVAILABILITY.equals(sm.getType())) {
 							SlimAvailabilityUserMessage saum = (SlimAvailabilityUserMessage)sm;
-							model.getContacts().receiveAvailabiltyMessage(saum);
+							SwingUtilities.invokeLater(new ReceiveAvailabiltyTask(model, saum));
 						} 
 						else if (SlimMessageTypeEnum.UPDATE_USER.equals(sm.getType())) {
 							SlimUpdateUserMessage suum = (SlimUpdateUserMessage)sm;
-							model.getContacts().receiveUpdateUserMessage(suum);
+							SwingUtilities.invokeLater(new ReceiveUpdateUserTask(model, suum));
 						}
 						else if (SlimMessageTypeEnum.NEW_TALK.equals(sm.getType())) {
 							SlimNewTalkMessage sntm = (SlimNewTalkMessage)sm;
-							boolean success = model.getTalks().receiveNewTalkMessage(sntm);
-							if (!success) {
-								SlimLogger.log(Externalizer.getString("LANSLIM.42")); //$NON-NLS-1$
-							}
+							SwingUtilities.invokeLater(new ReceiveNewTalkTask(model, sntm));
 						} 
 						else if (SlimMessageTypeEnum.EXIT_TALK.equals(sm.getType())) {
 							SlimExitTalkMessage setm = (SlimExitTalkMessage)sm;
-							SlimTalk st = model.getTalks().getTalkById(setm.getTalkId());
-							if (st != null) {
-								st.receiveExitTalkMessage(setm);
-							}
-							else {
-								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
-							}
+							SwingUtilities.invokeLater(new ReceiveExitTalkTask(model, setm));
 						} 
 						else if (SlimMessageTypeEnum.INVITE_TALK.equals(sm.getType())) {
 							SlimInviteTalkMessage sitm = (SlimInviteTalkMessage)sm;
-							SlimTalk st = model.getTalks().getTalkById(sitm.getTalkId());
-							if (st != null) {
-								st.receiveInviteTalkMessage(sitm);
-							}
-							else {
-								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
-							}
+							SwingUtilities.invokeLater(new ReceiveInvitationTask(model, sitm));
 						} 
 						else if (SlimMessageTypeEnum.UPDATE_TALK.equals(sm.getType())) {
 							SlimUpdateTalkMessage sutm = (SlimUpdateTalkMessage)sm;
-							SlimTalk st = model.getTalks().getTalkById(sutm.getTalkId());
-							if (st != null) {
-								st.receiveUpdateTalkMessage(sutm);
-								iconListener.startIconBlinking();
-							}
-							else {
-								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
-							}
+							SwingUtilities.invokeLater(new ReceiveTalkMessageTask(model, 
+									sutm, iconListener));
 						}
 						else if (SlimMessageTypeEnum.EXCLUDE_TALK.equals(sm.getType())) {
 							SlimExcludeTalkMessage setm = (SlimExcludeTalkMessage)sm;
-							SlimTalk st = model.getTalks().getTalkById(setm.getTalkId());
-							if (st != null) {
-								st.receiveExcludeTalkMessage(setm);
-								iconListener.startIconBlinking();
-							}
-							else {
-								SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$
-							}
+							SwingUtilities.invokeLater(new ReceiveExcludeTalkTask(model, setm));
 						}				
 						else {
 							SlimLogger.log(Externalizer.getString("LANSLIM.44")); //$NON-NLS-1$
