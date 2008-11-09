@@ -493,7 +493,7 @@ public class SlimSettings {
     public void setSize(Dimension pDim) {
         h = pDim.height;
         w = pDim.width;
-        
+        saveSettings();
     }
 
 	private void saveSettings() {
