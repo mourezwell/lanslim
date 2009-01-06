@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,11 +30,11 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.jdic.tray.SystemTray;
 import org.jdesktop.jdic.tray.TrayIcon;
 
+import com.oz.lanslim.gui.AboutDialog;
 import com.oz.lanslim.gui.MainPane;
 import com.oz.lanslim.gui.MainPaneWindowListener;
 import com.oz.lanslim.gui.SlimIcon;
 import com.oz.lanslim.model.HTMLConstants;
-import com.oz.lanslim.model.SlimIconListener;
 import com.oz.lanslim.model.SlimModel;
 
 public class LANSLIMMain extends JFrame 
@@ -179,7 +178,9 @@ public class LANSLIMMain extends JFrame
 			setVisible(true);
 			toFront();
 		}
-		
+		if (model.getSettings().isAutoCheckVersion()) {
+			AboutDialog.checkVersion(this, true);
+		}
 	}
 
 	public void windowGainedFocus(WindowEvent e) {
