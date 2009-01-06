@@ -11,8 +11,8 @@ public class SlimUpdateTalkMessage extends SlimTalkMessage implements Serializab
 	private static final String MESSAGE_ITEM = "Message"; //$NON-NLS-1$
 	private String message;
 	
-	public SlimUpdateTalkMessage(SlimUserContact pSender, String pTalkId, String pNewMessage) {
-		super(pSender, SlimMessageTypeEnum.UPDATE_TALK, pTalkId);
+	public SlimUpdateTalkMessage(SlimUserContact pSender, String pTalkId, String pNewMessage, String pDate) {
+		super(pSender, SlimMessageTypeEnum.UPDATE_TALK, pTalkId, pDate);
 		message = pNewMessage;
 	}
 	
@@ -29,7 +29,8 @@ public class SlimUpdateTalkMessage extends SlimTalkMessage implements Serializab
 		SlimUserContact suc = 
 			SlimUserContact.fromString((String)pItems.get(SENDER_ITEM));
 		String tid = (String)pItems.get(TALKID_ITEM);
-		return new SlimUpdateTalkMessage(suc, tid, msg);
+		String date = (String)pItems.get(DATE_ITEM);
+		return new SlimUpdateTalkMessage(suc, tid, msg, date);
 	}
 	
 }

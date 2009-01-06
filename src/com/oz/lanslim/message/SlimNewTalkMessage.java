@@ -15,8 +15,8 @@ public class SlimNewTalkMessage extends SlimTalkMessage implements Serializable 
 	private static final String TITLE_ITEM = "Title"; //$NON-NLS-1$
 	private static final String PARTICIPANTS_ITEM = "Participants"; //$NON-NLS-1$
 	
-	public SlimNewTalkMessage(SlimUserContact pSender, String pId, String pTitle, List pAttendees) {
-		super(pSender, SlimMessageTypeEnum.NEW_TALK, pId);
+	public SlimNewTalkMessage(SlimUserContact pSender, String pId, String pTitle, List pAttendees, String pDate) {
+		super(pSender, SlimMessageTypeEnum.NEW_TALK, pId, pDate);
 		title = pTitle;
 		participants = pAttendees;
 	}
@@ -24,7 +24,7 @@ public class SlimNewTalkMessage extends SlimTalkMessage implements Serializable 
 	public String getTitle() {
 		return title;
 	}
-	
+
 	public List getParticipants() {
 		return participants;
 	}
@@ -40,11 +40,12 @@ public class SlimNewTalkMessage extends SlimTalkMessage implements Serializable 
 			SlimUserContact.fromString((String)pItems.get(SENDER_ITEM));
 		String tid = (String)pItems.get(TALKID_ITEM);
 		String[] attendees = listFromString((String)pItems.get(PARTICIPANTS_ITEM));
+		String date = (String)pItems.get(DATE_ITEM);
 		List part = new ArrayList(attendees.length);
 		for (int i = 0; i < attendees.length; i++) {
 			part.add(SlimUserContact.fromString(attendees[i]));
 		}
-		return new SlimNewTalkMessage(suc, tid, titl, part);
+		return new SlimNewTalkMessage(suc, tid, titl, part, date);
 	}
 
 }

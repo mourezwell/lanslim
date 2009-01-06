@@ -11,8 +11,8 @@ public class SlimInviteTalkMessage extends SlimTalkMessage implements Serializab
 	private SlimUserContact newContact;
 	private static final String CONTACT_ITEM = "Contact"; //$NON-NLS-1$
 	
-	public SlimInviteTalkMessage(SlimUserContact pSender, String pTalkId, SlimUserContact pNewContact) {
-		super(pSender, SlimMessageTypeEnum.INVITE_TALK, pTalkId);
+	public SlimInviteTalkMessage(SlimUserContact pSender, String pTalkId, SlimUserContact pNewContact, String pDate) {
+		super(pSender, SlimMessageTypeEnum.INVITE_TALK, pTalkId, pDate);
 		newContact = pNewContact;
 	}
 	
@@ -30,7 +30,8 @@ public class SlimInviteTalkMessage extends SlimTalkMessage implements Serializab
 		SlimUserContact suc = 
 			SlimUserContact.fromString((String)pItems.get(SENDER_ITEM));
 		String tid = (String)pItems.get(TALKID_ITEM);
-		return new SlimInviteTalkMessage(suc, tid, ex);
+		String date = (String)pItems.get(DATE_ITEM);
+		return new SlimInviteTalkMessage(suc, tid, ex, date);
 	}
 
 }

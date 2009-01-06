@@ -39,13 +39,18 @@ public class HTMLConstants {
 	public static final  String DEFAULT_SIZE = "4"; //$NON-NLS-1$
 	public static final  String DEFAULT_COLOR = BLACK;
 
-	private static final DateFormat myFormat = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
-	public static String DATE_START = " ["; //$NON-NLS-1$
-	public static String DATE_END = "]>"; //$NON-NLS-1$
+	public static final String DATE_START = " ["; //$NON-NLS-1$
+	public static final String DATE_END = "]>"; //$NON-NLS-1$
 	
-	public static String getHeader(String pSender) {
+	public static final DateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
+	
+	public static String getHeader(String pSender, String pDate) {
+		String date = pDate;  
+		if (date == null) {
+			date = HTMLConstants.TIME_FORMAT.format(new Date());
+		}
 		return FONTCOLOR + DEFAULT_SIZE + FONTSIZE + DEFAULT_SIZE 
-			+ TAGEND + BOLD + pSender + DATE_START + myFormat.format(new Date()) + DATE_END 
+			+ TAGEND + BOLD + pSender + DATE_START + date + DATE_END 
 			+ ENDBOLD + ENDFONT ;
 	}
 }
