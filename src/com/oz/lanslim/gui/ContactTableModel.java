@@ -24,8 +24,8 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 	public ContactTableModel(SlimContactList pList, boolean pHideGroup, boolean pHideOffline) {
 		list = pList;
 		contactObjectArrayModel = list.getTableModelData();
-		list.addContactListener(this);
-		list.addCategoryListener(null);
+		list.registerContactListener(this);
+		list.registerCategoryListener(null);
 		prefixNameFilter = StringConstants.EMPTY;
 		hideGroupFilter = pHideGroup;
 		hideOfflineFilter = pHideOffline;

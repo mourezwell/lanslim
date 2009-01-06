@@ -1,4 +1,4 @@
-package com.oz.lanslim.model;
+package com.oz.lanslim;
 
 public interface SlimIconListener {
 	

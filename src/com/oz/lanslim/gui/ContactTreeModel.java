@@ -35,8 +35,8 @@ public class ContactTreeModel extends DefaultTreeModel
 		
 		super(new DefaultMutableTreeNode(ROOT_NAME, true), true);
 		list = pList;
-		list.addContactListener(this);
-		list.addCategoryListener(this);
+		list.registerContactListener(this);
+		list.registerCategoryListener(this);
 		prefixNameFilter = StringConstants.EMPTY;
 		hideGroupFilter = pHideGroup;
 		hideOfflineFilter = pHideOffline;
