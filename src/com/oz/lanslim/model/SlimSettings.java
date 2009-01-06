@@ -45,6 +45,11 @@ public class SlimSettings {
 	private static final String FRAME_W = SLIM_SETTINGS_PROPS_PREFIX + "w"; //$NON-NLS-1$
 	private static final String FRAME_H = SLIM_SETTINGS_PROPS_PREFIX + "h"; //$NON-NLS-1$
 	private static final String SHORTCUT_PROP_PREFIX = SLIM_SETTINGS_PROPS_PREFIX + "shortcut."; //$NON-NLS-1$
+	private static final String AUTO_CHECK_VERSION_PROP = SLIM_SETTINGS_PROPS_PREFIX + "autoCheckVersion"; //$NON-NLS-1$
+	private static final String PROXY_PREFIX = SLIM_SETTINGS_PROPS_PREFIX + "proxy."; //$NON-NLS-1$
+	private static final String PROXY_NEEDED_PROP = PROXY_PREFIX + "needed"; //$NON-NLS-1$
+	private static final String PROXY_HOST_PROP = PROXY_PREFIX + "host"; //$NON-NLS-1$
+	private static final String PROXY_PORT_PROP = PROXY_PREFIX + "port"; //$NON-NLS-1$
 	
 	public static final String DEFAULT_LANGUAGE = "EN"; //$NON-NLS-1$
 	public static final String DEFAULT_PORT = "17000"; //$NON-NLS-1$
@@ -70,6 +75,8 @@ public class SlimSettings {
 	private static final int DEFAULT_H = 400;
 	private static final String DEFAULT_SHORCUT = StringConstants.EMPTY;
 	public static final int SHORTCUT_NUMBER = 12;
+	public static final boolean DEFAULT_AUTO_CHECK = false;
+	public static final boolean DEFAULT_NEED_PROXY = false;
 
 
 	private  SlimModel model = null;
@@ -89,12 +96,16 @@ public class SlimSettings {
 	private  boolean groupHidden = DEFAULT_HIDE_GROUP;
 	private  boolean offlineHidden = DEFAULT_HIDE_OFFLINE;
 	private  boolean contactTree = DEFAULT_CONTACT_TREE;
-	private  boolean contactQuickDnd= DEFAULT_CONTACT_DND;
+	private  boolean contactQuickDnd = DEFAULT_CONTACT_DND;
 	private  int x = DEFAULT_X;
 	private  int y = DEFAULT_Y;
 	private  int w = DEFAULT_W;
 	private  int h = DEFAULT_H;
 	private  String[] shortcuts = null;
+	private  boolean autoCheckVersion= DEFAULT_AUTO_CHECK;
+	private  boolean proxyNeeded = DEFAULT_NEED_PROXY;
+	private  String proxyHost = null;
+	private  String proxyPort = null;
 	
 	private SlimUserContact contactInfo = null;
 
@@ -132,7 +143,11 @@ public class SlimSettings {
 		for (int i = 0; i < SHORTCUT_NUMBER; i++) {
 			shortcuts[i] = DEFAULT_SHORCUT;
 		};
-		
+		autoCheckVersion= DEFAULT_AUTO_CHECK;
+		proxyNeeded = DEFAULT_NEED_PROXY;
+		proxyHost = null;
+		proxyPort = null;
+
 		initOk = true;
 	}
 
@@ -263,6 +278,24 @@ public class SlimSettings {
 		}
 		setShortcuts(lTemps);
 		
+		lTemp = p.getProperty(AUTO_CHECK_VERSION_PROP);
+		if (lTemp != null) {
+			setAutoCheckVersion(Boolean.valueOf(lTemp).booleanValue());
+		}
+
+		lTemp = p.getProperty(PROXY_HOST_PROP);
+		if (lTemp != null) {
+			setProxyHost(lTemp);
+		}
+		lTemp = p.getProperty(PROXY_PORT_PROP);
+		if (lTemp != null) {
+			setProxyPort(lTemp);
+		}
+		lTemp = p.getProperty(PROXY_NEEDED_PROP);
+		if (lTemp != null) {
+			setProxyNeeded(Boolean.valueOf(lTemp).booleanValue());
+		}
+		
 		initOk = true;
 		saveSettings();
 	}
@@ -339,6 +372,14 @@ public class SlimSettings {
 		p.put(FRAME_Y, Integer.toString(getY()));
 		for (int i = 0; i < 12; i++) {
 			p.put(SHORTCUT_PROP_PREFIX + i, getShortcuts()[i]);
+		}
+		p.put(AUTO_CHECK_VERSION_PROP, Boolean.toString(isAutoCheckVersion()));
+		p.put(PROXY_NEEDED_PROP, Boolean.toString(isProxyNeeded()));
+		if (getProxyHost() != null) {
+			p.put(PROXY_HOST_PROP, getProxyHost());
+		}
+		if (getProxyPort() != null) {
+			p.put(PROXY_PORT_PROP, getProxyPort());
 		}
 
 		return p;
@@ -565,6 +606,65 @@ public class SlimSettings {
 
 	public String[] getAvailableLanguage() {
 		return AVAILABLE_LANGUAGE;
+	}
+
+	public boolean isAutoCheckVersion() {
+		return autoCheckVersion;
+	}
+
+	public void setAutoCheckVersion(boolean pAutoCheckVersion) {
+		autoCheckVersion = pAutoCheckVersion;
+	}
+
+	public String getProxyHost() {
+		return proxyHost;
+	}
+
+	public void setProxyHost(String pProxyHost) {
+		if (pProxyHost != null && pProxyHost.length() > 0) {
+			proxyHost = pProxyHost;
+		}
+		else {
+			proxyHost = pProxyHost;
+		}
+	}
+
+	public String getProxyPort() {
+		return proxyPort;
+	}
+
+	public void setProxyPort(String pProxyPort) {
+		if (pProxyPort != null && pProxyPort.length() > 0) {
+			proxyPort = pProxyPort;
+		}
+		else {
+			proxyPort = null;
+		}
+	}
+
+	public boolean isProxyNeeded() {
+		return proxyNeeded;
+	}
+
+	public void setProxyNeeded(boolean pProxyNeeded) {
+		proxyNeeded = pProxyNeeded;
+		if (isProxyNeeded() && getProxyHost() != null && getProxyPort() != null) {
+	        System.getProperties().put("http.proxyHost", getProxyHost()); //$NON-NLS-1$
+	        System.getProperties().put("http.proxyPort", getProxyPort()); //$NON-NLS-1$
+		} 
+		else {
+	        System.getProperties().remove("http.proxyHost"); //$NON-NLS-1$
+	        System.getProperties().remove("http.proxyPort"); //$NON-NLS-1$
+		}
+
+        /* PASSWORD MANAGEMENT NOT IMPLEMENTED YET
+	    Authenticator.setDefault(new Authenticator() {
+	      protected PasswordAuthentication getPasswordAuthentication() {
+	        return new PasswordAuthentication("mydomain\\username","password".toCharArray());
+	    }});
+        // PASSWORD */
+
+		
 	}
 	
 }

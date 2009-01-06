@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -15,13 +14,13 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.HTMLConstants;
 import com.oz.lanslim.model.SlimSettings;
 import com.oz.lanslim.model.SlimUserContact;
 
 import javax.swing.JButton;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -34,41 +33,35 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
 
 
 public class SettingsFrame extends JDialog implements ActionListener {
 	
-	private JLabel nameLabel;
 	private JTextField nameField;
-	private JLabel portLabel;
 	private JTextField portField;
 	private JTextField hostField;
-	private JLabel contactLabel;
 	private JButton importButton;
 	private JButton exportButton;
-	private JLabel contactDisplayLabel;
 	private JRadioButton tableButton;
 	private JRadioButton treeButton;
-	private JLabel dragDropLabel;
 	private JRadioButton multipleButton;
 	private JRadioButton quickButton;
 	private JButton cancelButton;
 	private JButton okButton;
-	private JLabel hostLabel;
-	private JLabel styleLabel;
 	private JButton colorButton;
 	private JButton underlineButton;
 	private JButton italicButton;
 	private JButton boldButton;
 	private JComboBox sizeComboBox;
-	private JLabel shortcutLabel;
 	private JButton shortcutButton;
 	private JCheckBox startAsTrayButton;
 	private JCheckBox closeAsTrayButton;
 	private FileDialog fileChooser; 
-	private JLabel languageLabel;
 	private JComboBox languageComboBox;
+	private JCheckBox checkVersionButton;
+	private JCheckBox proxyUsedButton;
+	private JTextField proxyHostField;
+	private JTextField proxyPortField;
 
 	
 	private SlimSettings model;
@@ -93,50 +86,45 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			
 			FormLayout thisLayout = new FormLayout(
 					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
 			setSize(270, 200);
 			setResizable(false);
 			
 			{
-				nameLabel = new JLabel();
+				JLabel nameLabel = new JLabel();
 				nameLabel.setText(Externalizer.getString("LANSLIM.7")); //$NON-NLS-1$
 				nameLabel.setPreferredSize(new java.awt.Dimension(30, 15));
 				getContentPane().add(nameLabel, new CellConstraints("2, 2, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				nameField = new JTextField();
 				nameField.setPreferredSize(new java.awt.Dimension(140, 20));
 				nameField.setText(model.getContactInfo().getName());
 				getContentPane().add(nameField, new CellConstraints("4, 2, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
-				hostLabel = new JLabel();
+				JLabel hostLabel = new JLabel();
 				hostLabel.setText(Externalizer.getString("LANSLIM.129")); //$NON-NLS-1$
 				getContentPane().add(hostLabel, new CellConstraints("2, 4, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				hostField = new JTextField();
 				hostField.setText(model.getContactInfo().getHost());
 				getContentPane().add(hostField, new CellConstraints("4, 4, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
-				portLabel = new JLabel();
+				JLabel portLabel = new JLabel();
 				portLabel.setText(Externalizer.getString("LANSLIM.130")); //$NON-NLS-1$
 				getContentPane().add(portLabel, new CellConstraints("2, 6, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				portField = new JTextField();
 				portField.setText(Integer.toString(model.getContactInfo().getPort()));
 				getContentPane().add(portField, new CellConstraints("4, 6, 1, 1, default, default")); //$NON-NLS-1$
 				portField.setEnabled(model.isPortUnlocked());
 			}
 			{
-				styleLabel = new JLabel();
+				JLabel styleLabel = new JLabel();
 				styleLabel.setText(Externalizer.getString("LANSLIM.145")); //$NON-NLS-1$
 				getContentPane().add(styleLabel, new CellConstraints("2, 8, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
 				
 				JPanel buttonPanel = new JPanel();
 				boldButton = new JButton();
@@ -186,22 +174,21 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				getContentPane().add(buttonPanel, new CellConstraints("4, 8, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
-				shortcutLabel = new JLabel();
+				JLabel shortcutLabel = new JLabel();
 				shortcutLabel.setText(Externalizer.getString("LANSLIM.141")); //$NON-NLS-1$
 				getContentPane().add(shortcutLabel, new CellConstraints("2, 10, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				shortcutButton = new JButton();
 				shortcutButton.addActionListener(this);
 				shortcutButton.setActionCommand(SettingsActionCommand.SHORTCUT);
 				shortcutButton.setText(Externalizer.getString("LANSLIM.142")); //$NON-NLS-1$
 				getContentPane().add(shortcutButton, new CellConstraints("4, 10, 1, 1, default, default")); //$NON-NLS-1$
 			}
-			{
+/*			{
 				JPanel closeActionGroupPanel = new JPanel(new GridLayout(0, 1));
 			    Border border = BorderFactory.createTitledBorder(Externalizer.getString("LANSLIM.143")); //$NON-NLS-1$
 			    closeActionGroupPanel.setBorder(border);
-				getContentPane().add(closeActionGroupPanel, new CellConstraints("4, 12, 1, 1, default, default")); //$NON-NLS-1$
+				getContentPane().add(closeActionGroupPanel, new CellConstraints("2, 12, 3, 1, default, default")); //$NON-NLS-1$
 				
 				if (!model.isTrayEnable()) {
 					JLabel trayLabel = new JLabel();
@@ -219,13 +206,36 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				    closeActionGroupPanel.add(closeAsTrayButton);
 
 				}
+			} */
+			{
+				JLabel trayLabel = new JLabel();
+				trayLabel.setText(Externalizer.getString("LANSLIM.143")); //$NON-NLS-1$
+				getContentPane().add(trayLabel, new CellConstraints("2, 12, 1, 1, default, default")); //$NON-NLS-1$
+
+				JPanel closeActionGroupPanel = new JPanel();
+				getContentPane().add(closeActionGroupPanel, new CellConstraints("4, 12, 1, 1, default, default")); //$NON-NLS-1$
+				
+				if (!model.isTrayEnable()) {
+					JLabel trayWarning = new JLabel();
+					trayWarning.setIcon(new SlimIcon("info.png")); //$NON-NLS-1$
+					closeActionGroupPanel.add(trayWarning);
+					trayWarning.setText(HTMLConstants.HTML + Externalizer.getString("LANSLIM.144") + HTMLConstants.ENDHTML); //$NON-NLS-1$
+				}
+				else {
+					startAsTrayButton = new JCheckBox(Externalizer.getString("LANSLIM.146")); //$NON-NLS-1$
+					closeActionGroupPanel.add(startAsTrayButton);
+				    startAsTrayButton.setSelected(model.isStartAsTray());
+				    
+				    closeAsTrayButton = new JCheckBox(Externalizer.getString("LANSLIM.147")); //$NON-NLS-1$
+				    closeAsTrayButton.setSelected(model.isCloseAsTray());
+				    closeActionGroupPanel.add(closeAsTrayButton);
+				}
 			}
 			{
-				contactLabel = new JLabel();
+				JLabel contactLabel = new JLabel();
 				contactLabel.setText(Externalizer.getString("LANSLIM.148")); //$NON-NLS-1$
 				getContentPane().add(contactLabel, new CellConstraints("2, 14, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				JPanel buttonPanel = new JPanel();
 				importButton = new JButton();
 				importButton.setText(Externalizer.getString("LANSLIM.149")); //$NON-NLS-1$
@@ -245,11 +255,10 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				getContentPane().add(buttonPanel, new CellConstraints("4, 14, 1, 1, default, center")); //$NON-NLS-1$
 			}
 			{
-				contactDisplayLabel = new JLabel();
+				JLabel contactDisplayLabel = new JLabel();
 				contactDisplayLabel.setText(Externalizer.getString("LANSLIM.151")); //$NON-NLS-1$
 				getContentPane().add(contactDisplayLabel, new CellConstraints("2, 16, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				JPanel lDisplayPanel = new JPanel();
 				ButtonGroup lGroup = new ButtonGroup();
 				
@@ -272,11 +281,10 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				getContentPane().add(lDisplayPanel, new CellConstraints("4, 16, 1, 1, default, center")); //$NON-NLS-1$
 			}
 			{
-				dragDropLabel = new JLabel();
+				JLabel dragDropLabel = new JLabel();
 				dragDropLabel.setText(Externalizer.getString("LANSLIM.154")); //$NON-NLS-1$
 				getContentPane().add(dragDropLabel, new CellConstraints("2, 18, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
+
 				JPanel lDisplayPanel = new JPanel();
 				ButtonGroup lGroup = new ButtonGroup();
 				
@@ -299,16 +307,14 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				getContentPane().add(lDisplayPanel, new CellConstraints("4, 18, 1, 1, default, center")); //$NON-NLS-1$
 			}
 			{
-				languageLabel = new JLabel();
+				JLabel languageLabel = new JLabel();
 				languageLabel.setText(Externalizer.getString("LANSLIM.24")); //$NON-NLS-1$
 				getContentPane().add(languageLabel, new CellConstraints("2, 20, 1, 1, default, default")); //$NON-NLS-1$
-			}
-			{
 				
-				ComboBoxModel sizeComboBoxModel = 
+				ComboBoxModel langComboBoxModel = 
 					new DefaultComboBoxModel(model.getAvailableLanguage()); 
 				languageComboBox = new JComboBox();
-				languageComboBox.setModel(sizeComboBoxModel);
+				languageComboBox.setModel(langComboBoxModel);
 				languageComboBox.setSelectedItem(model.getLanguage());
 				languageComboBox.setMaximumSize(new Dimension(40, 20));
 				languageComboBox.addActionListener(this);
@@ -321,6 +327,50 @@ public class SettingsFrame extends JDialog implements ActionListener {
 					multipleButton.setSelected(true);
 				}
 				getContentPane().add(languageComboBox, new CellConstraints("4, 20, 1, 1, default, center")); //$NON-NLS-1$
+			}
+			{
+				JLabel checkVersionLabel = new JLabel();
+				checkVersionLabel.setText(Externalizer.getString("LANSLIM.133")); //$NON-NLS-1$
+				getContentPane().add(checkVersionLabel, new CellConstraints("2, 22, 1, 1, default, default")); //$NON-NLS-1$
+
+				JPanel buttonGroupPanel = new JPanel();
+				getContentPane().add(buttonGroupPanel, new CellConstraints("4, 22, 1, 1, default, default")); //$NON-NLS-1$
+				
+				checkVersionButton = new JCheckBox(Externalizer.getString("LANSLIM.132")); //$NON-NLS-1$
+				checkVersionButton.setSelected(model.isAutoCheckVersion());
+				buttonGroupPanel.add(checkVersionButton);
+			}
+			{
+				JLabel proxyLabel = new JLabel();
+				proxyLabel.setText(Externalizer.getString("LANSLIM.134")); //$NON-NLS-1$
+				getContentPane().add(proxyLabel, new CellConstraints("2, 24, 1, 1, default, default")); //$NON-NLS-1$
+				
+				JPanel buttonGroupPanel = new JPanel();
+				getContentPane().add(buttonGroupPanel, new CellConstraints("4, 24, 1, 1, default, default")); //$NON-NLS-1$
+				
+				proxyUsedButton = new JCheckBox(StringConstants.EMPTY); 
+				proxyUsedButton.setSelected(model.isProxyNeeded());
+				proxyUsedButton.setActionCommand(SettingsActionCommand.PROXY);
+				proxyUsedButton.addActionListener(this);
+				buttonGroupPanel.add(proxyUsedButton);
+				
+				proxyHostField = new JTextField(Externalizer.getString("LANSLIM.129")); //$NON-NLS-1$
+				proxyHostField.setPreferredSize(new Dimension(100, 20));
+				proxyHostField.setEnabled(proxyUsedButton.isSelected());
+				buttonGroupPanel.add(proxyHostField);
+				
+				JLabel separatorLabel = new JLabel(":");
+				buttonGroupPanel.add(separatorLabel);
+				
+				proxyPortField =  new JTextField(Externalizer.getString("LANSLIM.130"));
+				proxyPortField.setPreferredSize(new Dimension(30, 20));
+				proxyPortField.setEnabled(proxyUsedButton.isSelected());
+				buttonGroupPanel.add(proxyPortField);
+
+				if (model.isProxyNeeded()) {
+	                proxyPortField.setText(model.getProxyPort());
+	                proxyHostField.setText(model.getProxyHost());
+				}
 			}
 			{
 				JPanel buttonPanel = new JPanel();
@@ -337,8 +387,9 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("4, 22, 1, 1, default, center")); //$NON-NLS-1$
+				getContentPane().add(buttonPanel, new CellConstraints("4, 26, 1, 1, default, center")); //$NON-NLS-1$
 			}
+			
 			if (userLocked) {
 				nameField.setEnabled(false);
 				hostField.setEnabled(false);
@@ -364,7 +415,19 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			model.setBold(boldSelected);
 			model.setItalic(italicSelected);
 			model.setUnderline(underSelected);
-			
+
+			model.setAutoCheckVersion(checkVersionButton.isSelected());
+
+            if (proxyUsedButton.isSelected()) {
+                model.setProxyHost(proxyHostField.getText());
+                model.setProxyPort(proxyPortField.getText());
+            }
+            else {
+            	model.setProxyHost(null);
+            	model.setProxyHost(null);
+            }
+            model.setProxyNeeded(proxyUsedButton.isSelected());
+
 			try {
 				model.setLanguage((String)languageComboBox.getSelectedItem());
 				model.setFontSize(sizeComboBox.getSelectedIndex() + 1);
@@ -385,7 +448,6 @@ public class SettingsFrame extends JDialog implements ActionListener {
 		else if (e.getActionCommand().equals(SettingsActionCommand.BOLD)) {
 			boldSelected = !boldSelected;
 			boldButton.setBorder(SlimButtonBorder.getSelectedBorder(boldSelected));
-				
 		}
 		else if (e.getActionCommand().equals(SettingsActionCommand.UNDERLINE)) {
 			underSelected = !underSelected;
@@ -470,6 +532,10 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			lShrortcutDialog.setLocationRelativeTo(this);
 			lShrortcutDialog.setVisible(true);
 		}
+		else if (e.getActionCommand().equals(SettingsActionCommand.PROXY)) {
+			proxyHostField.setEnabled(proxyUsedButton.isSelected());
+			proxyPortField.setEnabled(proxyUsedButton.isSelected());
+		}
 	}
 
 	private class SettingsActionCommand {
@@ -493,6 +559,8 @@ public class SettingsFrame extends JDialog implements ActionListener {
 		public static final String CANCEL = "cancel"; //$NON-NLS-1$
 
 		public static final String LANGUAGE = "language"; //$NON-NLS-1$
+
+		public static final String PROXY = "proxy"; //$NON-NLS-1$
 
 	}
 }
