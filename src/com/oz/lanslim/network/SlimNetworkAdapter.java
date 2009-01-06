@@ -7,6 +7,7 @@ import javax.swing.SwingUtilities;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.SlimIconListener;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
@@ -17,7 +18,6 @@ import com.oz.lanslim.message.SlimMessageTypeEnum;
 import com.oz.lanslim.message.SlimNewTalkMessage;
 import com.oz.lanslim.message.SlimUpdateTalkMessage;
 import com.oz.lanslim.message.SlimUpdateUserMessage;
-import com.oz.lanslim.model.SlimIconListener;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimUserContact;
 

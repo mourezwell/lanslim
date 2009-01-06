@@ -1,9 +1,9 @@
 package com.oz.lanslim.network;
 
 import com.oz.lanslim.Externalizer;
+import com.oz.lanslim.SlimIconListener;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimUpdateTalkMessage;
-import com.oz.lanslim.model.SlimIconListener;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
 

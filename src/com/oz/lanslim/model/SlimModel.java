@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.SlimIconListener;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.network.SlimNetworkAdapter;
 
