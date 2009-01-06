@@ -25,12 +25,12 @@
     <maxHeapSize>0</maxHeapSize>
   </jre>
   <versionInfo>
-    <fileVersion>1.0.4.0</fileVersion>
-    <txtFileVersion>V1.04</txtFileVersion>
+    <fileVersion>1.1.0.0</fileVersion>
+    <txtFileVersion>V1.1</txtFileVersion>
     <fileDescription>Lanslim Windows Binary Distribution</fileDescription>
     <copyright>Created by Olivier Mourez but free to use</copyright>
-    <productVersion>1.0.4.0</productVersion>
-    <txtProductVersion>V1.04</txtProductVersion>
+    <productVersion>1.1.0.0</productVersion>
+    <txtProductVersion>V1.1</txtProductVersion>
     <productName>LANSLIM (Local Area Network Instant Messaging)</productName>
     <companyName>None</companyName>
     <internalName>lanslim</internalName>
