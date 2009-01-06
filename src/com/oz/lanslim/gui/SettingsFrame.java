@@ -359,10 +359,10 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				proxyHostField.setEnabled(proxyUsedButton.isSelected());
 				buttonGroupPanel.add(proxyHostField);
 				
-				JLabel separatorLabel = new JLabel(":");
+				JLabel separatorLabel = new JLabel(StringConstants.COLON);
 				buttonGroupPanel.add(separatorLabel);
 				
-				proxyPortField =  new JTextField(Externalizer.getString("LANSLIM.130"));
+				proxyPortField =  new JTextField(Externalizer.getString("LANSLIM.130")); //$NON-NLS-1$
 				proxyPortField.setPreferredSize(new Dimension(30, 20));
 				proxyPortField.setEnabled(proxyUsedButton.isSelected());
 				buttonGroupPanel.add(proxyPortField);

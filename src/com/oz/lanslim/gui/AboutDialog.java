@@ -45,7 +45,7 @@ public class AboutDialog extends JOptionPane {
 	        DataInputStream di = null;
 	        byte [] b = new byte[1];
 	
-	        URL url = new URL("http://lanslim.sourceforge.net/version.txt");
+	        URL url = new URL("http://lanslim.sourceforge.net/version.txt"); //$NON-NLS-1$
 	        HttpURLConnection con = (HttpURLConnection) url.openConnection(); //$NON-NLS-1$
 	        
 	        di = new DataInputStream(con.getInputStream());
@@ -58,7 +58,7 @@ public class AboutDialog extends JOptionPane {
 	        float lLast = Float.parseFloat(lLastStr);
 	        boolean equals = (lProduct == lLast);
 	        
-	        String lMessage = Externalizer.getString("LANSLIM.199", VERSION, lLastStr);
+	        String lMessage = Externalizer.getString("LANSLIM.199", VERSION, lLastStr); //$NON-NLS-1$
 	        if (!equals) {
 	        	lMessage =  lMessage + StringConstants.NEW_LINE 
 	        		+ Externalizer.getString("LANSLIM.131", VERSION, lLastStr) + StringConstants.NEW_LINE + //$NON-NLS-1$
