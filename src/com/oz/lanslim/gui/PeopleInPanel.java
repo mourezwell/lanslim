@@ -18,11 +18,12 @@ import javax.swing.JToolBar;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.model.PeopleInAvailabilityListener;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimUserContact;
 
-public class PeopleInPanel extends JPanel implements ActionListener {
+public class PeopleInPanel extends JPanel implements ActionListener, PeopleInAvailabilityListener {
 
 	private JToolBar peopleInBar;
 	private JLabel peopleInLabel;
@@ -41,7 +42,7 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 		model = pModel;
 		talkDisplay = pDisplay;
 		init();
-		
+		pModel.getContacts().registerPeopleInListener(this);
 	}
 	
 	private void init() {
@@ -83,6 +84,7 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 			peopleInList.setModel(peopleInModel);
 			peopleInList.setCellRenderer(new PeopleInCellRenderer());
 			peopleInList.setTransferHandler(new ContactTransferHandler(talkDisplay));
+			peopleInList.setToolTipText(Externalizer.getString("LANSLIM.187"));  //$NON-NLS-1$
 			peopleInAreaPane.setViewportView(peopleInList);
 			
 			popupMenu = new PeopleInPopupMenu(this);
@@ -114,7 +116,11 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 				if (st != null) {
 					try {
 						Object[] excluded = peopleInList.getSelectedValues();
-						st.removePeople(excluded);
+						for (int i = 0; i < excluded.length; i++) {
+							if (excluded[i] instanceof SlimUserContact) {
+								st.removePeople((SlimUserContact)excluded[i]);
+							}
+						}
 					}
 					catch (SlimException lE) {
 						JOptionPane.showMessageDialog(getRootPane().getParent(),
@@ -170,6 +176,10 @@ public class PeopleInPanel extends JPanel implements ActionListener {
 		public static final String EXCLUDE = "exclude"; //$NON-NLS-1$
 		
 
+	}
+
+	public void updateAvailabilities() {
+		repaint();	
 	}
 
 }

@@ -8,7 +8,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -231,28 +234,37 @@ public class ContactPanel extends JPanel
 			else if (e.getActionCommand() == ContactPaneActionCommand.INVITE_POPUP) {
 				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
 				if (lSelectedContacts.length >= 1) {
-					List cl = new ArrayList();
-					for (int j = 0 ; j < lSelectedContacts.length; j++) {
-						SlimContact sc  = lSelectedContacts[j];
-						if (sc.isGroup()) {
-							cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
-						}
-						else {
-							if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
-								cl.add(sc);
-							}
-						}
-					}
 					SlimTalk st = talkDisplay.getDisplayedTalk();
 					if (st != null) {
-						try {
-							st.addPeople(cl);
+						Set cl = new HashSet();
+						for (int j = 0 ; j < lSelectedContacts.length; j++) {
+							SlimContact sc = lSelectedContacts[j];
+							if (sc.isGroup()) {
+								cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
+							}
+							else if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
+								cl.add(sc);
+							} 
 						}
-						catch (SlimException se) {
+						if (cl.size() < 1) {
 							JOptionPane.showMessageDialog(getRootPane().getParent(),
-								    Externalizer.getString("LANSLIM.25"), //$NON-NLS-1$
-								    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
-								    JOptionPane.ERROR_MESSAGE);
+								    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
+								    JOptionPane.WARNING_MESSAGE);
+						}
+						else {
+							try {
+								Iterator lIt = cl.iterator();
+								while (lIt.hasNext()) {
+									st.addPeople((SlimUserContact)lIt.next());
+								}
+							}
+							catch (SlimException se) {
+								JOptionPane.showMessageDialog(getRootPane().getParent(),
+									    Externalizer.getString("LANSLIM.25"), //$NON-NLS-1$
+									    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
+									    JOptionPane.ERROR_MESSAGE);
+							}
 						}
 					}
 					else {

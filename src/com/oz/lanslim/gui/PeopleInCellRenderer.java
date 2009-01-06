@@ -1,10 +1,13 @@
 package com.oz.lanslim.gui;
 
 import java.awt.Component;
+import java.awt.Font;
+
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimUserContact;
 
 public class PeopleInCellRenderer extends JLabel implements ListCellRenderer {
@@ -25,13 +28,21 @@ public class PeopleInCellRenderer extends JLabel implements ListCellRenderer {
 		if (isSelected) {
 			setBackground(list.getSelectionBackground());
 			setForeground(list.getSelectionForeground());
-		} else {
+		} 
+		else {
 			setBackground(list.getBackground());
 			setForeground(list.getForeground());
 		}
 
-		setText(((SlimUserContact) value).getName());
-
+		SlimUserContact lContact = (SlimUserContact)value;
+		setText(lContact.getName());
+		Font lFont = getFont(); 
+		if (lContact.getAvailability() == SlimAvailabilityEnum.ONLINE) {
+			setFont(lFont.deriveFont(Font.BOLD));
+		}
+		else {
+			setFont(lFont.deriveFont(Font.PLAIN));
+		}
 		return this;
 	}
 

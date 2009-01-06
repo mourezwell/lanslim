@@ -3,7 +3,8 @@ package com.oz.lanslim.gui;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,7 +13,6 @@ import javax.swing.JPopupMenu;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
-import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimGroupContact;
 import com.oz.lanslim.model.SlimModel;
@@ -53,37 +53,21 @@ public class ContactViewMouseListener extends MouseAdapter {
         	doubleclick = true;
         	if (model.getSettings().areValidSettings()) {
         		SlimContact[] scs = contactView.getSelectedContacts();
-        		List cl = new ArrayList();
+        		Set cl = new HashSet();
         		if (scs.length == 1) {
         			SlimContact sc = scs[0];
 	    			if (sc.isGroup()) {
-	    				if (((SlimGroupContact)sc).getOnlineMembers().size() > 0) {
-	    					cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
-	    				}
-	    				else {
-	    					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
-							    Externalizer.getString("LANSLIM.27"), //$NON-NLS-1$
-							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
-							    JOptionPane.WARNING_MESSAGE);
-	    				}
+    					cl.addAll(((SlimGroupContact)sc).getMembers());
 	    			}
 	    			else {
-	    				if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
-	    					cl.add(sc);
-	    				}
-	    				else {
-	    					JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),
-							    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
-							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
-							    JOptionPane.WARNING_MESSAGE);
-	    				}
+    					cl.add(sc);
 	    			}
 	    			
 	    			if (cl.size() > 0) {
 		        		try {
                             cl.add(model.getSettings().getContactInfo());
-		        			model.getTalks().addTalk(model.getSettings().getContactInfo().getName() 
-		        					+ TALK_SEPARATOR + sc.getName(), cl);
+		        			model.getTalks().startNewTalk(model.getSettings().getContactInfo().getName() 
+		        					+ TALK_SEPARATOR + sc.getName(), new ArrayList(cl));
 						}
 						catch (SlimException se) {
 							JOptionPane.showMessageDialog(SlimGUITUtils.getTopLevelCompoenent(e.getComponent()),

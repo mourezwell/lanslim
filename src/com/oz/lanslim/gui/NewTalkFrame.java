@@ -14,10 +14,12 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimGroupContact;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
+import com.oz.lanslim.model.SlimUserContact;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -91,17 +93,21 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 					BoxLayout jPanel1Layout = new BoxLayout(contactCheckPanel, javax.swing.BoxLayout.Y_AXIS);
 					contactCheckPanel.setLayout(jPanel1Layout);
 					contactScrollPane.setPreferredSize(new java.awt.Dimension(168, 128));
-					for (Iterator it = model.getContacts().getOnlineContact().iterator(); it.hasNext();) {
+					for (Iterator it = model.getContacts().getAllContacts().iterator(); it.hasNext();) {
 						SlimContact c = (SlimContact)it.next();
 						JCheckBox cb = new JCheckBox();
 						contactCheckPanel.add(cb);
 						cb.addActionListener(this);
 						cb.setText(c.getName());
+						Font lFont = cb.getFont();
 						if (c.isGroup()) {
-							cb.setFont(new Font("Default", Font.ITALIC, 11)); //$NON-NLS-1$
+							cb.setFont(lFont.deriveFont(Font.ITALIC));
+						}
+						else if (c.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+							cb.setFont(lFont.deriveFont(Font.PLAIN));
 						}
 						else {
-							cb.setFont(new Font("Default", Font.PLAIN, 11)); //$NON-NLS-1$
+							cb.setFont(lFont);
 						}
 						contactCheckBoxList.add(cb);
 						if (pPreSelcetdContacts != null && pPreSelcetdContacts.contains(c)) {
@@ -170,31 +176,23 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 						String s = (String)it.next();
 						SlimContact c = model.getContacts().getContactByName(s);
 						if (c.isGroup()) {
-							cl.addAll(((SlimGroupContact)c).getOnlineMembers());
+							cl.addAll(((SlimGroupContact)c).getMembers());
 						}
 						else {
 							cl.add(c);
 						}
 					}
-					if (cl.size() == 0) {
+					try {
+                        cl.add(model.getSettings().getContactInfo());
+						model.getTalks().startNewTalk(titleField.getText(), new ArrayList(cl));
+					}
+					catch (SlimException se) {
 						JOptionPane.showMessageDialog(getRootPane().getParent(),
-						    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
-						    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
-						    JOptionPane.WARNING_MESSAGE);
+						    Externalizer.getString("LANSLIM.21"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
+						    JOptionPane.ERROR_MESSAGE);
 					}
-					else {
-						try {
-                            cl.add(model.getSettings().getContactInfo());
-							model.getTalks().addTalk(titleField.getText(), new ArrayList(cl));
-						}
-						catch (SlimException se) {
-							JOptionPane.showMessageDialog(getRootPane().getParent(),
-							    Externalizer.getString("LANSLIM.21"), //$NON-NLS-1$
-							    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
-							    JOptionPane.ERROR_MESSAGE);
-						}
-						setVisible(false);
-					}
+					setVisible(false);
 				}
 			}
 			else {
@@ -215,27 +213,38 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 						    JOptionPane.WARNING_MESSAGE);
 				}
 				else {
-					List cl = new ArrayList();
+					Set cl = new HashSet();
 					for (Iterator it = l.iterator(); it.hasNext();) {
 						String s = (String)it.next();
-						SlimContact c = model.getContacts().getContactByName(s);
-						if (c.isGroup()) {
-							cl.addAll(((SlimGroupContact)c).getOnlineMembers());
+						SlimContact sc = model.getContacts().getContactByName(s);
+						if (sc.isGroup()) {
+							cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
 						}
-						else {
-							cl.add(c);
-						}
+						else if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE) {
+							cl.add(sc);
+						} 
 					}
-					try {
-						talk.addPeople(cl);
-					}
-					catch (SlimException se) {
+					if (cl.size() < 1) {
 						JOptionPane.showMessageDialog(getRootPane().getParent(),
-						    Externalizer.getString("LANSLIM.20"), //$NON-NLS-1$
-						    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
-						    JOptionPane.ERROR_MESSAGE);
+							    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
+							    JOptionPane.WARNING_MESSAGE);
 					}
-					setVisible(false);
+					else {
+						try {
+							Iterator lIt = cl.iterator();
+							while (lIt.hasNext()) {
+								talk.addPeople((SlimUserContact)lIt.next());
+							}
+						}
+						catch (SlimException se) {
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.20"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
+							    JOptionPane.ERROR_MESSAGE);
+						}
+						setVisible(false);
+					}
 				}
 			}
 		}

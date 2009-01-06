@@ -5,8 +5,9 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
@@ -137,17 +138,29 @@ public class ContactTransferHandler extends TransferHandler {
         	if (st != null) {
             	try {
             		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, humanRepresentationOfFlavor));
-            		List onlinUserContactsList = new ArrayList();
+            		Set cl = new HashSet();
             		for (int i = 0; i < contactsArray.length; i++) {
-            			if (contactsArray[i].isGroup()) {
-            				onlinUserContactsList.addAll(((SlimGroupContact)contactsArray[i]).getOnlineMembers());
-            			}
-            			else if (contactsArray[i].getAvailability() == SlimAvailabilityEnum.ONLINE) {
-            				onlinUserContactsList.add(contactsArray[i]);
-            			}
+						SlimContact sc = contactsArray[i];
+						if (sc.isGroup()) {
+							cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
+						}
+						else if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE){
+							cl.add(sc);
+						} 
             		}
-            		st.addPeople(onlinUserContactsList);
-            		return true;
+					if (cl.size() < 1) {
+						JOptionPane.showMessageDialog(comp.getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.19"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
+							    JOptionPane.WARNING_MESSAGE);
+					}
+					else {
+						Iterator lIt = cl.iterator();
+						while (lIt.hasNext()) {
+							talk.addPeople((SlimUserContact)lIt.next());
+						}
+						return true;
+					}
             	}
             	catch (SlimException se) {
             		JOptionPane.showMessageDialog(comp.getRootPane().getParent(),
@@ -163,25 +176,22 @@ public class ContactTransferHandler extends TransferHandler {
         		}
         	}
         	else if (tree != null) {
-        		String lCatName = null;
-        		DefaultMutableTreeNode tn = 
-        			(DefaultMutableTreeNode)tree.getSelectionPath().getLastPathComponent();
-        		if (tn.getUserObject() instanceof String) {
-        			lCatName = (String)tn.getUserObject();
-        			if (SlimContactList.CATEGORY_GROUP.equals(lCatName)) {
-        				return false;
-        			}
-				}
-        		else {
-        			return false;
-        		}
         		try {
-	        		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, humanRepresentationOfFlavor));
-	        		for (int i = 0; i < contactsArray.length; i++) {
-	        			if (!contactsArray[i].isGroup()) {
-	                		model.getContacts().moveUserIntoCategory((SlimUserContact)contactsArray[i], lCatName);
+	        		String lCatName = null;
+	        		DefaultMutableTreeNode tn = 
+	        			(DefaultMutableTreeNode)tree.getSelectionPath().getLastPathComponent();
+	        		if (tn.getUserObject() instanceof String) {
+	        			lCatName = (String)tn.getUserObject();
+	        			if (!SlimContactList.CATEGORY_GROUP.equals(lCatName)) {
+        	        		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, humanRepresentationOfFlavor));
+        	        		for (int i = 0; i < contactsArray.length; i++) {
+        	        			if (!contactsArray[i].isGroup()) {
+        	                		model.getContacts().moveUserIntoCategory((SlimUserContact)contactsArray[i], lCatName);
+        	        			}
+        	        		}
+            				return true;
 	        			}
-	        		}
+					}
         		}
             	catch (IOException ioe) {
             		// should not happen
