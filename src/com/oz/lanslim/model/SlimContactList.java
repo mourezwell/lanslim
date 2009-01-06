@@ -19,6 +19,7 @@ import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
+import com.oz.lanslim.message.SlimTalkMessage;
 import com.oz.lanslim.message.SlimUpdateUserMessage;
 
 public class SlimContactList {
@@ -50,6 +51,7 @@ public class SlimContactList {
 	private Map list = null;
 	private SlimContactListener listener = null;
 	private SlimCategoryListener catListener = null;
+	private PeopleInAvailabilityListener peopleInListener = null;
 	private SlimModel model = null;
 	
 	private Map categoryByContact = null;
@@ -150,9 +152,8 @@ public class SlimContactList {
 						endGroup = true;
 					}
 					else {
-						if (list.containsKey(lName.trim()) 
-								&& !((SlimContact)list.get(lName.trim())).isGroup()) {
-							g.addMembers((SlimUserContact)list.get(lName.trim()));
+						if (list.containsKey(lName.trim()) && !((SlimContact)list.get(lName.trim())).isGroup()) {
+							g.addMember((SlimUserContact)list.get(lName.trim()));
 							list.put(g.getName(), g);
 						}
 						else {
@@ -190,14 +191,12 @@ public class SlimContactList {
 		return datas;
 	}
 	
-	public synchronized List getOnlineContact() {
+	public synchronized List getAllContacts() {
 		List l = new ArrayList();
 		for (Iterator it = list.values().iterator(); it.hasNext();) {
 			SlimContact c = (SlimContact)it.next();
-			if (c.getAvailability() != SlimAvailabilityEnum.OFFLINE) {
-				if (!(c.equals(model.getSettings().getContactInfo()))) {
-					l.add(c);
-				}
+			if (!(c.equals(model.getSettings().getContactInfo()))) {
+				l.add(c);
 			}
 		}
 		return l;
@@ -306,7 +305,7 @@ public class SlimContactList {
 			List lGroupList = getAllGroupContact();
 			for (Iterator it = lGroupList.iterator(); it.hasNext();) {
 				SlimGroupContact sgc = (SlimGroupContact)it.next();
-				sgc.getMembers().remove(lRemoved);
+				sgc.removeMember(lRemoved);
 			}
 		}		
 		model.storeSettings();
@@ -372,13 +371,20 @@ public class SlimContactList {
 		if (listener != null) {
 			listener.updateContacts();
 		}
+		if (peopleInListener != null) {
+			peopleInListener.updateAvailabilities();
+		}
 	}
-	
-	public void addContactListener(SlimContactListener pListener) {
+
+	public void registerPeopleInListener(PeopleInAvailabilityListener pListener) {
+		peopleInListener = pListener;
+	}
+
+	public void registerContactListener(SlimContactListener pListener) {
 		listener = pListener;
 	}
 	
-	public void addCategoryListener(SlimCategoryListener pListener) {
+	public void registerCategoryListener(SlimCategoryListener pListener) {
 		catListener = pListener;
 	}
 	
@@ -395,21 +401,42 @@ public class SlimContactList {
 		}
 	}
 
+	
+	private void sendEnqueuedMessage(SlimUserContact pContact) {
+		
+		try {
+			SlimTalkMessage lMsg = pContact.getOldestMessageInQueue();
+			while (lMsg != null) {
+				model.getNetworkAdapter().send(lMsg, pContact);
+				lMsg = pContact.getOldestMessageInQueue();
+			}
+		}
+		catch (SlimException lException) {
+			// should not happen unless setting badly set
+		}
+	}
+
+	
 	public synchronized void receiveAvailabiltyMessage(SlimAvailabilityUserMessage pMessage) {
 		
 		SlimUserContact knownSuc = getOrAddUserByAddress(pMessage.getSender());
 		
-		SlimAvailabilityEnum ase = pMessage.getAvailability();
+		SlimAvailabilityEnum lNew = pMessage.getAvailability();
+		SlimAvailabilityEnum lOld = knownSuc.getAvailability();
 		
-		if (ase == SlimAvailabilityEnum.ONLINE) {
-			knownSuc.setAvailability(ase);
+		if (lNew == SlimAvailabilityEnum.ONLINE) {
+			knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
 			sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.UNKNOWN);
 		}
-		else if (ase == SlimAvailabilityEnum.UNKNOWN) {
+		else if (lNew == SlimAvailabilityEnum.UNKNOWN) {
 			knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
 		}
 		else { // offline
-			knownSuc.setAvailability(ase);
+			knownSuc.setAvailability(lNew);
+		}
+		
+		if (lNew != SlimAvailabilityEnum.OFFLINE && lOld == SlimAvailabilityEnum.OFFLINE) {
+			sendEnqueuedMessage(knownSuc);
 		}
 		updateListener();
 	}
@@ -573,7 +600,7 @@ public class SlimContactList {
 										lError = true;
 									}
 									else {
-										((SlimGroupContact)sc).addMembers((SlimUserContact)scm);
+										((SlimGroupContact)sc).addMember((SlimUserContact)scm);
 									}
 								}
 								if (((SlimGroupContact)sc).getMembers().size() == 0) {

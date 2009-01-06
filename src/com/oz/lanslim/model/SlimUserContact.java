@@ -2,11 +2,14 @@ package com.oz.lanslim.model;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
+import com.oz.lanslim.message.SlimTalkMessage;
 
 public class SlimUserContact extends SlimContact implements Serializable {
 
@@ -15,16 +18,33 @@ public class SlimUserContact extends SlimContact implements Serializable {
 			"([^\\" + PORT_SEPARATOR + "]*)" + PORT_SEPARATOR + "([0-9]{1,6})");   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	private String host = null;
-
 	private int port = 0;
+
+	private LinkedList messageQueue = null;
 	
 	public SlimUserContact(String pName, String pIp, String pPort) throws SlimException {
 		super(pName);
 
 		setPort(pPort);
 		setHost(pIp);
+		messageQueue = new LinkedList();
 	}
 
+	public synchronized SlimTalkMessage getOldestMessageInQueue() {
+		SlimTalkMessage lMessage = null;
+		try {
+			lMessage = (SlimTalkMessage)messageQueue.removeFirst();
+		}
+		catch (NoSuchElementException lE) {
+			// ignored  cause it means list is empty
+		}
+		return lMessage;
+	}
+
+	public synchronized void addMessageInQueue(SlimTalkMessage pMessage) {
+		messageQueue.addLast(pMessage);
+	}
+	
 	public boolean isGroup() {
 		return false;
 	}

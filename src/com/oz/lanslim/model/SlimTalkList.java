@@ -21,17 +21,12 @@ public class SlimTalkList {
 		model = pModel;
 	}
 	
-	public synchronized void addTalk(String pTitle, List pContacts) throws SlimException {
+	public synchronized void startNewTalk(String pTitle, List pContacts) throws SlimException {
 		
 		SlimTalk lTalk = new SlimTalk(model, pTitle, pContacts);
 		talks.put(lTalk.getId(), lTalk);
-		for (Iterator it = pContacts.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
-				lTalk.sendNewTalkMessage(suc, pContacts);
-			}
-		}
-		if (listener != null) { // could not happend since event is sent from listener 
+		lTalk.sendNewTalkMessage();
+		if (listener != null) { // could not happen since event is sent from listener 
 			listener.notifyNewTalk(lTalk);
 		}
 	}
@@ -57,8 +52,8 @@ public class SlimTalkList {
 				model.getContacts().sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.ONLINE);
 			}
 		}
-
-		SlimTalk lTalk = new SlimTalk(model, pMessage.getTitle(), pMessage.getTalkId(), attendees);
+		SlimTalk lTalk = new SlimTalk(model, pMessage.getTitle(), pMessage.getTalkId(), attendees, 
+				pMessage.getSender(), pMessage.getDate());
 		// the new talk may replace previous one, which won't be updated anymore
 		talks.put(lTalk.getId(), lTalk);
 		listener.notifyNewTalk(lTalk);

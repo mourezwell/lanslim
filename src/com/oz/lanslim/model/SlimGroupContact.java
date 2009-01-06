@@ -21,11 +21,16 @@ public class SlimGroupContact extends SlimContact {
 		return true;
 	}
 	
-	public List getMembers() {
-		return members;
+	public synchronized List getMembers() {
+		List lResult = new ArrayList();
+		for (Iterator it = members.iterator(); it.hasNext();) {
+			SlimUserContact suc = (SlimUserContact)it.next();
+			lResult.add(suc);
+		}
+		return lResult;
 	}
 
-	public List getOnlineMembers() {
+	public synchronized List getOnlineMembers() {
 		List lResult = new ArrayList();
 		for (Iterator it = members.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
@@ -36,13 +41,17 @@ public class SlimGroupContact extends SlimContact {
 		return lResult;
 	}
 
-	public void addMembers(SlimUserContact pContact) {
+	public synchronized void addMember(SlimUserContact pContact) {
 		if (!members.contains(pContact)) {
 			members.add(pContact);
 		}
 	}
-	
-	public void updateMembers(List pMembers) {
+
+	public synchronized void removeMember(SlimContact pContact) {
+		members.remove(pContact);
+	}
+
+	public synchronized void updateMembers(List pMembers) {
 		members = pMembers;
 	}
 	

@@ -1,7 +1,7 @@
 package com.oz.lanslim.model;
 
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,78 +38,89 @@ public class SlimTalk {
 	private String text = null;
 	private SlimTalkListener listener = null;
 	private SlimModel model = null;
+	private boolean leader = false;
 
-	public SlimTalk(SlimModel pModel, String pTitle, String pId, List pPeople) {
+	public SlimTalk(SlimModel pModel, String pTitle, String pId, List pPeople, SlimUserContact pLeader, 
+			String pDate) {
 		model = pModel;
 		title = pTitle;
 		peopleIn = pPeople;
-
 		id = pId;
 		messageFontColor = pModel.getSettings().getColor();
 		messageFontSize = String.valueOf(pModel.getSettings().getFontSize());
-		text = StringConstants.EMPTY;
+		SlimUserContact lYou = pModel.getContacts().getSettingsUser();
+		
+		if (pLeader.equals(lYou)) {
+			leader = true;
+			text = HTMLConstants.getHeader(HTMLConstants.SYSTEM, pDate) + HTMLConstants.BOLD 
+				+ Externalizer.getString("LANSLIM.27") //$NON-NLS-1$
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+		}
+		else {
+			leader = false;
+			text = HTMLConstants.getHeader(HTMLConstants.SYSTEM, pDate) + HTMLConstants.BOLD 
+				+ Externalizer.getString("LANSLIM.175",	lYou.getName(), pLeader.getName()) //$NON-NLS-1$
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+		}
 	}
 
 	public SlimTalk(SlimModel pModel, String pTitle, List pPeople) {
-		this(pModel, pTitle, (pTitle + (int)Math.round(Math.random() * 1000000)), pPeople);
+		this(pModel, pTitle, (pTitle + (int)Math.round(Math.random() * 1000000)), pPeople, 
+				pModel.getContacts().getSettingsUser(), HTMLConstants.TIME_FORMAT.format(new Date()));
 	}
 	
 	public String getId() {
 		return id;
 	}
+
+	public boolean isLeader() {
+		return leader;
+	}
 	
 	// gestion des membres
-	public synchronized void addPeople(List pInvitedContacts) throws SlimException {
+	public synchronized void addPeople(SlimUserContact pInvitedContact) throws SlimException {
 		
-		List newPeopleIn = new ArrayList();
-		newPeopleIn.addAll(peopleIn);
-		for (Iterator it = pInvitedContacts.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!newPeopleIn.contains(suc)) {
-				newPeopleIn.add(suc);
-				sendNewTalkMessage(suc, newPeopleIn);
-				sendInviteTalkMessage(suc);
-				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-					+ Externalizer.getString("LANSLIM.175",	//$NON-NLS-1$
-							suc.getName(), model.getSettings().getContactInfo().getName())
-					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
-				if (listener !=  null) {
-					listener.notifyTextTalkUpdate(this);
-				}
+		if (!peopleIn.contains(pInvitedContact)) {
+			String date = HTMLConstants.TIME_FORMAT.format(new Date());
+			sendInviteTalkMessage(pInvitedContact, date);
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, date) + HTMLConstants.BOLD 
+				+ Externalizer.getString("LANSLIM.175",	//$NON-NLS-1$
+						pInvitedContact.getName(), model.getSettings().getContactInfo().getName())
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+			if (listener !=  null) {
+				listener.notifyTextTalkUpdate(this);
+			}
+			peopleIn.add(pInvitedContact);
+			sendNewTalkMessage(pInvitedContact);
+
+			if (listener !=  null) {
+				listener.notifyTextTalkUpdate(this);
 			}
 		}
-		peopleIn = newPeopleIn;
-		if (listener !=  null) {
-			listener.notifyTextTalkUpdate(this);
-		}
+		
 	}
 
-	public synchronized void removePeople(Object[] pExcludedContacts) throws SlimException {
+	public synchronized void removePeople(SlimUserContact pExcludedContacts) throws SlimException {
 		
-		List newPeopleIn = new ArrayList();
-		newPeopleIn.addAll(peopleIn);
-		SlimUserContact suc = null;
-		for (int i = 0; i < pExcludedContacts.length; i++) {;
-			if (newPeopleIn.contains(pExcludedContacts[i])) {
-				suc = (SlimUserContact)pExcludedContacts[i];
-				newPeopleIn.remove(suc);
-				sendExcludeTalkMessage(suc);
-				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-					+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
-						suc.getName(), model.getSettings().getContactInfo().getName())
+		if (peopleIn.contains(pExcludedContacts)) {
+			String date = HTMLConstants.TIME_FORMAT.format(new Date());
+			sendExcludeTalkMessage(pExcludedContacts, date);
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, date) + HTMLConstants.BOLD 
+				+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
+						pExcludedContacts.getName(), model.getSettings().getContactInfo().getName())
+				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
+			if (model.getSettings().getContactInfo().equals(pExcludedContacts)) {
+				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, date) + HTMLConstants.BOLD 
+					+ Externalizer.getString("LANSLIM.178") //$NON-NLS-1$
 					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
-				if (model.getSettings().getContactInfo().equals(suc)) {
-					text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-						+ Externalizer.getString("LANSLIM.178") //$NON-NLS-1$
-						+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
-					newPeopleIn.clear();
-					break;
-				}
+				peopleIn.clear();
 			}
-		}
-		peopleIn = newPeopleIn;
-		if (listener !=  null) {
-			listener.notifyTextTalkUpdate(this);
+			else {
+				peopleIn.remove(pExcludedContacts) ;
+			}
+			if (listener !=  null) {
+				listener.notifyTextTalkUpdate(this);
+			}
 		}
 	}
 
@@ -126,41 +137,58 @@ public class SlimTalk {
 		return lResult;
 	}
 	
-	private void sendInviteTalkMessage(SlimUserContact pContact) throws SlimException {
+	private void sendInviteTalkMessage(SlimUserContact pContact, String pDate) throws SlimException {
 		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimInviteTalkMessage setm = new SlimInviteTalkMessage(sender, getId(), pContact);
+		SlimInviteTalkMessage setm = new SlimInviteTalkMessage(sender, getId(), pContact, pDate);
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
-				model.getNetworkAdapter().send(setm, suc);
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(setm);
+				}
+				else {
+					model.getNetworkAdapter().send(setm, suc);
+				}
 			}
 		}
 	}
 
 	
-	private void sendExcludeTalkMessage(SlimUserContact pContact) throws SlimException {
+	private void sendExcludeTalkMessage(SlimUserContact pContact, String pDate) throws SlimException {
 		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimExcludeTalkMessage setm = new SlimExcludeTalkMessage(sender, getId(), pContact);
+		SlimExcludeTalkMessage setm = new SlimExcludeTalkMessage(sender, getId(), pContact, pDate);
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
-				model.getNetworkAdapter().send(setm, suc);
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(setm);
+				}
+				else {
+					model.getNetworkAdapter().send(setm, suc);
+				}
 			}
 		}
 	}
 
 	public synchronized void receiveInviteTalkMessage(SlimInviteTalkMessage pMessage) {
 		
+		if (isLeader()) {
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(pMessage);
+				}
+			}
+		}
+
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getNewContact());
-		
 		if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
 			model.getContacts().sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.ONLINE);
 		}
-		
 		if (!peopleIn.contains(knownSuc)) {
 			peopleIn.add(knownSuc);
-			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ Externalizer.getString("LANSLIM.175",	//$NON-NLS-1$
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, pMessage.getDate()) 
+				+ HTMLConstants.BOLD + Externalizer.getString("LANSLIM.175",	//$NON-NLS-1$
 						pMessage.getNewContact().getName(), pMessage.getSender().getName())
 				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (listener !=  null) {
@@ -170,17 +198,26 @@ public class SlimTalk {
 	}
 	
 	public synchronized void receiveExcludeTalkMessage(SlimExcludeTalkMessage pMessage) {
+
+		if (isLeader()) {
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(pMessage);
+				}
+			}
+		}
 		
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getExcludedContact());
 		if (peopleIn.contains(knownSuc) || model.getSettings().getContactInfo().equals(knownSuc)) {
 			peopleIn.remove(knownSuc);
-			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, pMessage.getDate()) 
+				+ HTMLConstants.BOLD + Externalizer.getString("LANSLIM.177",	//$NON-NLS-1$
 						pMessage.getExcludedContact().getName(), pMessage.getSender().getName())
 				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (model.getSettings().getContactInfo().equals(knownSuc)) {
-				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-					+ Externalizer.getString("LANSLIM.178") //$NON-NLS-1$
+				text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, pMessage.getDate()) 
+					+ HTMLConstants.BOLD + Externalizer.getString("LANSLIM.178") //$NON-NLS-1$
 					+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 				peopleIn.clear();
 			}
@@ -191,22 +228,48 @@ public class SlimTalk {
 	}
 
 	protected synchronized void sendExitTalkMessage() throws SlimException {
+
+		if (isLeader()) {
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					removePeople(suc);
+				}
+			}
+		}
+		
+		String date = HTMLConstants.TIME_FORMAT.format(new Date());
 		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimExitTalkMessage setm = new SlimExitTalkMessage(sender, getId());
+		SlimExitTalkMessage setm = new SlimExitTalkMessage(sender, getId(), date);
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
-				model.getNetworkAdapter().send(setm, suc);
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(setm);
+				}
+				else {
+					model.getNetworkAdapter().send(setm, suc);
+				}
 			}
 		}
 	}
 	
 	public synchronized void receiveExitTalkMessage(SlimExitTalkMessage pMessage) {
+
+		if (isLeader()) {
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(pMessage);
+				}
+			}
+		}
+
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getSender());
 		if (peopleIn.contains(knownSuc)) {
 			peopleIn.remove(knownSuc);
-			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM) + HTMLConstants.BOLD 
-				+ Externalizer.getString("LANSLIM.179", pMessage.getSender().getName()) //$NON-NLS-1$
+			text = text + HTMLConstants.getHeader(HTMLConstants.SYSTEM, pMessage.getDate()) 
+				+ HTMLConstants.BOLD + Externalizer.getString("LANSLIM.179", pMessage.getSender().getName()) //$NON-NLS-1$
 				+ HTMLConstants.ENDBOLD + HTMLConstants.NEWLINE;
 			if (listener !=  null) {
 				listener.notifyTextTalkUpdate(this);
@@ -214,39 +277,73 @@ public class SlimTalk {
 		}
 	}
 
-	// receiveNewTalkMessage is located in TalkList class because it is call before Talk creation  
-	protected synchronized void sendNewTalkMessage(SlimUserContact pContact, List pGuests) throws SlimException {
-		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimNewTalkMessage sntm = new SlimNewTalkMessage(sender, getId(), getTitle(), pGuests);
-		model.getNetworkAdapter().send(sntm, pContact);
+	protected synchronized void sendNewTalkMessage() throws SlimException {
+		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+			SlimUserContact suc = (SlimUserContact)it.next();
+			if (!suc.equals(model.getSettings().getContactInfo())) {
+				sendNewTalkMessage(suc);
+			}
+		}
 	}
-
 	
-	public synchronized void sendUpdateTalkMessage(String pRawMessage, boolean pBuildBefore) throws SlimException {
+	// receiveNewTalkMessage is located in TalkList class because it is call before Talk creation  
+	private void sendNewTalkMessage(SlimUserContact pContact) throws SlimException {
+		String date = HTMLConstants.TIME_FORMAT.format(new Date());
+		SlimUserContact sender = model.getSettings().getContactInfo();
+		SlimNewTalkMessage sntm = new SlimNewTalkMessage(sender, getId(), getTitle(), peopleIn, date);
+
+		if (pContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+			pContact.addMessageInQueue(sntm);
+		}
+		else {
+			model.getNetworkAdapter().send(sntm, pContact);
+		}
+	}
+	
+	public synchronized void sendUpdateTalkMessage(String pRawMessage, boolean pBuildBefore) 
+		throws SlimException {
+		
 		String lMessageToSend = pRawMessage;
+		String date = HTMLConstants.TIME_FORMAT.format(new Date());
+
 		if (pBuildBefore) {
 			lMessageToSend = prepareMessageBeforeSending(pRawMessage);
 		}
 		SlimUserContact sender = model.getSettings().getContactInfo();
-		text = text + buildMessageBeforeDisplaying(lMessageToSend, sender);
+		text = text + buildMessageBeforeDisplaying(lMessageToSend, sender, date);
 		if (listener !=  null) {
 			listener.notifyTextTalkUpdate(this);
 		}
-		SlimUpdateTalkMessage sutm = new SlimUpdateTalkMessage(sender, getId(), lMessageToSend);
+		SlimUpdateTalkMessage sutm = new SlimUpdateTalkMessage(sender, getId(), lMessageToSend, date);
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
-				model.getNetworkAdapter().send(sutm, suc);
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(sutm);
+				}
+				else {
+					model.getNetworkAdapter().send(sutm, suc);
+				}
 			}
 		}
 	}
 	
 	public synchronized void receiveUpdateTalkMessage(SlimUpdateTalkMessage pMessage) {
+
+		if (isLeader()) {
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					suc.addMessageInQueue(pMessage);
+				}
+			}
+		}
+
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getSender());
 		if (!peopleIn.contains(knownSuc)) {
 			peopleIn.add(knownSuc);
 		} 
-		text = text + buildMessageBeforeDisplaying(pMessage.getNewMessage(), pMessage.getSender());
+		text = text + buildMessageBeforeDisplaying(pMessage.getNewMessage(), pMessage.getSender(), pMessage.getDate());
 		if (listener !=  null) {
 			listener.notifyTextTalkUpdate(this);
 		}
@@ -329,7 +426,7 @@ public class SlimTalk {
 
 
 	
-	private String buildMessageBeforeDisplaying(String pMessageArea, SlimUserContact pSender) {
+	private String buildMessageBeforeDisplaying(String pMessageArea, SlimUserContact pSender, String pDate) {
 		
 		String temp = pMessageArea ;
 
@@ -342,7 +439,7 @@ public class SlimTalk {
 		// add hyperlink
 		int s = temp.indexOf(HTMLConstants.HTTP);
 		while (s >= 0) {
-			if (s > 1 && temp.charAt(s-1) == '=') {
+			if (s > 2 && temp.charAt(s - 2) == '=') {
 				s = temp.indexOf(HTMLConstants.HTTP, s + 1);
 			}
 			else {
@@ -358,7 +455,7 @@ public class SlimTalk {
 			}
 		}
 		
-		return HTMLConstants.getHeader(pSender.getName()) + temp;
+		return HTMLConstants.getHeader(pSender.getName(), pDate) + temp;
 	}
 	
 	private String getSmileyImgTag(int smilNb) {
