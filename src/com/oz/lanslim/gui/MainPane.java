@@ -231,19 +231,21 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 	}
 	
 	public void notifyTextTalkUpdate(SlimTalk pTalk) {
-		if (((TalkPane)talkTabPanes.getSelectedComponent()).getTalk() !=  pTalk) {
-			for (int i = 0; i < talkTabPanes.getComponents().length; i++) {
-				TalkPane tp = (TalkPane)talkTabPanes.getComponents()[i];
-				if (tp.getTalk() == pTalk) {
-					talkTabPanes.setIconAt(talkTabPanes.indexOfComponent(tp), new SlimIcon("favorite.png")); //$NON-NLS-1$
-					talkTabPanes.setToolTipTextAt(talkTabPanes.indexOfComponent(tp), pTalk.getPeopleInListAsString()); 
+		if (talkTabPanes.getSelectedComponent() != null) {
+			if (((TalkPane)talkTabPanes.getSelectedComponent()).getTalk() !=  pTalk) {
+				for (int i = 0; i < talkTabPanes.getComponents().length; i++) {
+					TalkPane tp = (TalkPane)talkTabPanes.getComponents()[i];
+					if (tp.getTalk() == pTalk) {
+						talkTabPanes.setIconAt(talkTabPanes.indexOfComponent(tp), new SlimIcon("favorite.png")); //$NON-NLS-1$
+						talkTabPanes.setToolTipTextAt(talkTabPanes.indexOfComponent(tp), pTalk.getPeopleInListAsString()); 
+					}
 				}
 			}
-		}
-		else {
-			peopleInPane.update(pTalk.getPeopleIn());
-			talkTabPanes.setToolTipTextAt(talkTabPanes.getSelectedIndex(), pTalk.getPeopleInListAsString());
-			talkTabPanes.setTitleAt(talkTabPanes.getSelectedIndex(), pTalk.getTitle());
+			else {
+				peopleInPane.update(pTalk.getPeopleIn());
+				talkTabPanes.setToolTipTextAt(talkTabPanes.getSelectedIndex(), pTalk.getPeopleInListAsString());
+				talkTabPanes.setTitleAt(talkTabPanes.getSelectedIndex(), pTalk.getTitle());
+			}
 		}
 	}
 	
