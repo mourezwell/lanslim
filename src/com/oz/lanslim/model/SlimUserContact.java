@@ -19,6 +19,7 @@ public class SlimUserContact extends SlimContact implements Serializable {
 
 	private String host = null;
 	private int port = 0;
+	private SlimKey key = null;
 
 	private LinkedList messageQueue = null;
 	
@@ -125,6 +126,14 @@ public class SlimUserContact extends SlimContact implements Serializable {
 			return new SlimUserContact(lMatch.group(1), lMatch.group(2), lMatch.group(3));
 		}
 		throw new SlimException(Externalizer.getString("LANSLIM.49", pString)); //$NON-NLS-1$
+	}
+
+	public SlimKey getKey() {
+		return key;
+	}
+
+	public void setKey(SlimKey pKey) {
+		key = pKey;
 	}
 
 }

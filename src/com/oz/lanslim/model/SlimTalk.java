@@ -1,6 +1,7 @@
 package com.oz.lanslim.model;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -230,11 +231,16 @@ public class SlimTalk {
 	protected synchronized void sendExitTalkMessage() throws SlimException {
 
 		if (isLeader()) {
+			List peopletoRemove = new ArrayList();
 			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 				SlimUserContact suc = (SlimUserContact)it.next();
 				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					removePeople(suc);
+					peopletoRemove.add(suc);
 				}
+			}
+			for (Iterator it = peopletoRemove.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				peopleIn.remove(suc);
 			}
 		}
 		
@@ -314,7 +320,10 @@ public class SlimTalk {
 		if (listener !=  null) {
 			listener.notifyTextTalkUpdate(this);
 		}
-		SlimUpdateTalkMessage sutm = new SlimUpdateTalkMessage(sender, getId(), lMessageToSend, date);
+		SlimUpdateTalkMessage sutm = 
+			new SlimUpdateTalkMessage(sender, getId(), lMessageToSend, date, false);
+		
+		boolean lCryptoLocallyEnable = model.getSettings().isCryptoEnable();
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
@@ -322,7 +331,16 @@ public class SlimTalk {
 					suc.addMessageInQueue(sutm);
 				}
 				else {
-					model.getNetworkAdapter().send(sutm, suc);
+					SlimKey lKey = suc.getKey();
+					if (lCryptoLocallyEnable && lKey != null) {
+						String lEncodedMsg = lKey.encodeMsg(lMessageToSend);
+						SlimUpdateTalkMessage ssutm = 
+							new SlimUpdateTalkMessage(sender, getId(), lEncodedMsg, date, true);
+						model.getNetworkAdapter().send(ssutm, suc);
+					}
+					else {
+						model.getNetworkAdapter().send(sutm, suc);
+					}
 				}
 			}
 		}
@@ -330,6 +348,26 @@ public class SlimTalk {
 	
 	public synchronized void receiveUpdateTalkMessage(SlimUpdateTalkMessage pMessage) {
 
+		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getSender());
+		if (!peopleIn.contains(knownSuc)) {
+			peopleIn.add(knownSuc);
+		} 
+		
+		if (pMessage.isEncrypted()) {
+			SlimKey lKey = knownSuc.getKey();
+			if (lKey != null) {
+				try {
+					pMessage.setNewMessage(lKey.decodeMsg(pMessage.getNewMessage()));
+				}
+				catch (SlimException se) {
+					pMessage.setNewMessage(se.getMessage());
+				}
+			}
+			else {
+				pMessage.setNewMessage(Externalizer.getString("LANSLIM.9"));
+			}
+		}
+		
 		if (isLeader()) {
 			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
 				SlimUserContact suc = (SlimUserContact)it.next();
@@ -339,10 +377,6 @@ public class SlimTalk {
 			}
 		}
 
-		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getSender());
-		if (!peopleIn.contains(knownSuc)) {
-			peopleIn.add(knownSuc);
-		} 
 		text = text + buildMessageBeforeDisplaying(pMessage.getNewMessage(), pMessage.getSender(), pMessage.getDate());
 		if (listener !=  null) {
 			listener.notifyTextTalkUpdate(this);

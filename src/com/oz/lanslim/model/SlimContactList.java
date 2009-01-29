@@ -20,6 +20,7 @@ import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimTalkMessage;
+import com.oz.lanslim.message.SlimUpdateTalkMessage;
 import com.oz.lanslim.message.SlimUpdateUserMessage;
 
 public class SlimContactList {
@@ -86,27 +87,30 @@ public class SlimContactList {
 			else {
 				lKey = SLIM_CONTACT_PROPS_PREFIX + i + USERNAME_SUFFIX;
 				if (p.getProperty(lKey) != null) {
-					String lName = p.getProperty(lKey);
-					lKey = SLIM_CONTACT_PROPS_PREFIX + i + USERIP_SUFFIX;
-					String lIP = p.getProperty(lKey); 
-					lKey = SLIM_CONTACT_PROPS_PREFIX + i + USERPORT_SUFFIX;
-					String lPortString = null;
-					if (model.getSettings().isPortUnlocked()) {
-						lPortString = p.getProperty(lKey);
-					}
-					else {
-						lPortString = SlimSettings.DEFAULT_PORT;
-					}
-					if (lIP != null && lPortString != null) {
-						try {
-							SlimUserContact suc = new SlimUserContact(lName.trim(), 
-									lIP.trim(), lPortString.trim());
-							list.put(lName.trim(), suc);
+					String lName = p.getProperty(lKey).trim();
+					if (!list.containsKey(lName)) {
+						lKey = SLIM_CONTACT_PROPS_PREFIX + i + USERIP_SUFFIX;
+						String lIP = p.getProperty(lKey); 
+						lKey = SLIM_CONTACT_PROPS_PREFIX + i + USERPORT_SUFFIX;
+						String lPortString = null;
+						if (model.getSettings().isPortUnlocked()) {
+							lPortString = p.getProperty(lKey);
 						}
-						catch (SlimException e) {
-							SlimLogger.logException("ContactList.constructor", e); //$NON-NLS-1$
+						else {
+							lPortString = SlimSettings.DEFAULT_PORT;
+						}
+						if (lIP != null && lPortString != null) {
+							try {
+								SlimUserContact suc = new SlimUserContact(lName, 
+										lIP.trim(), lPortString.trim());
+								list.put(lName, suc);
+							}
+							catch (SlimException e) {
+								SlimLogger.logException("ContactList.constructor", e); //$NON-NLS-1$
+							}
 						}
 					}
+					// else contact name defined twice or more is ignored
 				}
 				else {
 					lKey = SLIM_CONTACT_PROPS_PREFIX + i + CATEGORYNAME_SUFFIX;
@@ -177,20 +181,6 @@ public class SlimContactList {
 		}
 	}
 	
-	public synchronized Object[][] getTableModelData() {
-		
-		Object[][] datas = new Object[list.size() - 1][2];
-		int i = 0;
-		for (Iterator it = list.values().iterator(); it.hasNext();) {
-			SlimContact c = (SlimContact)it.next();
-			if (!(c.equals(model.getSettings().getContactInfo()))) {
-				datas[i] = new Object[] { c.getName(), c.getAvailability() };
-				i++;
-			}
-		}
-		return datas;
-	}
-	
 	public synchronized List getAllContacts() {
 		List l = new ArrayList();
 		for (Iterator it = list.values().iterator(); it.hasNext();) {
@@ -256,7 +246,8 @@ public class SlimContactList {
 		
 		model.storeSettings();
 		updateListener();
-		if (existingContactWithSameName.getAvailability() != SlimAvailabilityEnum.UNKNOWN) {  
+		if (existingContactWithSameName.getAvailability() != SlimAvailabilityEnum.UNKNOWN
+				&& !existingContactWithSameName.equals(model.getSettings().getContactInfo())) {  
 			sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
 		}
 		return true;
@@ -293,7 +284,8 @@ public class SlimContactList {
 		model.storeSettings();
 		updateListener();
 		
-		if (pOldContact.getAvailability() != SlimAvailabilityEnum.UNKNOWN) {  
+		if (pOldContact.getAvailability() != SlimAvailabilityEnum.UNKNOWN
+			&& !pOldContact.equals(model.getSettings().getContactInfo())) {  
 			sendAvailabiltyMessage((SlimUserContact)pOldContact, SlimAvailabilityEnum.ONLINE);
 		}
 		return true;
@@ -393,7 +385,8 @@ public class SlimContactList {
 		
 		try {
 			SlimUserContact sender = model.getSettings().getContactInfo();
-			SlimAvailabilityUserMessage saum = new SlimAvailabilityUserMessage(sender, pStatus);
+			SlimAvailabilityUserMessage saum = 
+				new SlimAvailabilityUserMessage(sender, pStatus, sender.getKey());
 			model.getNetworkAdapter().send(saum, pContact);
 		}
 		catch (SlimException lException) {
@@ -406,9 +399,23 @@ public class SlimContactList {
 		
 		try {
 			SlimTalkMessage lMsg = pContact.getOldestMessageInQueue();
-			while (lMsg != null) {
-				model.getNetworkAdapter().send(lMsg, pContact);
-				lMsg = pContact.getOldestMessageInQueue();
+			SlimKey lKey = pContact.getKey();
+			boolean lCryptoLocallyEnable = model.getSettings().isCryptoEnable();
+			if (lCryptoLocallyEnable && lKey != null) {
+				while (lMsg != null) {
+					if (lMsg instanceof SlimUpdateTalkMessage) {
+						SlimUpdateTalkMessage lTmpMsg = (SlimUpdateTalkMessage)lMsg;
+						lTmpMsg.setNewMessage(lKey.encodeMsg(lTmpMsg.getNewMessage()));
+					}
+					model.getNetworkAdapter().send(lMsg, pContact);
+					lMsg = pContact.getOldestMessageInQueue();
+				}
+			}
+			else {
+				while (lMsg != null) {
+					model.getNetworkAdapter().send(lMsg, pContact);
+					lMsg = pContact.getOldestMessageInQueue();
+				}
 			}
 		}
 		catch (SlimException lException) {
@@ -423,6 +430,8 @@ public class SlimContactList {
 		
 		SlimAvailabilityEnum lNew = pMessage.getAvailability();
 		SlimAvailabilityEnum lOld = knownSuc.getAvailability();
+		
+		knownSuc.setKey(pMessage.getKey());
 		
 		if (lNew == SlimAvailabilityEnum.ONLINE) {
 			knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
@@ -462,11 +471,7 @@ public class SlimContactList {
 		
 		SlimUserContact oldSuc = getOrAddUserByAddress(pMessage.getOldSettings());
 		
-		boolean lUpdated = updateContact(oldSuc, pMessage.getSender());
-		
-		if (lUpdated) {
-			sendAvailabiltyMessage(oldSuc, SlimAvailabilityEnum.ONLINE);
-		}
+		updateContact(oldSuc, pMessage.getSender());
 	}
 
 	

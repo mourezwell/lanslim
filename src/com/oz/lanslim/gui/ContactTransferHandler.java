@@ -21,6 +21,7 @@ import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimGroupContact;
+import com.oz.lanslim.model.SlimKey;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimUserContact;
@@ -145,7 +146,16 @@ public class ContactTransferHandler extends TransferHandler {
 							cl.addAll(((SlimGroupContact)sc).getOnlineMembers());
 						}
 						else if (sc.getAvailability() == SlimAvailabilityEnum.ONLINE){
-							cl.add(sc);
+	        				try {
+    	        				SlimUserContact suc = (SlimUserContact)contactsArray[i];
+    	        				if (suc.getKey() != null) {
+    	        					suc.setKey(SlimKey.fromString(suc.getKey().toString()));
+    	        				}
+    							cl.add(suc);
+	        				}
+	        				catch (SlimException e) {
+	                     		// should not happen
+							}
 						} 
             		}
 					if (cl.size() < 1) {
@@ -169,7 +179,7 @@ public class ContactTransferHandler extends TransferHandler {
 						    JOptionPane.ERROR_MESSAGE);                	
         		}
             	catch (IOException ioe) {
-            		// should not happen
+             		// should not happen
         		}
             	catch (UnsupportedFlavorException ufe) {
             		// should not happen
@@ -186,7 +196,16 @@ public class ContactTransferHandler extends TransferHandler {
         	        		SlimContact[] contactsArray = (SlimContact[])t.getTransferData(new DataFlavor(SlimContact.class, humanRepresentationOfFlavor));
         	        		for (int i = 0; i < contactsArray.length; i++) {
         	        			if (!contactsArray[i].isGroup()) {
-        	                		model.getContacts().moveUserIntoCategory((SlimUserContact)contactsArray[i], lCatName);
+        	        				try {
+	        	        				SlimUserContact suc = (SlimUserContact)contactsArray[i];
+	        	        				if (suc.getKey() != null) {
+	        	        					suc.setKey(SlimKey.fromString(suc.getKey().toString()));
+	        	        				}
+	        	                		model.getContacts().moveUserIntoCategory(suc, lCatName);
+        	        				}
+        	        				catch (SlimException e) {
+        	                     		// should not happen
+									}
         	        			}
         	        		}
             				return true;
@@ -194,6 +213,7 @@ public class ContactTransferHandler extends TransferHandler {
 					}
         		}
             	catch (IOException ioe) {
+            		ioe.printStackTrace();
             		// should not happen
         		}
             	catch (UnsupportedFlavorException ufe) {

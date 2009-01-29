@@ -16,6 +16,7 @@ import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.HTMLConstants;
+import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimSettings;
 import com.oz.lanslim.model.SlimUserContact;
 
@@ -62,6 +63,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 	private JCheckBox proxyUsedButton;
 	private JTextField proxyHostField;
 	private JTextField proxyPortField;
+	private JCheckBox cryptoButton;
 
 	
 	private SlimSettings model;
@@ -86,7 +88,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			
 			FormLayout thisLayout = new FormLayout(
 					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
 			setSize(270, 200);
 			setResizable(false);
@@ -373,6 +375,18 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				}
 			}
 			{
+				JLabel cryptoLabel = new JLabel();
+				cryptoLabel.setText(Externalizer.getString("LANSLIM.135")); //$NON-NLS-1$
+				getContentPane().add(cryptoLabel, new CellConstraints("2, 26, 1, 1, default, default")); //$NON-NLS-1$
+				
+				JPanel buttonGroupPanel = new JPanel();
+				getContentPane().add(buttonGroupPanel, new CellConstraints("4, 26, 1, 1, default, default")); //$NON-NLS-1$
+				
+				cryptoButton = new JCheckBox(Externalizer.getString("LANSLIM.187")); //$NON-NLS-1$
+				cryptoButton.setSelected(model.isCryptoEnable());
+				buttonGroupPanel.add(cryptoButton);
+			}
+			{
 				JPanel buttonPanel = new JPanel();
 				okButton = new JButton();
 				okButton.setText(Externalizer.getString("LANSLIM.15")); //$NON-NLS-1$
@@ -387,7 +401,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("4, 26, 1, 1, default, center")); //$NON-NLS-1$
+				getContentPane().add(buttonPanel, new CellConstraints("4, 28, 1, 1, default, center")); //$NON-NLS-1$
 			}
 			
 			if (userLocked) {
@@ -417,7 +431,16 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			model.setUnderline(underSelected);
 
 			model.setAutoCheckVersion(checkVersionButton.isSelected());
-
+			try {
+				model.setCryptoEnable(cryptoButton.isSelected());
+			}
+			catch (SlimException se) {
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+				    Externalizer.getString("LANSLIM.136", se.getMessage()), //$NON-NLS-1$
+				    Externalizer.getString("LANSLIM.135"), //$NON-NLS-1$
+				    JOptionPane.WARNING_MESSAGE);
+			}
+			
             if (proxyUsedButton.isSelected()) {
                 model.setProxyHost(proxyHostField.getText());
                 model.setProxyPort(proxyPortField.getText());
@@ -434,7 +457,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				
 				SlimUserContact contact = 
 					new SlimUserContact(nameField.getText(), hostField.getText(), portField.getText());
-				
+				contact.setAvailability(SlimAvailabilityEnum.ONLINE);
 				model.updateSettings(contact);
 				setVisible(false);
 			}

@@ -9,6 +9,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
+import com.oz.lanslim.model.SlimUserContact;
 
 public class ContactTreeCellRenderer extends DefaultTreeCellRenderer {
 	
@@ -22,7 +23,14 @@ public class ContactTreeCellRenderer extends DefaultTreeCellRenderer {
 	        String imgLocation = null;
 	        
 	        if (avail == SlimAvailabilityEnum.ONLINE) {
-	    		imgLocation = "accept.png"; //$NON-NLS-1$
+	    		SlimUserContact user = (SlimUserContact)sc;
+	    		boolean isSecured = (user.getKey() != null);
+	    		if (isSecured) {
+	        		imgLocation = "accept_locked.png"; //$NON-NLS-1$
+	    		}
+	    		else {
+	    			imgLocation = "accept.png"; //$NON-NLS-1$
+	    		}
 	            setToolTipText(Externalizer.getString("LANSLIM.35")); //$NON-NLS-1$
 	        } 
 	        else if (avail == SlimAvailabilityEnum.OFFLINE) {

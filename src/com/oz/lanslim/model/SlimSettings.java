@@ -50,6 +50,7 @@ public class SlimSettings {
 	private static final String PROXY_NEEDED_PROP = PROXY_PREFIX + "needed"; //$NON-NLS-1$
 	private static final String PROXY_HOST_PROP = PROXY_PREFIX + "host"; //$NON-NLS-1$
 	private static final String PROXY_PORT_PROP = PROXY_PREFIX + "port"; //$NON-NLS-1$
+	private static final String CRYPTO_PROP = SLIM_SETTINGS_PROPS_PREFIX + "crypto"; //$NON-NLS-1$
 	
 	public static final String DEFAULT_LANGUAGE = "EN"; //$NON-NLS-1$
 	public static final String DEFAULT_PORT = "17000"; //$NON-NLS-1$
@@ -77,6 +78,7 @@ public class SlimSettings {
 	public static final int SHORTCUT_NUMBER = 12;
 	public static final boolean DEFAULT_AUTO_CHECK = false;
 	public static final boolean DEFAULT_NEED_PROXY = false;
+	public static final boolean DEFAULT_CRYPTO = false;
 
 
 	private  SlimModel model = null;
@@ -106,6 +108,7 @@ public class SlimSettings {
 	private  boolean proxyNeeded = DEFAULT_NEED_PROXY;
 	private  String proxyHost = null;
 	private  String proxyPort = null;
+	private  boolean crypto= DEFAULT_CRYPTO;
 	
 	private SlimUserContact contactInfo = null;
 
@@ -296,6 +299,16 @@ public class SlimSettings {
 			setProxyNeeded(Boolean.valueOf(lTemp).booleanValue());
 		}
 		
+		lTemp = p.getProperty(CRYPTO_PROP);
+		if (lTemp != null) {
+			try {
+				setCryptoEnable(Boolean.valueOf(lTemp).booleanValue());
+			}
+			catch (SlimException se) {
+				// ignore start exception
+			}
+		}
+
 		initOk = true;
 		saveSettings();
 	}
@@ -381,6 +394,7 @@ public class SlimSettings {
 		if (getProxyPort() != null) {
 			p.put(PROXY_PORT_PROP, getProxyPort());
 		}
+		p.put(CRYPTO_PROP, Boolean.toString(isCryptoEnable()));
 
 		return p;
 	}
@@ -665,6 +679,23 @@ public class SlimSettings {
         // PASSWORD */
 
 		
+	}
+
+	public boolean isCryptoEnable() {
+		return crypto;
+	}
+
+	public void setCryptoEnable(boolean pCrypto) throws SlimException {
+		
+		if (pCrypto) {
+			if (!crypto) {
+				contactInfo.setKey(SlimKey.generateKey());
+			}
+		}
+		else {
+			contactInfo.setKey(null);
+		}
+		crypto = pCrypto;
 	}
 	
 }
