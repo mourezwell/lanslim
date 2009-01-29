@@ -311,16 +311,16 @@ public class ContactPanel extends JPanel
 						
 					}
 					else {
-						if (sc.getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
+						if (sc.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
 							NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
-									model, (SlimUserContact)sc, false);
+									model, (SlimUserContact)sc, true);
 							lFrame.pack();
 							lFrame.setLocationRelativeTo(getRootPane().getParent());
 							lFrame.setVisible(true);
 						}
 						else {
 							NewUserFrame lFrame = new NewUserFrame((Frame)getRootPane().getParent(), 
-									model, (SlimUserContact)sc, true);
+									model, (SlimUserContact)sc, false);
 							lFrame.pack();
 							lFrame.setLocationRelativeTo(getRootPane().getParent());
 							lFrame.setVisible(true);
