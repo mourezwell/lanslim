@@ -9,7 +9,6 @@ import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 
 import com.oz.lanslim.Externalizer;
-import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimModel;
 
@@ -28,7 +27,7 @@ public class ContactTable extends JTable implements ContactView {
     	}
 
 		columnToolTips = new String[] { Externalizer.getString("LANSLIM.7"), Externalizer.getString("LANSLIM.8") }; //$NON-NLS-1$ //$NON-NLS-2$
-		setDefaultRenderer(SlimAvailabilityEnum.class, new ContactTableAvailabilityCellRenderer());
+		setDefaultRenderer(SlimContact.class, new ContactTableAvailabilityCellRenderer());
 		contactTableModel = new ContactTableModel(pModel.getContacts(), 
 				pModel.getSettings().isGroupHidden(), pModel.getSettings().isOfflineHidden());
 		TableSorter ts = new TableSorter(contactTableModel, getTableHeader());
