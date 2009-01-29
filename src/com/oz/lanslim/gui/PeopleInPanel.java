@@ -84,7 +84,6 @@ public class PeopleInPanel extends JPanel implements ActionListener, PeopleInAva
 			peopleInList.setModel(peopleInModel);
 			peopleInList.setCellRenderer(new PeopleInCellRenderer());
 			peopleInList.setTransferHandler(new ContactTransferHandler(talkDisplay));
-			peopleInList.setToolTipText(Externalizer.getString("LANSLIM.187"));  //$NON-NLS-1$
 			peopleInAreaPane.setViewportView(peopleInList);
 			
 			popupMenu = new PeopleInPopupMenu(this);

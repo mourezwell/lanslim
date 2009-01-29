@@ -1,7 +1,6 @@
 package com.oz.lanslim.gui;
 
 import java.awt.Component;
-import java.awt.Font;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -36,13 +35,22 @@ public class PeopleInCellRenderer extends JLabel implements ListCellRenderer {
 
 		SlimUserContact lContact = (SlimUserContact)value;
 		setText(lContact.getName());
-		Font lFont = getFont(); 
+		
+        String imgLocation = null;
 		if (lContact.getAvailability() == SlimAvailabilityEnum.ONLINE) {
-			setFont(lFont.deriveFont(Font.BOLD));
+    		boolean isSecured = (lContact.getKey() != null);
+    		if (isSecured) {
+        		imgLocation = "accept_locked.png"; //$NON-NLS-1$
+    		}
+    		else {
+    			imgLocation = "accept.png"; //$NON-NLS-1$
+    		}
 		}
 		else {
-			setFont(lFont.deriveFont(Font.PLAIN));
+			imgLocation = "remove.png"; //$NON-NLS-1$
 		}
+		setIcon(new SlimIcon(imgLocation));
+		
 		return this;
 	}
 
