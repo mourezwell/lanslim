@@ -99,7 +99,6 @@ public class NewGroupFrame extends JDialog implements ActionListener {
 							i++;
 						}
 						membersCheckPanel.add(cb, i);
-						cb.addActionListener(this);
 						cb.setText(c.getName());
 						membersCheckBoxList.add(cb);
 						if (group != null && group.getMembers().contains(c)) {
