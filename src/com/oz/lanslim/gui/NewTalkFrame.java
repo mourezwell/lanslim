@@ -109,7 +109,12 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 						else {
 							cb.setFont(lFont);
 						}
-						contactCheckBoxList.add(cb);
+						int i = 0;
+						while (i < contactCheckPanel.getComponentCount() 
+							&& c.getName().compareToIgnoreCase(((JCheckBox)contactCheckPanel.getComponent(i)).getText()) > 0) {
+							i++;
+						}
+						contactCheckPanel.add(cb, i);
 						if (pPreSelcetdContacts != null && pPreSelcetdContacts.contains(c)) {
 							cb.setSelected(true);
 						}
