@@ -20,7 +20,6 @@ import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimTalkMessage;
-import com.oz.lanslim.message.SlimUpdateTalkMessage;
 import com.oz.lanslim.message.SlimUpdateUserMessage;
 
 public class SlimContactList {
@@ -399,23 +398,9 @@ public class SlimContactList {
 		
 		try {
 			SlimTalkMessage lMsg = pContact.getOldestMessageInQueue();
-			SlimKey lKey = pContact.getKey();
-			boolean lCryptoLocallyEnable = model.getSettings().isCryptoEnable();
-			if (lCryptoLocallyEnable && lKey != null) {
-				while (lMsg != null) {
-					if (lMsg instanceof SlimUpdateTalkMessage) {
-						SlimUpdateTalkMessage lTmpMsg = (SlimUpdateTalkMessage)lMsg;
-						lTmpMsg.setNewMessage(lKey.encodeMsg(lTmpMsg.getNewMessage()));
-					}
-					model.getNetworkAdapter().send(lMsg, pContact);
-					lMsg = pContact.getOldestMessageInQueue();
-				}
-			}
-			else {
-				while (lMsg != null) {
-					model.getNetworkAdapter().send(lMsg, pContact);
-					lMsg = pContact.getOldestMessageInQueue();
-				}
+			while (lMsg != null) {
+				model.getNetworkAdapter().send(lMsg, pContact);
+				lMsg = pContact.getOldestMessageInQueue();
 			}
 		}
 		catch (SlimException lException) {
