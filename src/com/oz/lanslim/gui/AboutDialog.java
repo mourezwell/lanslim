@@ -14,7 +14,7 @@ import com.oz.lanslim.StringConstants;
 
 public class AboutDialog extends JOptionPane {
 
-	private static final String VERSION = "1.2.1"; //$NON-NLS-1$
+	private static final String VERSION = "1.2.2"; //$NON-NLS-1$
 	private static final String AUTHOR_NAME = "Olivier Mourez"; //$NON-NLS-1$
 	private static final String AUTHOR_ADDRESS = "mourezwell@users.sourceforge.net"; //$NON-NLS-1$
 	private static final String PROJECT_HOME = "http://sourceforge.net/projects/lanslim/"; //$NON-NLS-1$
@@ -54,9 +54,7 @@ public class AboutDialog extends JOptionPane {
 	           lBuffer.append(new String(b));
 	        }
 	        String lLastStr = lBuffer.toString().trim();
-	        float lProduct = Float.parseFloat(VERSION);
-	        float lLast = Float.parseFloat(lLastStr);
-	        boolean equals = (lProduct == lLast);
+	        boolean equals = VERSION.equals(lLastStr);
 	        
 	        String lMessage = Externalizer.getString("LANSLIM.199", VERSION, lLastStr); //$NON-NLS-1$
 	        if (!equals) {
