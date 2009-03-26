@@ -96,7 +96,7 @@ public class NewTalkFrame extends JDialog implements ActionListener {
 					for (Iterator it = model.getContacts().getAllContacts().iterator(); it.hasNext();) {
 						SlimContact c = (SlimContact)it.next();
 						JCheckBox cb = new JCheckBox();
-						contactCheckBoxList.add(cb);
+						contactCheckPanel.add(cb);
 						cb.addActionListener(this);
 						cb.setText(c.getName());
 						Font lFont = cb.getFont();
