@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -26,8 +28,10 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -62,6 +66,7 @@ public class TalkPane extends JSplitPane
 	private JButton underlineButton;
 	private JButton italicButton;
 	private JButton boldButton;
+	private JButton escapeXMLButton;
 	private JComboBox smileyCBox;
 	private JComboBox sizeComboBox;
 
@@ -74,6 +79,7 @@ public class TalkPane extends JSplitPane
 	private boolean underline = false;
 	private boolean bold = false;
 	private boolean italic = false;
+	private boolean autoEscape = false;
 	
 	public TalkPane(SlimTalkListener pMainPane, SlimTalk pTalk) {
 		super();
@@ -88,6 +94,7 @@ public class TalkPane extends JSplitPane
 		underline = pTalk.isDefaultUndeline();
 		bold = pTalk.isDefaultBold();
 		italic = pTalk.isDefaultItalic();
+		autoEscape = pTalk.isDefaultEscapeXML();
 	}
 	
 	
@@ -197,6 +204,16 @@ public class TalkPane extends JSplitPane
 					messageToolbar.add(smileyCBox);
 				}
 				{
+					escapeXMLButton = new JButton();
+					escapeXMLButton.setIcon(new SlimIcon("xml.png")); //$NON-NLS-1$
+					escapeXMLButton.addActionListener(this);
+					escapeXMLButton.setActionCommand(TalkPaneActionCommand.AUTO_ESCAPE);
+					escapeXMLButton.setToolTipText(Externalizer.getString("LANSLIM.219")); //$NON-NLS-1$
+					escapeXMLButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultEscapeXML()));
+			        messageToolbar.addSeparator();
+					messageToolbar.add(escapeXMLButton);
+				}
+				{
 					sendButton = new JButton();
 					sendButton.setIcon(new SlimIcon("next.png")); //$NON-NLS-1$
 					sendButton.addActionListener(this);
@@ -218,6 +235,7 @@ public class TalkPane extends JSplitPane
 					newMessageArea.setWrapStyleWord(true);
 					newMessageArea.setText(StringConstants.EMPTY);
 					newMessageArea.addCaretListener(this);
+					newMessageArea.addMouseListener(new EscapeXMLCharMouseListener(this));
 					if (talkModel.isDefaultBold()) {
 						newMessageArea.setText(newMessageArea.getText() + HTMLConstants.BOLD);
 					}
@@ -275,6 +293,7 @@ public class TalkPane extends JSplitPane
 		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.SEND) {
 			send();
+			newMessageArea.requestFocus();
 		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.SMILEY) {
     		int lPos = newMessageArea.getSelectionStart();
@@ -284,6 +303,15 @@ public class TalkPane extends JSplitPane
     		newMessageArea.setCaretPosition(lPos 
     				+ SlimTalk.SMILEY_TEXT[smileyCBox.getSelectedIndex()].length());
     		newMessageArea.requestFocus();
+		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.ESCAPE_CHAR) {
+			escapeXMLChar();
+			newMessageArea.requestFocus();
+		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.AUTO_ESCAPE) {
+			autoEscape = !autoEscape;
+			escapeXMLButton.setBorder(SlimButtonBorder.getSelectedBorder(autoEscape));
+			newMessageArea.requestFocus();
 		}
 
 	}
@@ -302,7 +330,11 @@ public class TalkPane extends JSplitPane
 
 	private void send() {
 		try {
-			talkModel.sendUpdateTalkMessage(newMessageArea.getText(), true);
+			String lMessage = newMessageArea.getText();
+			if (autoEscape) {
+				lMessage = lMessage.replaceAll("<", "&lt;");
+			}
+			talkModel.sendUpdateTalkMessage(lMessage, true);
 			history[historyIndex] = newMessageArea.getText();
 			if (historyIndex < 9) {
 				historyIndex++;
@@ -382,8 +414,7 @@ public class TalkPane extends JSplitPane
 	        	send();		        
         	}
 		}
-		else if (e.getKeyCode() == KeyEvent.VK_UP 
-				&& ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0)) {
+		else if (e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
 			if (historyCallIndex == 0) {
 				historyCallIndex = 9;
 	        }
@@ -392,8 +423,7 @@ public class TalkPane extends JSplitPane
 			}
 			newMessageArea.setText(history[historyCallIndex]);
 		}
-		else if (e.getKeyCode() == KeyEvent.VK_DOWN 
-				&& ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0)) {
+		else if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
 			if (historyCallIndex == 9) {
 				historyCallIndex = 0;
 	        }
@@ -463,11 +493,22 @@ public class TalkPane extends JSplitPane
 
 	
 	private void insertShortcut(int i) {
-		int lPos = newMessageArea.getSelectionStart();
-		String before = newMessageArea.getText().substring(0, lPos);
-		String after = newMessageArea.getText().substring(lPos);
-		newMessageArea.setText(before + talkModel.getShortcut(i) + after);
-		newMessageArea.setCaretPosition(lPos + talkModel.getShortcut(i).length());
+
+		if (newMessageArea.getSelectedText() == null) {
+			int lPos = newMessageArea.getCaret().getDot();
+			String before = newMessageArea.getText().substring(0, lPos);
+			String after = newMessageArea.getText().substring(lPos);
+			newMessageArea.setText(before + talkModel.getShortcut(i) + after);
+			newMessageArea.setCaretPosition(lPos + talkModel.getShortcut(i).length());
+		}
+		else {
+			int start = newMessageArea.getSelectionStart();
+			int end = newMessageArea.getSelectionEnd();
+			String before = newMessageArea.getText().substring(0, start);
+			String after = newMessageArea.getText().substring(end);
+			newMessageArea.setText(before + talkModel.getShortcut(i) + after);
+			newMessageArea.setCaretPosition(start + talkModel.getShortcut(i).length());
+		}
 	}
 	
  	public void keyReleased(KeyEvent e) {
@@ -587,7 +628,67 @@ public class TalkPane extends JSplitPane
 
 		public static final String SIZE = "size"; //$NON-NLS-1$
 
+		public static final String ESCAPE_CHAR = "escapeChar"; //$NON-NLS-1$
+
+		public static final String AUTO_ESCAPE = "autoEscape"; //$NON-NLS-1$
+
 	}
 
+	private class EscapeXMLCharMouseListener extends MouseAdapter {
+		
+		EscapeXMLCaracterPopupMenu popupMenu = null;
+		
+		public EscapeXMLCharMouseListener(TalkPane pPane) {
+			popupMenu = new EscapeXMLCaracterPopupMenu(pPane);
+		}
+		
+		public void mouseReleased(MouseEvent e) {
+	        if (e.isPopupTrigger()) {
+	        	popupMenu.show(e.getComponent(), e.getX(), e.getY());
+	        }
+		}
+		
+	}
+
+	private class EscapeXMLCaracterPopupMenu extends JPopupMenu {
+
+		public EscapeXMLCaracterPopupMenu(TalkPane pPane) {
+			JMenuItem userEditMenuItem = new JMenuItem(Externalizer.getString("LANSLIM.218")); //$NON-NLS-1$
+	        userEditMenuItem.addActionListener(pPane);
+	        userEditMenuItem.setActionCommand(TalkPaneActionCommand.ESCAPE_CHAR);
+	        add(userEditMenuItem);
+		}
+	}
+	
+	private void escapeXMLChar() {
+		
+		int start = 0;
+		int end = newMessageArea.getText().length();
+		int pos = newMessageArea.getCaret().getDot();
+		
+		if (newMessageArea.getSelectedText() != null) {
+			start = newMessageArea.getSelectionStart();
+			end = newMessageArea.getSelectionEnd();
+			pos = end;
+		}
+		String before = newMessageArea.getText().substring(0, start);
+		String after = newMessageArea.getText().substring(end);
+		String lBeforeReplace = newMessageArea.getText().substring(start, end);
+		int count = 0;
+		int from = 0;
+		int last = 0;
+		while (from < lBeforeReplace.length()) {
+			last = lBeforeReplace.indexOf('<', from);
+			if (last != -1) {
+				count = count + 1;
+				from = last + 1;
+			}
+			else {
+				break;
+			}
+		}
+		newMessageArea.setText(before + lBeforeReplace.replaceAll("<", "&lt;") + after);
+		newMessageArea.setCaretPosition(pos + + count * 3);
+	}
 
 }
