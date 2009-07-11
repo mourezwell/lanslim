@@ -130,9 +130,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 	        String lMessage = Externalizer.getString("LANSLIM.199", VERSION, lLastStr); //$NON-NLS-1$
 	        if (!equals) {
 	        	lMessage =  lMessage + StringConstants.NEW_LINE 
-	        		+ Externalizer.getString("LANSLIM.131", VERSION, lLastStr) + StringConstants.NEW_LINE + //$NON-NLS-1$
-				    Externalizer.getString("LANSLIM.117", PROJECT_HOME) + StringConstants.NEW_LINE + //$NON-NLS-1$
-				    Externalizer.getString("LANSLIM.189", WEB_HOME) + StringConstants.NEW_LINE; //$NON-NLS-1$
+	        		+ Externalizer.getString("LANSLIM.131") + StringConstants.NEW_LINE; //$NON-NLS-1$
 	        } 
 	        if (!equals || !showOnlyDiff) {
 		        JOptionPane.showMessageDialog(getRootPane().getParent(), lMessage,
