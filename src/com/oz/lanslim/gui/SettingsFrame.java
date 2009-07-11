@@ -35,7 +35,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-
 public class SettingsFrame extends JDialog implements ActionListener {
 	
 	private JTextField nameField;
@@ -64,6 +63,9 @@ public class SettingsFrame extends JDialog implements ActionListener {
 	private JTextField proxyHostField;
 	private JTextField proxyPortField;
 	private JCheckBox cryptoButton;
+	private JCheckBox refreshButton;
+	private JButton notifButton;
+	private JCheckBox escapeXMLBox;
 
 	
 	private SlimSettings model;
@@ -88,7 +90,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			
 			FormLayout thisLayout = new FormLayout(
 					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
 			setSize(270, 200);
 			setResizable(false);
@@ -186,29 +188,6 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				shortcutButton.setText(Externalizer.getString("LANSLIM.142")); //$NON-NLS-1$
 				getContentPane().add(shortcutButton, new CellConstraints("4, 10, 1, 1, default, default")); //$NON-NLS-1$
 			}
-/*			{
-				JPanel closeActionGroupPanel = new JPanel(new GridLayout(0, 1));
-			    Border border = BorderFactory.createTitledBorder(Externalizer.getString("LANSLIM.143")); //$NON-NLS-1$
-			    closeActionGroupPanel.setBorder(border);
-				getContentPane().add(closeActionGroupPanel, new CellConstraints("2, 12, 3, 1, default, default")); //$NON-NLS-1$
-				
-				if (!model.isTrayEnable()) {
-					JLabel trayLabel = new JLabel();
-					trayLabel.setIcon(new SlimIcon("info.png")); //$NON-NLS-1$
-					closeActionGroupPanel.add(trayLabel);
-					trayLabel.setText(HTMLConstants.HTML + Externalizer.getString("LANSLIM.144") + HTMLConstants.ENDHTML); //$NON-NLS-1$
-				}
-				else {
-					startAsTrayButton = new JCheckBox(Externalizer.getString("LANSLIM.146")); //$NON-NLS-1$
-					closeActionGroupPanel.add(startAsTrayButton);
-				    startAsTrayButton.setSelected(model.isStartAsTray());
-				    
-				    closeAsTrayButton = new JCheckBox(Externalizer.getString("LANSLIM.147")); //$NON-NLS-1$
-				    closeAsTrayButton.setSelected(model.isCloseAsTray());
-				    closeActionGroupPanel.add(closeAsTrayButton);
-
-				}
-			} */
 			{
 				JLabel trayLabel = new JLabel();
 				trayLabel.setText(Externalizer.getString("LANSLIM.143")); //$NON-NLS-1$
@@ -387,6 +366,41 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				buttonGroupPanel.add(cryptoButton);
 			}
 			{
+				JLabel notifLabel = new JLabel();
+				notifLabel.setText(Externalizer.getString("LANSLIM.63")); //$NON-NLS-1$
+				getContentPane().add(notifLabel, new CellConstraints("2, 28, 1, 1, default, default")); //$NON-NLS-1$
+
+				notifButton = new JButton();
+				notifButton.addActionListener(this);
+				notifButton.setActionCommand(SettingsActionCommand.NOTIFICATION);
+				notifButton.setText(Externalizer.getString("LANSLIM.142")); //$NON-NLS-1$
+				getContentPane().add(notifButton, new CellConstraints("4, 28, 1, 1, default, default")); //$NON-NLS-1$
+			}
+			{
+				JLabel refreshLabel = new JLabel();
+				refreshLabel.setText(Externalizer.getString("LANSLIM.201")); //$NON-NLS-1$
+				getContentPane().add(refreshLabel, new CellConstraints("2, 30, 1, 1, default, default")); //$NON-NLS-1$
+				
+				JPanel buttonGroupPanel = new JPanel();
+				getContentPane().add(buttonGroupPanel, new CellConstraints("4, 30, 1, 1, default, default")); //$NON-NLS-1$
+				
+				refreshButton = new JCheckBox(Externalizer.getString("LANSLIM.202")); //$NON-NLS-1$
+				refreshButton.setSelected(model.isAutoRefreshContacts());
+				buttonGroupPanel.add(refreshButton);
+			}
+			{
+				JLabel escapeLabel = new JLabel();
+				escapeLabel.setText(Externalizer.getString("LANSLIM.216")); //$NON-NLS-1$
+				getContentPane().add(escapeLabel, new CellConstraints("2, 32, 1, 1, default, default")); //$NON-NLS-1$
+				
+				JPanel buttonGroupPanel = new JPanel();
+				getContentPane().add(buttonGroupPanel, new CellConstraints("4, 32, 1, 1, default, default")); //$NON-NLS-1$
+				
+				escapeXMLBox = new JCheckBox(Externalizer.getString("LANSLIM.217")); //$NON-NLS-1$
+				escapeXMLBox.setSelected(model.isAutoEscapeXML());
+				buttonGroupPanel.add(escapeXMLBox);
+			}
+			{
 				JPanel buttonPanel = new JPanel();
 				okButton = new JButton();
 				okButton.setText(Externalizer.getString("LANSLIM.15")); //$NON-NLS-1$
@@ -401,7 +415,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				buttonPanel.add(okButton);
 				buttonPanel.add(cancelButton);
 				
-				getContentPane().add(buttonPanel, new CellConstraints("4, 28, 1, 1, default, center")); //$NON-NLS-1$
+				getContentPane().add(buttonPanel, new CellConstraints("4, 34, 1, 1, default, center")); //$NON-NLS-1$
 			}
 			
 			if (userLocked) {
@@ -431,6 +445,8 @@ public class SettingsFrame extends JDialog implements ActionListener {
 			model.setUnderline(underSelected);
 
 			model.setAutoCheckVersion(checkVersionButton.isSelected());
+			model.setAutoRefreshContacts(refreshButton.isSelected());
+			model.setAutoEscapeXML(escapeXMLBox.isSelected());
 			try {
 				model.setCryptoEnable(cryptoButton.isSelected());
 			}
@@ -550,14 +566,20 @@ public class SettingsFrame extends JDialog implements ActionListener {
             } 
 		}
 		else if (e.getActionCommand().equals(SettingsActionCommand.SHORTCUT)) {
-			ShortcutFrame lShrortcutDialog = new ShortcutFrame(this, model);
-			lShrortcutDialog.pack();
-			lShrortcutDialog.setLocationRelativeTo(this);
-			lShrortcutDialog.setVisible(true);
+			ShortcutFrame lShortcutDialog = new ShortcutFrame(this, model);
+			lShortcutDialog.pack();
+			lShortcutDialog.setLocationRelativeTo(this);
+			lShortcutDialog.setVisible(true);
 		}
 		else if (e.getActionCommand().equals(SettingsActionCommand.PROXY)) {
 			proxyHostField.setEnabled(proxyUsedButton.isSelected());
 			proxyPortField.setEnabled(proxyUsedButton.isSelected());
+		}
+		else if (e.getActionCommand().equals(SettingsActionCommand.NOTIFICATION)) {
+			NotificationSettingsFrame lNotificationDialog = new NotificationSettingsFrame(this, model);
+			lNotificationDialog.pack();
+			lNotificationDialog.setLocationRelativeTo(this);
+			lNotificationDialog.setVisible(true);
 		}
 	}
 
@@ -584,6 +606,9 @@ public class SettingsFrame extends JDialog implements ActionListener {
 		public static final String LANGUAGE = "language"; //$NON-NLS-1$
 
 		public static final String PROXY = "proxy"; //$NON-NLS-1$
+		
+		public static final String NOTIFICATION = "notification"; //$NON-NLS-1$
+		
 
 	}
 }

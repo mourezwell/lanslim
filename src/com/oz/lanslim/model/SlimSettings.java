@@ -1,5 +1,6 @@
 package com.oz.lanslim.model;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
@@ -10,6 +11,10 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.swing.SwingUtilities;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
@@ -51,6 +56,20 @@ public class SlimSettings {
 	private static final String PROXY_HOST_PROP = PROXY_PREFIX + "host"; //$NON-NLS-1$
 	private static final String PROXY_PORT_PROP = PROXY_PREFIX + "port"; //$NON-NLS-1$
 	private static final String CRYPTO_PROP = SLIM_SETTINGS_PROPS_PREFIX + "crypto"; //$NON-NLS-1$
+	private static final String AUTOESCAPEXML_PROP = SLIM_SETTINGS_PROPS_PREFIX + "autorescapeXML"; //$NON-NLS-1$
+	private static final String AUTOREFRESH_PROP = SLIM_SETTINGS_PROPS_PREFIX + "autorefresh"; //$NON-NLS-1$
+	private static final String NOTIFICATION_PREFIX = SLIM_SETTINGS_PROPS_PREFIX + "notification."; //$NON-NLS-1$
+	private static final String NOTIFICATION_BUBBLE_PREFIX = NOTIFICATION_PREFIX + "bubble."; //$NON-NLS-1$
+	private static final String NOTIFICATION_BLINK_PREFIX = NOTIFICATION_PREFIX + "blink."; //$NON-NLS-1$
+	private static final String NOTIFICATION_AVAILABILTY_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
+	private static final String NOTIFICATION_AVAILABILTY_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWTALK_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWTALK_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWMESSAGE_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWMESSAGE_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
+	private static final String NOTIFICATION_PEOPLEIN_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
+	private static final String NOTIFICATION_PEOPLEIN_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
+	
 	
 	public static final String DEFAULT_LANGUAGE = "EN"; //$NON-NLS-1$
 	public static final String DEFAULT_PORT = "17000"; //$NON-NLS-1$
@@ -76,20 +95,27 @@ public class SlimSettings {
 	private static final int DEFAULT_H = 400;
 	private static final String DEFAULT_SHORCUT = StringConstants.EMPTY;
 	public static final int SHORTCUT_NUMBER = 12;
-	public static final boolean DEFAULT_AUTO_CHECK = false;
-	public static final boolean DEFAULT_NEED_PROXY = false;
-	public static final boolean DEFAULT_CRYPTO = false;
+	private static final boolean DEFAULT_AUTO_CHECK = false;
+	private static final boolean DEFAULT_NEED_PROXY = false;
+	private static final boolean DEFAULT_CRYPTO = false;
+	private static final boolean DEFAULT_AUTOREFRESH = false;
+	private static final boolean DEFAULT_AUTOESCAPE = false;
+	private static final boolean DEFAULT_AVAILABILTY_BUBBLE = false;
+	private static final boolean DEFAULT_AVAILABILTY_BLINK = false;
+	private static final boolean DEFAULT_NEWTALK_BUBBLE = false;
+	private static final boolean DEFAULT_NEWTALK_BLINK = false;
+	private static final boolean DEFAULT_NEWMESSAGE_BUBBLE = true;
+	private static final boolean DEFAULT_NEWMESSAGE_BLINK = true;
+	private static final boolean DEFAULT_PEOPLEIN_BUBBLE = false;
+	private static final boolean DEFAULT_PEOPLEIN_BLINK = false;
 
 
-	private  SlimModel model = null;
 	private  String language = DEFAULT_LANGUAGE;
-	
 	private  String color = DEFAULT_COLOR;
 	private  int size = DEFAULT_SIZE;
 	private  boolean underline = DEFAULT_UNDERLINE;
 	private  boolean italic = DEFAULT_ITALIC;
 	private  boolean bold = DEFAULT_BOLD;
-	
 	private  boolean networkValid = DEFAULT_NETWORK_VALID;
 	private  boolean unlockPort = DEFAULT_UNLOCK_PORT;
 	private  boolean trayEnable = DEFAULT_TRAY_ENABLE;
@@ -108,13 +134,26 @@ public class SlimSettings {
 	private  boolean proxyNeeded = DEFAULT_NEED_PROXY;
 	private  String proxyHost = null;
 	private  String proxyPort = null;
-	private  boolean crypto= DEFAULT_CRYPTO;
+	private  boolean crypto = DEFAULT_CRYPTO;
+	private  boolean autoRefreshContacts = DEFAULT_AUTOREFRESH;
+	private  boolean autoEscapeXML = DEFAULT_AUTOESCAPE;
+	private  boolean notifAvailabiltyBlink = DEFAULT_AVAILABILTY_BLINK;
+	private  boolean notifAvailabiltyBubble = DEFAULT_AVAILABILTY_BUBBLE;
+	private  boolean notifNewTalkBlink = DEFAULT_NEWTALK_BLINK;
+	private  boolean notifNewTalkBubble = DEFAULT_NEWTALK_BUBBLE;
+	private  boolean notifNewMessageBlink = DEFAULT_NEWMESSAGE_BLINK;
+	private  boolean notifNewMessageBubble = DEFAULT_NEWMESSAGE_BUBBLE;
+	private  boolean notifPeopleInBlink = DEFAULT_PEOPLEIN_BLINK;
+	private  boolean notifPeopleInBubble = DEFAULT_PEOPLEIN_BUBBLE;
 	
+	private SlimModel model = null;
 	private SlimUserContact contactInfo = null;
-
 	private ContactViewListener contactViewListener = null;
-
 	private boolean initOk = false;
+	private Timer timer = null;
+	private TimerTask saveLocationTask = null;
+	private RefreshTask refreshTask = null;
+	
 	
 	public SlimSettings(SlimModel pModel) throws SlimException, UnknownHostException {
 		language = DEFAULT_LANGUAGE;
@@ -150,6 +189,24 @@ public class SlimSettings {
 		proxyNeeded = DEFAULT_NEED_PROXY;
 		proxyHost = null;
 		proxyPort = null;
+		crypto = DEFAULT_CRYPTO;
+		autoRefreshContacts = DEFAULT_AUTOREFRESH;
+		autoEscapeXML = DEFAULT_AUTOESCAPE;
+		notifAvailabiltyBlink = DEFAULT_AVAILABILTY_BLINK;
+		notifAvailabiltyBubble = DEFAULT_AVAILABILTY_BUBBLE;
+		notifNewTalkBlink = DEFAULT_NEWTALK_BLINK;
+		notifNewTalkBubble = DEFAULT_NEWTALK_BUBBLE;
+		notifNewMessageBlink = DEFAULT_NEWMESSAGE_BLINK;
+		notifNewMessageBubble = DEFAULT_NEWMESSAGE_BUBBLE;
+		notifPeopleInBlink = DEFAULT_PEOPLEIN_BLINK;
+		notifPeopleInBubble = DEFAULT_PEOPLEIN_BUBBLE;
+
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			public void run() {
+				Thread.currentThread().setName("Settings Timer"); //$NON-NLS-1$
+			}
+		}, 0);
 
 		initOk = true;
 	}
@@ -308,6 +365,49 @@ public class SlimSettings {
 				// ignore start exception
 			}
 		}
+		
+		lTemp = p.getProperty(AUTOREFRESH_PROP);
+		if (lTemp != null) {
+			setAutoRefreshContacts(Boolean.valueOf(lTemp).booleanValue());
+		}
+		
+		lTemp = p.getProperty(AUTOESCAPEXML_PROP);
+		if (lTemp != null) {
+			setAutoEscapeXML(Boolean.valueOf(lTemp).booleanValue());
+		}
+		
+		lTemp = p.getProperty(NOTIFICATION_AVAILABILTY_BLINK);
+		if (lTemp != null) {
+			setNotifAvailabiltyBlink(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_AVAILABILTY_BUBBLE);
+		if (lTemp != null) {
+			setNotifAvailabiltyBubble(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_NEWMESSAGE_BLINK);
+		if (lTemp != null) {
+			setNotifNewMessageBlink(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_NEWMESSAGE_BUBBLE);
+		if (lTemp != null) {
+			setNotifNewMessageBubble(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_NEWTALK_BLINK);
+		if (lTemp != null) {
+			setNotifNewTalkBlink(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_NEWTALK_BUBBLE);
+		if (lTemp != null) {
+			setNotifNewTalkBubble(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_PEOPLEIN_BLINK);
+		if (lTemp != null) {
+			setNotifPeopleInBlink(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_PEOPLEIN_BUBBLE);
+		if (lTemp != null) {
+			setNotifPeopleInBubble(Boolean.valueOf(lTemp).booleanValue());
+		}
 
 		initOk = true;
 		saveSettings();
@@ -395,6 +495,16 @@ public class SlimSettings {
 			p.put(PROXY_PORT_PROP, getProxyPort());
 		}
 		p.put(CRYPTO_PROP, Boolean.toString(isCryptoEnable()));
+		p.put(AUTOREFRESH_PROP, Boolean.toString(isAutoRefreshContacts()));
+		p.put(AUTOESCAPEXML_PROP, Boolean.toString(isAutoEscapeXML()));
+		p.put(NOTIFICATION_AVAILABILTY_BLINK, Boolean.toString(isNotifAvailabiltyBlink()));
+		p.put(NOTIFICATION_AVAILABILTY_BUBBLE, Boolean.toString(isNotifAvailabiltyBubble()));
+		p.put(NOTIFICATION_NEWMESSAGE_BLINK, Boolean.toString(isNotifNewMessageBlink()));
+		p.put(NOTIFICATION_NEWMESSAGE_BUBBLE, Boolean.toString(isNotifNewMessageBubble()));
+		p.put(NOTIFICATION_NEWTALK_BLINK, Boolean.toString(isNotifNewTalkBlink()));
+		p.put(NOTIFICATION_NEWTALK_BUBBLE, Boolean.toString(isNotifNewTalkBubble()));
+		p.put(NOTIFICATION_PEOPLEIN_BLINK, Boolean.toString(isNotifPeopleInBlink()));
+		p.put(NOTIFICATION_PEOPLEIN_BUBBLE, Boolean.toString(isNotifPeopleInBubble()));
 
 		return p;
 	}
@@ -544,7 +654,7 @@ public class SlimSettings {
         x = pPoint.x;
         saveSettings();
     }
-
+    
     public void setSize(Dimension pDim) {
         h = pDim.height;
         w = pDim.width;
@@ -697,5 +807,130 @@ public class SlimSettings {
 		}
 		crypto = pCrypto;
 	}
+
+	public boolean isNotifAvailabiltyBlink() {
+		return notifAvailabiltyBlink;
+	}
+
+	public void setNotifAvailabiltyBlink(boolean pNotifAvailabiltyBlink) {
+		notifAvailabiltyBlink = pNotifAvailabiltyBlink;
+	}
+
+	public boolean isNotifAvailabiltyBubble() {
+		return notifAvailabiltyBubble;
+	}
+
+	public void setNotifAvailabiltyBubble(boolean pNotifAvailabiltyBubble) {
+		notifAvailabiltyBubble = pNotifAvailabiltyBubble;
+	}
+
+	public boolean isNotifNewMessageBlink() {
+		return notifNewMessageBlink;
+	}
+
+	public void setNotifNewMessageBlink(boolean pNotifNewMessageBlink) {
+		notifNewMessageBlink = pNotifNewMessageBlink;
+	}
+
+	public boolean isNotifNewMessageBubble() {
+		return notifNewMessageBubble;
+	}
+
+	public void setNotifNewMessageBubble(boolean pNotifNewMessageBubble) {
+		notifNewMessageBubble = pNotifNewMessageBubble;
+	}
+
+	public boolean isNotifNewTalkBlink() {
+		return notifNewTalkBlink;
+	}
+
+	public void setNotifNewTalkBlink(boolean pNotifNewTalkBlink) {
+		notifNewTalkBlink = pNotifNewTalkBlink;
+	}
+
+	public boolean isNotifNewTalkBubble() {
+		return notifNewTalkBubble;
+	}
+
+	public void setNotifNewTalkBubble(boolean pNotifNewTalkBubble) {
+		notifNewTalkBubble = pNotifNewTalkBubble;
+	}
+
+	public boolean isNotifPeopleInBlink() {
+		return notifPeopleInBlink;
+	}
+
+	public void setNotifPeopleInBlink(boolean pNotifPeopleInBlink) {
+		notifPeopleInBlink = pNotifPeopleInBlink;
+	}
+
+	public boolean isNotifPeopleInBubble() {
+		return notifPeopleInBubble;
+	}
+
+	public void setNotifPeopleInBubble(boolean pNotifPeopleInBubble) {
+		notifPeopleInBubble = pNotifPeopleInBubble;
+	}
 	
+	public boolean isAutoRefreshContacts() {
+		return autoRefreshContacts;
+	}
+
+	public void setAutoRefreshContacts(boolean pAutoRefresh) {
+		if (pAutoRefresh != autoRefreshContacts) {
+			autoRefreshContacts = pAutoRefresh;
+			if (pAutoRefresh) {
+				refreshTask = new RefreshTask();
+				timer.schedule(refreshTask, 10000, 3600000);
+			}
+			else {
+				refreshTask.cancel();
+				refreshTask = null;
+			}
+		}
+	}
+
+	
+    public void scheduleLocationSaving(Component pComp) {
+    	
+		if (saveLocationTask == null) {
+			saveLocationTask = new SavingLocationTask(pComp);
+			timer.schedule(saveLocationTask, 5000);
+		}
+
+    }
+	private class SavingLocationTask extends TimerTask {
+		
+		private Component comp = null;
+		
+		public SavingLocationTask(Component pC) {
+			comp = pC;
+		}
+		
+		public void run() {
+			setLocation(comp.getLocation());
+			saveLocationTask = null;
+		}
+	}
+
+	private class RefreshTask extends TimerTask {
+		
+		public void run() {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					model.getContacts().refresh();
+					System.out.println("ref");
+				}
+			});
+		}
+	}
+
+	public boolean isAutoEscapeXML() {
+		return autoEscapeXML;
+	}
+
+	public void setAutoEscapeXML(boolean pAutoEscapeXML) {
+		autoEscapeXML = pAutoEscapeXML;
+	}
+
 }
