@@ -7,7 +7,6 @@ import javax.swing.SwingUtilities;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
-import com.oz.lanslim.SlimIconListener;
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
@@ -27,12 +26,10 @@ public class SlimNetworkAdapter implements Runnable {
 	private SlimModel model;
 	private Thread socketListener;
 	private boolean initOK = false;
-	private SlimIconListener iconListener = null;
 	
-	public SlimNetworkAdapter(SlimModel pModel, SlimIconListener pIconListener) {
+	public SlimNetworkAdapter(SlimModel pModel) {
 		
 		model = pModel;
-		iconListener = pIconListener;
 		try {
 			initSocket();
 		}
@@ -88,8 +85,7 @@ public class SlimNetworkAdapter implements Runnable {
 						} 
 						else if (SlimMessageTypeEnum.UPDATE_TALK.equals(sm.getType())) {
 							SlimUpdateTalkMessage sutm = (SlimUpdateTalkMessage)sm;
-							SwingUtilities.invokeLater(new ReceiveTalkMessageTask(model, 
-									sutm, iconListener));
+							SwingUtilities.invokeLater(new ReceiveTalkMessageTask(model, sutm));
 						}
 						else if (SlimMessageTypeEnum.EXCLUDE_TALK.equals(sm.getType())) {
 							SlimExcludeTalkMessage setm = (SlimExcludeTalkMessage)sm;

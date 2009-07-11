@@ -21,6 +21,7 @@ public class ReceiveInvitationTask
 		SlimTalk st = model.getTalks().getTalkById(message.getTalkId());
 		if (st != null) {
 			st.receiveInviteTalkMessage(message);
+			model.notifyMessageReceived(message);
 		}
 		else {
 			SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$

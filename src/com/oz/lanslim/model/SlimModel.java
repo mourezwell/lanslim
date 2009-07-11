@@ -6,9 +6,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.SlimIconListener;
 import com.oz.lanslim.SlimLogger;
+import com.oz.lanslim.message.SlimAvailabilityUserMessage;
+import com.oz.lanslim.message.SlimExcludeTalkMessage;
+import com.oz.lanslim.message.SlimInviteTalkMessage;
+import com.oz.lanslim.message.SlimMessage;
+import com.oz.lanslim.message.SlimMessageTypeEnum;
 import com.oz.lanslim.network.SlimNetworkAdapter;
 
 public class SlimModel {
@@ -22,33 +28,35 @@ public class SlimModel {
 	private SlimTalkList talks = null;
 	private SlimSettings settings = null;
 	private SlimNetworkAdapter networkAdapter = null;
+	private SlimIconListener iconListener = null;
+	
 	private boolean settingsLoaded = false;
 	
-	public SlimModel(SlimIconListener pIconListener) throws IOException, SlimException {
+	public SlimModel() throws IOException, SlimException {
 		talks = new SlimTalkList(this);
 		settingsLoaded = false;
 		
 		File iniFile = new File(
 				System.getProperty("user.home") +  File.separator + INI_FILE_NAME); //$NON-NLS-1$
 		if (iniFile.exists() && iniFile.isFile()) {
-			loadSettings(iniFile, pIconListener);
+			loadSettings(iniFile);
 		}
 		else {
 			settings = new SlimSettings(this);
-			networkAdapter = new SlimNetworkAdapter(this, pIconListener);
+			networkAdapter = new SlimNetworkAdapter(this);
 			contacts = new SlimContactList(this);
 		}
 		settingsLoaded = true;
 	}
 
-	public void loadSettings(File pIniFile, SlimIconListener pIconListener) throws SlimException, IOException {
+	public void loadSettings(File pIniFile) throws SlimException, IOException {
 		Properties p = new Properties();
 		FileInputStream fis = new FileInputStream(pIniFile);
 		p.load(fis);
 		fis.close();
 		
 		settings = new SlimSettings(this, p);
-		networkAdapter = new SlimNetworkAdapter(this, pIconListener);
+		networkAdapter = new SlimNetworkAdapter(this);
 		contacts = new SlimContactList(this, p);
 		contacts.sendWelcomeMessage();
 	}
@@ -117,5 +125,60 @@ public class SlimModel {
 	public SlimNetworkAdapter getNetworkAdapter() {
 		return networkAdapter;
 	}
+	
+	public SlimIconListener getIconListener() {
+		return iconListener;
+	}
 
+	public void registerIconListener(SlimIconListener pListener) {
+		iconListener = pListener;
+	}
+
+	public void notifyMessageReceived(SlimMessage pMessage) {
+		
+		if (iconListener != null) {
+			SlimMessageTypeEnum lType = pMessage.getType();
+			if (lType.equals(SlimMessageTypeEnum.UPDATE_TALK)) {
+				iconListener.startIconBlinking(settings.isNotifNewMessageBlink(), 
+					settings.isNotifNewMessageBubble(),
+					Externalizer.getString("LANSLIM.2", pMessage.getSender().getName()));
+			}
+			else if (lType.equals(SlimMessageTypeEnum.AVAILABILITY)) {
+				SlimAvailabilityUserMessage saum = (SlimAvailabilityUserMessage)pMessage;
+				if (saum.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
+					iconListener.startIconBlinking(settings.isNotifAvailabiltyBlink(), 
+						settings.isNotifAvailabiltyBubble(),
+						Externalizer.getString("LANSLIM.211", pMessage.getSender().getName()));
+				}
+				else if (saum.getAvailability().equals(SlimAvailabilityEnum.OFFLINE)){
+					iconListener.startIconBlinking(settings.isNotifAvailabiltyBlink(), 
+						settings.isNotifAvailabiltyBubble(),
+						Externalizer.getString("LANSLIM.212", pMessage.getSender().getName()));
+				}
+			}
+			else if (lType.equals(SlimMessageTypeEnum.EXCLUDE_TALK)) {
+				SlimExcludeTalkMessage setm = (SlimExcludeTalkMessage)pMessage;
+				iconListener.startIconBlinking(settings.isNotifPeopleInBlink(), 
+					settings.isNotifPeopleInBubble(),
+					Externalizer.getString("LANSLIM.210", setm.getExcludedContact().getName()));
+			}
+			else if (lType.equals(SlimMessageTypeEnum.INVITE_TALK)) {
+				SlimInviteTalkMessage sitm = (SlimInviteTalkMessage)pMessage;
+				iconListener.startIconBlinking(settings.isNotifPeopleInBlink(), 
+					settings.isNotifPeopleInBubble(),
+					Externalizer.getString("LANSLIM.209", sitm.getNewContact().getName()));
+			}
+			else if (lType.equals(SlimMessageTypeEnum.EXIT_TALK)) {
+				iconListener.startIconBlinking(settings.isNotifPeopleInBlink(), 
+					settings.isNotifPeopleInBubble(),
+					Externalizer.getString("LANSLIM.208", pMessage.getSender().getName()));
+			}
+			else if (lType.equals(SlimMessageTypeEnum.NEW_TALK)) {
+				iconListener.startIconBlinking(settings.isNotifNewTalkBlink(), 
+					settings.isNotifNewTalkBubble(),
+					Externalizer.getString("LANSLIM.207", pMessage.getSender().getName()));
+			}
+		}
+	}
+	
 }

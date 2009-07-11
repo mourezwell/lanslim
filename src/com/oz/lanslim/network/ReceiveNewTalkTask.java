@@ -21,6 +21,9 @@ public class ReceiveNewTalkTask
 		if (!success) {
 			SlimLogger.log(Externalizer.getString("LANSLIM.42")); //$NON-NLS-1$
 		}
+		else {
+			model.notifyMessageReceived(message);
+		}
 	}
 
 }

@@ -21,6 +21,7 @@ public class ReceiveExcludeTalkTask
 		SlimTalk st = model.getTalks().getTalkById(message.getTalkId());
 		if (st != null) {
 			st.receiveExcludeTalkMessage(message);
+			model.notifyMessageReceived(message);
 		}
 		else {
 			SlimLogger.log(Externalizer.getString("LANSLIM.43")); //$NON-NLS-1$

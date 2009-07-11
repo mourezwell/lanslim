@@ -16,6 +16,7 @@ public class ReceiveAvailabiltyTask
 	
 	public void run() {
 		model.getContacts().receiveAvailabiltyMessage(message);
+		model.notifyMessageReceived(message);
 	}
 
 }
