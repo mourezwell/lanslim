@@ -4,6 +4,8 @@
 	<property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.4"/>
     <property name="source" value="1.4"/>
+	
+    <property file="build.properties"/>
     
 	<path id="lanslim.classpath">
         <pathelement location="classes"/>
@@ -43,10 +45,10 @@
     	<tstamp/>	
         <jar destfile="liv/lanslim.jar" basedir="classes">
             <manifest>
-              	<attribute name="Manifest-Version" value="1.2.3"/>
+              	<attribute name="Manifest-Version" value="${version}"/>
               	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
               	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
-              	<attribute name="Implementation-Version" value="1.2.3"/>
+              	<attribute name="Implementation-Version" value="${version}"/>
             	<attribute name="Implementation-Vendor" value="Olivier Mourez"/>
 	            <attribute name="Main-Class" value="com.oz.lanslim.LANSLIMMain"/>
         	</manifest>         
@@ -63,6 +65,30 @@
 		<launch4j configFile="launch4j.xml" />
     	<copy file="lib/tray.dll" tofile="liv/tray.dll"/>
 	</target>
+
+	
+    <target name="build-distrib">
+		<zip destfile="lanslim_${version}.zip">
+			<fileset dir="liv">
+				<include name="lanslim.exe"/>
+				<include name="tray.dll"/>
+			</fileset>
+		</zip>
+		<zip destfile="lanslim_${version}_src.zip">
+			<fileset dir=".">
+				<include name="src/**/*.java"/>
+				<include name="src/**/*.png"/>
+				<include name="src/**/*.properties"/>
+				<include name="lib/*.*"/>
+				<include name="build.xml"/>
+				<include name="build.properties"/>
+				<include name="launch4j.xml"/>
+				<include name="comments.ico"/>
+				<include name="*.txt"/>
+			</fileset>
+		</zip>
+	</target>
+
 	
 	<!-- Test Target -->
 	
