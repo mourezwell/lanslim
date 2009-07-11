@@ -162,10 +162,13 @@ public class MainPane extends JPanel implements ActionListener, ChangeListener,
 			}
 		}
 		else if (e.getActionCommand() == MainPaneActionCommand.ABOUT) {
-			AboutDialog.showDialog(this);
+			AboutDialog lFrame = new AboutDialog((Frame)getRootPane().getParent());
+			lFrame.pack();
+			lFrame.setLocationRelativeTo(getRootPane().getParent());
+			lFrame.setVisible(true);
 		}
 		else if (e.getActionCommand() == MainPaneActionCommand.MINIMIZE) {
-			if (model.getSettings().isTrayEnable() && model.getSettings().isCloseAsTray()) {
+			if (model.getSettings().isTrayEnable()) {
 				getRootPane().getParent().setVisible(false);
 			}
 			else {
