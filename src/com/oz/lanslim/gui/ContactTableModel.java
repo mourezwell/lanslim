@@ -42,8 +42,10 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 		int i = 0;
 		for (Iterator it = lAll.iterator(); it.hasNext();) {
 			SlimContact c = (SlimContact)it.next();
-			datas[i] = new Object[] { c.getName(), c };
-			i++;
+			if (!c.equals(list.getSettingsUser())) {
+				datas[i] = new Object[] { c.getName(), c };
+				i++;
+			}
 		}
 		return datas;
 	}
@@ -72,13 +74,13 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 	public synchronized int getRowCount() {
 		int r = 0;
 		for (int i = 0; i < contactObjectArrayModel.length; i++) {
-			if (contactObjectArrayModel[i][nameColumnIndex].toString().startsWith(prefixNameFilter)) {
+			if (contactObjectArrayModel[i][nameColumnIndex].toString().toLowerCase().startsWith(prefixNameFilter)) {
 				if (hideGroupFilter 
-						&& contactObjectArrayModel[i][statusColumnIndex].equals(SlimAvailabilityEnum.UNKNOWN)) {
+						&& ((SlimContact)contactObjectArrayModel[i][statusColumnIndex]).getAvailability().equals(SlimAvailabilityEnum.UNKNOWN)) {
 					continue;
 				}
 				if (hideOfflineFilter && 
-						contactObjectArrayModel[i][statusColumnIndex].equals(SlimAvailabilityEnum.OFFLINE)) {
+						((SlimContact)contactObjectArrayModel[i][statusColumnIndex]).getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
 					continue;
 				}
 				r = r + 1;
@@ -90,13 +92,13 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 	public synchronized Object getValueAt(int rowIndex, int columnIndex) {
 		int r = 0;
 		for (int i = 0; i < contactObjectArrayModel.length; i++) {
-			if (contactObjectArrayModel[i][nameColumnIndex].toString().toLowerCase().startsWith(prefixNameFilter.toLowerCase())) {
+			if (contactObjectArrayModel[i][nameColumnIndex].toString().toLowerCase().startsWith(prefixNameFilter)) {
 				if (hideGroupFilter 
-						&& contactObjectArrayModel[i][statusColumnIndex].equals(SlimAvailabilityEnum.UNKNOWN)) {
+						&& ((SlimContact)contactObjectArrayModel[i][statusColumnIndex]).getAvailability().equals(SlimAvailabilityEnum.UNKNOWN)) {
 					continue;
 				}
 				if (hideOfflineFilter && 
-						contactObjectArrayModel[i][statusColumnIndex].equals(SlimAvailabilityEnum.OFFLINE)) {
+						((SlimContact)contactObjectArrayModel[i][statusColumnIndex]).getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
 					continue;
 				}
 				if (r == rowIndex) {
@@ -110,7 +112,7 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 
 
 	public void filter(String pPrefix, boolean pHideGroup, boolean pHideOffline) {
-		prefixNameFilter = pPrefix;
+		prefixNameFilter = pPrefix.toLowerCase();
 		hideGroupFilter = pHideGroup;
 		hideOfflineFilter = pHideOffline;
 		fireTableDataChanged();
