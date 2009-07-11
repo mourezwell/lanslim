@@ -167,7 +167,8 @@ public class ContactTransferHandler extends TransferHandler {
 					else {
 						Iterator lIt = cl.iterator();
 						while (lIt.hasNext()) {
-							talk.addPeople((SlimUserContact)lIt.next());
+							SlimUserContact suc = (SlimUserContact)lIt.next();
+							st.addPeople(suc);
 						}
 						return true;
 					}
