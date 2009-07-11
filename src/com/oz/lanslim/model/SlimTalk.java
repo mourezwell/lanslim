@@ -145,7 +145,9 @@ public class SlimTalk {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
 				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					suc.addMessageInQueue(setm);
+					if (isLeader()) {
+						suc.addMessageInQueue(setm);
+					}
 				}
 				else {
 					model.getNetworkAdapter().send(setm, suc);
@@ -162,7 +164,9 @@ public class SlimTalk {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
 				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					suc.addMessageInQueue(setm);
+					if (isLeader()) {
+						suc.addMessageInQueue(setm);
+					}
 				}
 				else {
 					model.getNetworkAdapter().send(setm, suc);
@@ -251,7 +255,9 @@ public class SlimTalk {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
 				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					suc.addMessageInQueue(setm);
+					if (isLeader()) {
+						suc.addMessageInQueue(setm);
+					}
 				}
 				else {
 					model.getNetworkAdapter().send(setm, suc);
@@ -292,14 +298,16 @@ public class SlimTalk {
 		}
 	}
 	
-	// receiveNewTalkMessage is located in TalkList class because it is call before Talk creation  
+	// receiveNewTalkMessage is located in TalkList class because it is called before Talk creation  
 	private void sendNewTalkMessage(SlimUserContact pContact) throws SlimException {
 		String date = HTMLConstants.TIME_FORMAT.format(new Date());
 		SlimUserContact sender = model.getSettings().getContactInfo();
 		SlimNewTalkMessage sntm = new SlimNewTalkMessage(sender, getId(), getTitle(), peopleIn, date);
 
 		if (pContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-			pContact.addMessageInQueue(sntm);
+			if (isLeader()) {
+				pContact.addMessageInQueue(sntm);
+			}
 		}
 		else {
 			model.getNetworkAdapter().send(sntm, pContact);
@@ -328,7 +336,9 @@ public class SlimTalk {
 			SlimUserContact suc = (SlimUserContact)it.next();
 			if (!suc.equals(model.getSettings().getContactInfo())) {
 				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					suc.addMessageInQueue(sutm);
+					if (isLeader()) {
+						suc.addMessageInQueue(sutm);
+					}
 				}
 				else {
 					SlimKey lKey = suc.getKey();
@@ -364,7 +374,7 @@ public class SlimTalk {
 				}
 			}
 			else {
-				pMessage.setNewMessage(Externalizer.getString("LANSLIM.9"));
+				pMessage.setNewMessage(Externalizer.getString("LANSLIM.9")); //$NON-NLS-1$
 			}
 		}
 		
@@ -516,6 +526,10 @@ public class SlimTalk {
 
 	public String getShortcut(int i) {
 		return model.getSettings().getShortcuts()[i];
+	}
+
+	public boolean isDefaultEscapeXML() {
+		return model.getSettings().isAutoEscapeXML();
 	}
 
 }
