@@ -62,13 +62,13 @@ public class SlimSettings {
 	private static final String NOTIFICATION_BUBBLE_PREFIX = NOTIFICATION_PREFIX + "bubble."; //$NON-NLS-1$
 	private static final String NOTIFICATION_BLINK_PREFIX = NOTIFICATION_PREFIX + "blink."; //$NON-NLS-1$
 	private static final String NOTIFICATION_AVAILABILTY_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
-	private static final String NOTIFICATION_AVAILABILTY_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
-	private static final String NOTIFICATION_NEWTALK_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
-	private static final String NOTIFICATION_NEWTALK_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
-	private static final String NOTIFICATION_NEWMESSAGE_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
-	private static final String NOTIFICATION_NEWMESSAGE_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
-	private static final String NOTIFICATION_PEOPLEIN_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
-	private static final String NOTIFICATION_PEOPLEIN_BLINK = NOTIFICATION_BLINK_PREFIX + "host"; //$NON-NLS-1$
+	private static final String NOTIFICATION_AVAILABILTY_BLINK = NOTIFICATION_BLINK_PREFIX + "availability"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWTALK_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "newTalk"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWTALK_BLINK = NOTIFICATION_BLINK_PREFIX + "newTalk"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWMESSAGE_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "newMessage"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWMESSAGE_BLINK = NOTIFICATION_BLINK_PREFIX + "newMessage"; //$NON-NLS-1$
+	private static final String NOTIFICATION_PEOPLEIN_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "peopleIn"; //$NON-NLS-1$
+	private static final String NOTIFICATION_PEOPLEIN_BLINK = NOTIFICATION_BLINK_PREFIX + "peopleIn"; //$NON-NLS-1$
 	
 	
 	public static final String DEFAULT_LANGUAGE = "EN"; //$NON-NLS-1$
@@ -673,6 +673,7 @@ public class SlimSettings {
 
 	public void setBold(boolean pBold) {
 		bold = pBold;
+		saveSettings();
 	}
 
 	public boolean isItalic() {
@@ -681,6 +682,7 @@ public class SlimSettings {
 
 	public void setItalic(boolean pItalic) {
 		italic = pItalic;
+		saveSettings();
 	}
 
 	public int getFontSize() {
@@ -690,6 +692,7 @@ public class SlimSettings {
 	public void setFontSize(int pSize) throws SlimException {
 		if (size > 0  && size < 8) {
 			size = pSize;
+			saveSettings();
 		}
 		else {
 			throw new SlimException(Externalizer.getString("LANSLIM.171", new Integer(size))); //$NON-NLS-1$
@@ -702,6 +705,7 @@ public class SlimSettings {
 
 	public void setUnderline(boolean pUnderline) {
 		underline = pUnderline;
+		saveSettings();
 	}
 
 	public String[] getShortcuts() {
@@ -710,6 +714,7 @@ public class SlimSettings {
 
 	public void setShortcuts(String[] pShortcuts) {
 		shortcuts = pShortcuts;
+		saveSettings();
 	}
 
 	public void exportContacts(File pFile) throws IOException {
@@ -726,6 +731,7 @@ public class SlimSettings {
 
 	public void setLanguage(String pLanguage) {
 		language = pLanguage;
+		saveSettings();
 	}
 
 	public String[] getAvailableLanguage() {
@@ -738,6 +744,7 @@ public class SlimSettings {
 
 	public void setAutoCheckVersion(boolean pAutoCheckVersion) {
 		autoCheckVersion = pAutoCheckVersion;
+		saveSettings();
 	}
 
 	public String getProxyHost() {
@@ -749,8 +756,9 @@ public class SlimSettings {
 			proxyHost = pProxyHost;
 		}
 		else {
-			proxyHost = pProxyHost;
+			proxyHost = null;
 		}
+		saveSettings();
 	}
 
 	public String getProxyPort() {
@@ -764,6 +772,7 @@ public class SlimSettings {
 		else {
 			proxyPort = null;
 		}
+		saveSettings();
 	}
 
 	public boolean isProxyNeeded() {
@@ -780,15 +789,14 @@ public class SlimSettings {
 	        System.getProperties().remove("http.proxyHost"); //$NON-NLS-1$
 	        System.getProperties().remove("http.proxyPort"); //$NON-NLS-1$
 		}
-
+		saveSettings();
+		
         /* PASSWORD MANAGEMENT NOT IMPLEMENTED YET
 	    Authenticator.setDefault(new Authenticator() {
 	      protected PasswordAuthentication getPasswordAuthentication() {
 	        return new PasswordAuthentication("mydomain\\username","password".toCharArray());
 	    }});
         // PASSWORD */
-
-		
 	}
 
 	public boolean isCryptoEnable() {
@@ -806,6 +814,7 @@ public class SlimSettings {
 			contactInfo.setKey(null);
 		}
 		crypto = pCrypto;
+		saveSettings();
 	}
 
 	public boolean isNotifAvailabiltyBlink() {
@@ -814,6 +823,7 @@ public class SlimSettings {
 
 	public void setNotifAvailabiltyBlink(boolean pNotifAvailabiltyBlink) {
 		notifAvailabiltyBlink = pNotifAvailabiltyBlink;
+		saveSettings();
 	}
 
 	public boolean isNotifAvailabiltyBubble() {
@@ -822,6 +832,7 @@ public class SlimSettings {
 
 	public void setNotifAvailabiltyBubble(boolean pNotifAvailabiltyBubble) {
 		notifAvailabiltyBubble = pNotifAvailabiltyBubble;
+		saveSettings();
 	}
 
 	public boolean isNotifNewMessageBlink() {
@@ -830,6 +841,7 @@ public class SlimSettings {
 
 	public void setNotifNewMessageBlink(boolean pNotifNewMessageBlink) {
 		notifNewMessageBlink = pNotifNewMessageBlink;
+		saveSettings();
 	}
 
 	public boolean isNotifNewMessageBubble() {
@@ -838,6 +850,7 @@ public class SlimSettings {
 
 	public void setNotifNewMessageBubble(boolean pNotifNewMessageBubble) {
 		notifNewMessageBubble = pNotifNewMessageBubble;
+		saveSettings();
 	}
 
 	public boolean isNotifNewTalkBlink() {
@@ -846,6 +859,7 @@ public class SlimSettings {
 
 	public void setNotifNewTalkBlink(boolean pNotifNewTalkBlink) {
 		notifNewTalkBlink = pNotifNewTalkBlink;
+		saveSettings();
 	}
 
 	public boolean isNotifNewTalkBubble() {
@@ -854,6 +868,7 @@ public class SlimSettings {
 
 	public void setNotifNewTalkBubble(boolean pNotifNewTalkBubble) {
 		notifNewTalkBubble = pNotifNewTalkBubble;
+		saveSettings();
 	}
 
 	public boolean isNotifPeopleInBlink() {
@@ -862,6 +877,7 @@ public class SlimSettings {
 
 	public void setNotifPeopleInBlink(boolean pNotifPeopleInBlink) {
 		notifPeopleInBlink = pNotifPeopleInBlink;
+		saveSettings();
 	}
 
 	public boolean isNotifPeopleInBubble() {
@@ -870,6 +886,7 @@ public class SlimSettings {
 
 	public void setNotifPeopleInBubble(boolean pNotifPeopleInBubble) {
 		notifPeopleInBubble = pNotifPeopleInBubble;
+		saveSettings();
 	}
 	
 	public boolean isAutoRefreshContacts() {
@@ -887,6 +904,7 @@ public class SlimSettings {
 				refreshTask.cancel();
 				refreshTask = null;
 			}
+			saveSettings();
 		}
 	}
 
@@ -931,6 +949,7 @@ public class SlimSettings {
 
 	public void setAutoEscapeXML(boolean pAutoEscapeXML) {
 		autoEscapeXML = pAutoEscapeXML;
+		saveSettings();
 	}
 
 }
