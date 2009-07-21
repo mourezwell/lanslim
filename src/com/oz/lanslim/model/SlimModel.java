@@ -144,13 +144,17 @@ public class SlimModel {
 					Externalizer.getString("LANSLIM.2", pMessage.getSender().getName()));
 			}
 			else if (lType.equals(SlimMessageTypeEnum.AVAILABILITY)) {
+				
 				SlimAvailabilityUserMessage saum = (SlimAvailabilityUserMessage)pMessage;
-				if (saum.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
+				SlimUserContact knownSuc = contacts.getOrAddUserByAddress(pMessage.getSender());
+				boolean lChange = !saum.getAvailability().equals(knownSuc.getAvailability());
+
+				if (lChange && saum.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
 					iconListener.startIconBlinking(settings.isNotifAvailabiltyBlink(), 
-						settings.isNotifAvailabiltyBubble(),
-						Externalizer.getString("LANSLIM.211", pMessage.getSender().getName()));
+							settings.isNotifAvailabiltyBubble(),
+							Externalizer.getString("LANSLIM.211", pMessage.getSender().getName()));
 				}
-				else if (saum.getAvailability().equals(SlimAvailabilityEnum.OFFLINE)){
+				else if (lChange && saum.getAvailability().equals(SlimAvailabilityEnum.OFFLINE)){
 					iconListener.startIconBlinking(settings.isNotifAvailabiltyBlink(), 
 						settings.isNotifAvailabiltyBubble(),
 						Externalizer.getString("LANSLIM.212", pMessage.getSender().getName()));
