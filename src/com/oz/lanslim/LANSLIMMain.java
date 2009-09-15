@@ -67,8 +67,6 @@ public class LANSLIMMain {
 		
 		new TrayIconManager(model, frame);
 				
-		frame.setVisible(true);
-		
 		if (!model.getSettings().isTrayEnable() || !model.getSettings().isStartAsTray()) {
 			frame.setVisible(true);
 			frame.toFront();
