@@ -66,6 +66,7 @@
 		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpathref="launch4j.classpath"/>
 		<launch4j configFile="launch4j.xml" />
     	<copy file="lib/tray.dll" tofile="liv/tray.dll"/>
+    	<copy file="lib/jna.jar" tofile="liv/jna.jar"/>
 	</target>
 
 	
