@@ -3,10 +3,10 @@ package com.oz.lanslim.gui;
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.model.SlimModel;
+import com.oz.lanslim.model.SlimStateEnum;
 
 public class SlimMainFrame extends JFrame {
 
@@ -20,7 +20,7 @@ public class SlimMainFrame extends JFrame {
 		}
 	}
 
-	private JPanel mainPanel = null;
+	private MainPane mainPanel = null;
 	private SlimMainFrameWindowListener listener = null;
 
 	private SlimModel model = null;
@@ -47,6 +47,10 @@ public class SlimMainFrame extends JFrame {
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 		setSize(model.getSettings().getW(), model.getSettings().getH());
 		setLocation(model.getSettings().getX(), model.getSettings().getY());
+	}
+	
+	protected void refreshState(SlimStateEnum pState) {
+		mainPanel.refreshState(pState);
 	}
 
 }
