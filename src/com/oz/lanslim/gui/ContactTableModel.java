@@ -42,7 +42,7 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 		int i = 0;
 		for (Iterator it = lAll.iterator(); it.hasNext();) {
 			SlimContact c = (SlimContact)it.next();
-			if (!c.equals(list.getSettingsUser())) {
+			if (!list.isSettingsUser(c)) {
 				datas[i] = new Object[] { c.getName(), c };
 				i++;
 			}

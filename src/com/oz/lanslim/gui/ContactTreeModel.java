@@ -72,7 +72,7 @@ public class ContactTreeModel extends DefaultTreeModel
 		Iterator it3 = users.iterator();
 		while (it3.hasNext()) {
 			SlimUserContact user = (SlimUserContact)it3.next();
-			if (!user.equals(list.getSettingsUser())) {
+			if (!list.isSettingsUser(user)) {
 				if (user.getAvailability() != SlimAvailabilityEnum.OFFLINE || !hideOfflineFilter) {
 					if (user.getName().toLowerCase().startsWith(prefixNameFilter)) {
 						addContactInCategoryNode(user, getCategoryNode(list.getCategory(user)));
@@ -161,7 +161,7 @@ public class ContactTreeModel extends DefaultTreeModel
 			Iterator it3 = users.iterator();
 			while (it3.hasNext()) {
 				SlimUserContact user = (SlimUserContact)it3.next();
-				if (!user.equals(list.getSettingsUser())) {
+				if (!list.isSettingsUser(user)) {
 					if (user.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
 						if (user.getName().toLowerCase().startsWith(prefixNameFilter)) {
 							addContactInCategoryNode(user, getCategoryNode(list.getCategory(user)));
