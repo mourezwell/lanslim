@@ -39,6 +39,7 @@ public class SlimSettings {
 	private static final String ITALIC_PROP = SLIM_SETTINGS_PROPS_PREFIX + "italic"; //$NON-NLS-1$
 	private static final String BOLD_PROP = SLIM_SETTINGS_PROPS_PREFIX + "bold"; //$NON-NLS-1$
 	private static final String SIZE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "size"; //$NON-NLS-1$
+	private static final String FACE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "face"; //$NON-NLS-1$
 	private static final String START_PROP = SLIM_SETTINGS_PROPS_PREFIX + "startAsTray"; //$NON-NLS-1$
 	private static final String CLOSE_PROP = SLIM_SETTINGS_PROPS_PREFIX + "closeAsTray"; //$NON-NLS-1$
 	private static final String HIDEGRP_PROP = SLIM_SETTINGS_PROPS_PREFIX + "hideGroup"; //$NON-NLS-1$
@@ -56,20 +57,27 @@ public class SlimSettings {
 	private static final String PROXY_HOST_PROP = PROXY_PREFIX + "host"; //$NON-NLS-1$
 	private static final String PROXY_PORT_PROP = PROXY_PREFIX + "port"; //$NON-NLS-1$
 	private static final String CRYPTO_PROP = SLIM_SETTINGS_PROPS_PREFIX + "crypto"; //$NON-NLS-1$
-	private static final String AUTOESCAPEXML_PROP = SLIM_SETTINGS_PROPS_PREFIX + "autorescapeXML"; //$NON-NLS-1$
 	private static final String AUTOREFRESH_PROP = SLIM_SETTINGS_PROPS_PREFIX + "autorefresh"; //$NON-NLS-1$
 	private static final String NOTIFICATION_PREFIX = SLIM_SETTINGS_PROPS_PREFIX + "notification."; //$NON-NLS-1$
 	private static final String NOTIFICATION_BUBBLE_PREFIX = NOTIFICATION_PREFIX + "bubble."; //$NON-NLS-1$
 	private static final String NOTIFICATION_BLINK_PREFIX = NOTIFICATION_PREFIX + "blink."; //$NON-NLS-1$
+	private static final String NOTIFICATION_BEEP_PREFIX = NOTIFICATION_PREFIX + "beep."; //$NON-NLS-1$
 	private static final String NOTIFICATION_AVAILABILTY_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "availability"; //$NON-NLS-1$
 	private static final String NOTIFICATION_AVAILABILTY_BLINK = NOTIFICATION_BLINK_PREFIX + "availability"; //$NON-NLS-1$
+	private static final String NOTIFICATION_AVAILABILTY_BEEP = NOTIFICATION_BEEP_PREFIX + "availability"; //$NON-NLS-1$
 	private static final String NOTIFICATION_NEWTALK_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "newTalk"; //$NON-NLS-1$
 	private static final String NOTIFICATION_NEWTALK_BLINK = NOTIFICATION_BLINK_PREFIX + "newTalk"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWTALK_BEEP = NOTIFICATION_BEEP_PREFIX + "newTalk"; //$NON-NLS-1$
 	private static final String NOTIFICATION_NEWMESSAGE_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "newMessage"; //$NON-NLS-1$
 	private static final String NOTIFICATION_NEWMESSAGE_BLINK = NOTIFICATION_BLINK_PREFIX + "newMessage"; //$NON-NLS-1$
+	private static final String NOTIFICATION_NEWMESSAGE_BEEP = NOTIFICATION_BEEP_PREFIX + "newMessage"; //$NON-NLS-1$
 	private static final String NOTIFICATION_PEOPLEIN_BUBBLE = NOTIFICATION_BUBBLE_PREFIX + "peopleIn"; //$NON-NLS-1$
 	private static final String NOTIFICATION_PEOPLEIN_BLINK = NOTIFICATION_BLINK_PREFIX + "peopleIn"; //$NON-NLS-1$
-	
+	private static final String NOTIFICATION_PEOPLEIN_BEEP = NOTIFICATION_BEEP_PREFIX + "peopleIn"; //$NON-NLS-1$
+	private static final String SOUND_PROP = SLIM_SETTINGS_PROPS_PREFIX + "sound"; //$NON-NLS-1$
+	private static final String MOOD_PROP = SLIM_SETTINGS_PROPS_PREFIX + "mood"; //$NON-NLS-1$
+	private static final String TEXTBUTTON_PROP = SLIM_SETTINGS_PROPS_PREFIX + "textButton"; //$NON-NLS-1$
+	private static final String DOWNLOAD_PROP = SLIM_SETTINGS_PROPS_PREFIX + "download"; //$NON-NLS-1$
 	
 	public static final String DEFAULT_LANGUAGE = "EN"; //$NON-NLS-1$
 	public static final String DEFAULT_PORT = "17000"; //$NON-NLS-1$
@@ -77,6 +85,7 @@ public class SlimSettings {
 	private static final String DEFAULT_COLOR = "000000"; //$NON-NLS-1$
 	private static final String COLOR_PATTERN = "[0-9A-F]{6}";  //$NON-NLS-1$
 	private static final int DEFAULT_SIZE = 4;
+	private static final String DEFAULT_FACE = "Default";
 	private static final boolean DEFAULT_BOLD = false;
 	private static final boolean DEFAULT_ITALIC = false;
 	private static final boolean DEFAULT_UNDERLINE = false;
@@ -99,19 +108,26 @@ public class SlimSettings {
 	private static final boolean DEFAULT_NEED_PROXY = false;
 	private static final boolean DEFAULT_CRYPTO = false;
 	private static final boolean DEFAULT_AUTOREFRESH = false;
-	private static final boolean DEFAULT_AUTOESCAPE = false;
 	private static final boolean DEFAULT_AVAILABILTY_BUBBLE = false;
 	private static final boolean DEFAULT_AVAILABILTY_BLINK = false;
+	private static final boolean DEFAULT_AVAILABILTY_BEEP = false;
 	private static final boolean DEFAULT_NEWTALK_BUBBLE = false;
 	private static final boolean DEFAULT_NEWTALK_BLINK = false;
+	private static final boolean DEFAULT_NEWTALK_BEEP = false;
 	private static final boolean DEFAULT_NEWMESSAGE_BUBBLE = true;
 	private static final boolean DEFAULT_NEWMESSAGE_BLINK = true;
+	private static final boolean DEFAULT_NEWMESSAGE_BEEP = false;
 	private static final boolean DEFAULT_PEOPLEIN_BUBBLE = false;
 	private static final boolean DEFAULT_PEOPLEIN_BLINK = false;
-
-
+	private static final boolean DEFAULT_PEOPLEIN_BEEP = false;
+	private static final boolean DEFAULT_TEXT_WITH_BUTTON = true;
+	private static final String DEFAULT_MOOD = "";
+	private static final boolean DEFAULT_SOUND = true;
+	private static final String DEFAULT_DOWNLOAD_DIR = System.getProperty("user.home");
+	
 	private  String language = DEFAULT_LANGUAGE;
 	private  String color = DEFAULT_COLOR;
+	private  String face = DEFAULT_FACE;
 	private  int size = DEFAULT_SIZE;
 	private  boolean underline = DEFAULT_UNDERLINE;
 	private  boolean italic = DEFAULT_ITALIC;
@@ -136,20 +152,27 @@ public class SlimSettings {
 	private  String proxyPort = null;
 	private  boolean crypto = DEFAULT_CRYPTO;
 	private  boolean autoRefreshContacts = DEFAULT_AUTOREFRESH;
-	private  boolean autoEscapeXML = DEFAULT_AUTOESCAPE;
 	private  boolean notifAvailabiltyBlink = DEFAULT_AVAILABILTY_BLINK;
 	private  boolean notifAvailabiltyBubble = DEFAULT_AVAILABILTY_BUBBLE;
+	private  boolean notifAvailabiltyBeep = DEFAULT_AVAILABILTY_BEEP;
 	private  boolean notifNewTalkBlink = DEFAULT_NEWTALK_BLINK;
 	private  boolean notifNewTalkBubble = DEFAULT_NEWTALK_BUBBLE;
+	private  boolean notifNewTalkBeep = DEFAULT_NEWTALK_BEEP;
 	private  boolean notifNewMessageBlink = DEFAULT_NEWMESSAGE_BLINK;
 	private  boolean notifNewMessageBubble = DEFAULT_NEWMESSAGE_BUBBLE;
+	private  boolean notifNewMessageBeep = DEFAULT_NEWMESSAGE_BEEP;
 	private  boolean notifPeopleInBlink = DEFAULT_PEOPLEIN_BLINK;
 	private  boolean notifPeopleInBubble = DEFAULT_PEOPLEIN_BUBBLE;
+	private  boolean notifPeopleInBeep = DEFAULT_PEOPLEIN_BEEP;
+	private  boolean sound = DEFAULT_SOUND;
+	private  boolean textWithButton = DEFAULT_TEXT_WITH_BUTTON;
+	private  String downloadDir = DEFAULT_DOWNLOAD_DIR;
 	
 	private SlimModel model = null;
 	private SlimUserContact contactInfo = null;
 	private ContactViewListener contactViewListener = null;
 	private boolean initOk = false;
+	private boolean saveLock = false;
 	private Timer timer = null;
 	private TimerTask saveLocationTask = null;
 	private RefreshTask refreshTask = null;
@@ -161,11 +184,14 @@ public class SlimSettings {
 		
 		contactInfo = new SlimUserContact(DEFAULT_NAME, InetAddress.getLocalHost().getHostName(), DEFAULT_PORT);
 		contactInfo.setAvailability(SlimAvailabilityEnum.ONLINE);
+		contactInfo.setMood(DEFAULT_MOOD);
+		
 		color = DEFAULT_COLOR;
 		size = DEFAULT_SIZE;
 		underline = DEFAULT_UNDERLINE;
 		italic = DEFAULT_ITALIC;
 		bold = DEFAULT_BOLD;
+		face = DEFAULT_FACE;
 		
 		model = pModel;
 		networkValid = DEFAULT_NETWORK_VALID;
@@ -191,16 +217,22 @@ public class SlimSettings {
 		proxyPort = null;
 		crypto = DEFAULT_CRYPTO;
 		autoRefreshContacts = DEFAULT_AUTOREFRESH;
-		autoEscapeXML = DEFAULT_AUTOESCAPE;
 		notifAvailabiltyBlink = DEFAULT_AVAILABILTY_BLINK;
 		notifAvailabiltyBubble = DEFAULT_AVAILABILTY_BUBBLE;
+		notifAvailabiltyBeep = DEFAULT_AVAILABILTY_BEEP;
 		notifNewTalkBlink = DEFAULT_NEWTALK_BLINK;
 		notifNewTalkBubble = DEFAULT_NEWTALK_BUBBLE;
+		notifNewTalkBeep = DEFAULT_NEWTALK_BEEP;
 		notifNewMessageBlink = DEFAULT_NEWMESSAGE_BLINK;
 		notifNewMessageBubble = DEFAULT_NEWMESSAGE_BUBBLE;
+		notifNewMessageBeep = DEFAULT_NEWMESSAGE_BEEP;
 		notifPeopleInBlink = DEFAULT_PEOPLEIN_BLINK;
 		notifPeopleInBubble = DEFAULT_PEOPLEIN_BUBBLE;
-
+		notifPeopleInBeep = DEFAULT_PEOPLEIN_BEEP;
+		sound = DEFAULT_SOUND;
+		textWithButton = DEFAULT_TEXT_WITH_BUTTON;
+		downloadDir = DEFAULT_DOWNLOAD_DIR;
+		
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			public void run() {
@@ -246,7 +278,12 @@ public class SlimSettings {
 				// ignore start exception
 			}
 		}
-		
+	
+		lTemp = p.getProperty(MOOD_PROP);
+		if (lTemp != null) {
+			contactInfo.setMood(lTemp);
+		}
+
 		lTemp = p.getProperty(COLOR_PROP);
 		if (lTemp != null) {
 			try {
@@ -265,6 +302,11 @@ public class SlimSettings {
 			catch (SlimException se) {
 				// ignore start exception
 			}
+		}
+
+		lTemp = p.getProperty(FACE_PROP);
+		if (lTemp != null) {
+			setFontFace(lTemp);
 		}
 
 		lTemp = p.getProperty(BOLD_PROP);
@@ -371,11 +413,6 @@ public class SlimSettings {
 			setAutoRefreshContacts(Boolean.valueOf(lTemp).booleanValue());
 		}
 		
-		lTemp = p.getProperty(AUTOESCAPEXML_PROP);
-		if (lTemp != null) {
-			setAutoEscapeXML(Boolean.valueOf(lTemp).booleanValue());
-		}
-		
 		lTemp = p.getProperty(NOTIFICATION_AVAILABILTY_BLINK);
 		if (lTemp != null) {
 			setNotifAvailabiltyBlink(Boolean.valueOf(lTemp).booleanValue());
@@ -383,6 +420,10 @@ public class SlimSettings {
 		lTemp = p.getProperty(NOTIFICATION_AVAILABILTY_BUBBLE);
 		if (lTemp != null) {
 			setNotifAvailabiltyBubble(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_AVAILABILTY_BEEP);
+		if (lTemp != null) {
+			setNotifAvailabiltyBeep(Boolean.valueOf(lTemp).booleanValue());
 		}
 		lTemp = p.getProperty(NOTIFICATION_NEWMESSAGE_BLINK);
 		if (lTemp != null) {
@@ -392,6 +433,10 @@ public class SlimSettings {
 		if (lTemp != null) {
 			setNotifNewMessageBubble(Boolean.valueOf(lTemp).booleanValue());
 		}
+		lTemp = p.getProperty(NOTIFICATION_NEWMESSAGE_BEEP);
+		if (lTemp != null) {
+			setNotifNewMessageBeep(Boolean.valueOf(lTemp).booleanValue());
+		}
 		lTemp = p.getProperty(NOTIFICATION_NEWTALK_BLINK);
 		if (lTemp != null) {
 			setNotifNewTalkBlink(Boolean.valueOf(lTemp).booleanValue());
@@ -400,6 +445,10 @@ public class SlimSettings {
 		if (lTemp != null) {
 			setNotifNewTalkBubble(Boolean.valueOf(lTemp).booleanValue());
 		}
+		lTemp = p.getProperty(NOTIFICATION_NEWTALK_BEEP);
+		if (lTemp != null) {
+			setNotifNewTalkBeep(Boolean.valueOf(lTemp).booleanValue());
+		}
 		lTemp = p.getProperty(NOTIFICATION_PEOPLEIN_BLINK);
 		if (lTemp != null) {
 			setNotifPeopleInBlink(Boolean.valueOf(lTemp).booleanValue());
@@ -407,6 +456,25 @@ public class SlimSettings {
 		lTemp = p.getProperty(NOTIFICATION_PEOPLEIN_BUBBLE);
 		if (lTemp != null) {
 			setNotifPeopleInBubble(Boolean.valueOf(lTemp).booleanValue());
+		}
+		lTemp = p.getProperty(NOTIFICATION_PEOPLEIN_BEEP);
+		if (lTemp != null) {
+			setNotifPeopleInBeep(Boolean.valueOf(lTemp).booleanValue());
+		}
+		
+		lTemp = p.getProperty(SOUND_PROP);
+		if (lTemp != null) {
+			setSoundEnable(Boolean.valueOf(lTemp).booleanValue());
+		}
+
+		lTemp = p.getProperty(TEXTBUTTON_PROP);
+		if (lTemp != null) {
+			setTextWithButton(Boolean.valueOf(lTemp).booleanValue());
+		}
+
+		lTemp = p.getProperty(DOWNLOAD_PROP);
+		if (lTemp != null) {
+			setDownloadDir(lTemp);
 		}
 
 		initOk = true;
@@ -468,7 +536,9 @@ public class SlimSettings {
 		p.put(NAME_PROP, contactInfo.getName());
 		p.put(PORT_PROP, Integer.toString(contactInfo.getPort()));
 		p.put(HOST_PROP, contactInfo.getHost());
+		p.put(MOOD_PROP, contactInfo.getMood());
 		p.put(COLOR_PROP, getColor());
+		p.put(FACE_PROP, getFontFace());
 		p.put(SIZE_PROP, Integer.toString(getFontSize()));
 		p.put(BOLD_PROP, Boolean.toString(isBold()));
 		p.put(ITALIC_PROP, Boolean.toString(isItalic()));
@@ -496,15 +566,21 @@ public class SlimSettings {
 		}
 		p.put(CRYPTO_PROP, Boolean.toString(isCryptoEnable()));
 		p.put(AUTOREFRESH_PROP, Boolean.toString(isAutoRefreshContacts()));
-		p.put(AUTOESCAPEXML_PROP, Boolean.toString(isAutoEscapeXML()));
 		p.put(NOTIFICATION_AVAILABILTY_BLINK, Boolean.toString(isNotifAvailabiltyBlink()));
 		p.put(NOTIFICATION_AVAILABILTY_BUBBLE, Boolean.toString(isNotifAvailabiltyBubble()));
+		p.put(NOTIFICATION_AVAILABILTY_BEEP, Boolean.toString(isNotifAvailabiltyBeep()));
 		p.put(NOTIFICATION_NEWMESSAGE_BLINK, Boolean.toString(isNotifNewMessageBlink()));
 		p.put(NOTIFICATION_NEWMESSAGE_BUBBLE, Boolean.toString(isNotifNewMessageBubble()));
+		p.put(NOTIFICATION_NEWMESSAGE_BEEP, Boolean.toString(isNotifNewMessageBeep()));
 		p.put(NOTIFICATION_NEWTALK_BLINK, Boolean.toString(isNotifNewTalkBlink()));
 		p.put(NOTIFICATION_NEWTALK_BUBBLE, Boolean.toString(isNotifNewTalkBubble()));
+		p.put(NOTIFICATION_NEWTALK_BEEP, Boolean.toString(isNotifNewTalkBeep()));
 		p.put(NOTIFICATION_PEOPLEIN_BLINK, Boolean.toString(isNotifPeopleInBlink()));
 		p.put(NOTIFICATION_PEOPLEIN_BUBBLE, Boolean.toString(isNotifPeopleInBubble()));
+		p.put(NOTIFICATION_PEOPLEIN_BEEP, Boolean.toString(isNotifPeopleInBeep()));
+		p.put(SOUND_PROP, Boolean.toString(isSoundEnable()));
+		p.put(TEXTBUTTON_PROP, Boolean.toString(isTextWithButton()));
+		p.put(DOWNLOAD_PROP, getDownloadDir());
 
 		return p;
 	}
@@ -662,7 +738,7 @@ public class SlimSettings {
     }
 
 	private void saveSettings() {
-		if (initOk) {
+		if (initOk && !saveLock) {
             model.storeSettings();
 		}
 	}
@@ -697,6 +773,14 @@ public class SlimSettings {
 		else {
 			throw new SlimException(Externalizer.getString("LANSLIM.171", new Integer(size))); //$NON-NLS-1$
 		}
+	}
+
+	public String getFontFace() {
+		return face;
+	}
+
+	public void setFontFace(String pFace) {
+		face = pFace;
 	}
 
 	public boolean isUnderline() {
@@ -835,6 +919,15 @@ public class SlimSettings {
 		saveSettings();
 	}
 
+	public void setNotifAvailabiltyBeep(boolean pNotifAvailabiltyBeep) {
+		notifAvailabiltyBeep = pNotifAvailabiltyBeep;
+		saveSettings();
+	}
+
+	public boolean isNotifAvailabiltyBeep() {
+		return notifAvailabiltyBeep;
+	}
+
 	public boolean isNotifNewMessageBlink() {
 		return notifNewMessageBlink;
 	}
@@ -851,6 +944,15 @@ public class SlimSettings {
 	public void setNotifNewMessageBubble(boolean pNotifNewMessageBubble) {
 		notifNewMessageBubble = pNotifNewMessageBubble;
 		saveSettings();
+	}
+
+	public void setNotifNewMessageBeep(boolean pNotifNewMessageBeep) {
+		notifNewMessageBeep = pNotifNewMessageBeep;
+		saveSettings();
+	}
+
+	public boolean isNotifNewMessageBeep() {
+		return notifNewMessageBeep;
 	}
 
 	public boolean isNotifNewTalkBlink() {
@@ -871,6 +973,15 @@ public class SlimSettings {
 		saveSettings();
 	}
 
+	public void setNotifNewTalkBeep(boolean pNotifNewTalkBeep) {
+		notifNewTalkBeep = pNotifNewTalkBeep;
+		saveSettings();
+	}
+
+	public boolean isNotifNewTalkBeep() {
+		return notifNewTalkBeep;
+	}
+
 	public boolean isNotifPeopleInBlink() {
 		return notifPeopleInBlink;
 	}
@@ -888,7 +999,16 @@ public class SlimSettings {
 		notifPeopleInBubble = pNotifPeopleInBubble;
 		saveSettings();
 	}
-	
+
+	public void setNotifPeopleInBeep(boolean pNotifPeopleInBeep) {
+		notifPeopleInBeep = pNotifPeopleInBeep;
+		saveSettings();
+	}
+
+	public boolean isNotifPeopleInBeep() {
+		return notifPeopleInBeep;
+	}
+
 	public boolean isAutoRefreshContacts() {
 		return autoRefreshContacts;
 	}
@@ -943,13 +1063,35 @@ public class SlimSettings {
 		}
 	}
 
-	public boolean isAutoEscapeXML() {
-		return autoEscapeXML;
+	public boolean isSoundEnable() {
+		return sound;
 	}
 
-	public void setAutoEscapeXML(boolean pAutoEscapeXML) {
-		autoEscapeXML = pAutoEscapeXML;
+	public void setSoundEnable(boolean pSoundEnable) {
+		sound = pSoundEnable;
 		saveSettings();
 	}
+
+	public void saveLock(boolean pLock) {
+		saveLock = pLock;
+		saveSettings();
+	}
+
+	public boolean isTextWithButton() {
+		return textWithButton;
+	}
+
+	public void setTextWithButton(boolean pTextWithButton) {
+		textWithButton = pTextWithButton;
+	}
+
+	public String getDownloadDir() {
+		return downloadDir;
+	}
+
+	public void setDownloadDir(String pDownloadDir) {
+		downloadDir = pDownloadDir;
+	}
+
 
 }
