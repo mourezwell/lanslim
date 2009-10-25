@@ -4,6 +4,7 @@ package com.oz.lanslim.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -28,6 +29,7 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -67,9 +69,12 @@ public class TalkPane extends JSplitPane
 	private JButton italicButton;
 	private JButton boldButton;
 	private JButton escapeXMLButton;
+	private JButton bellButton;
 	private JComboBox smileyCBox;
 	private JComboBox sizeComboBox;
-
+	private JButton fontButton;
+	private JButton attachmentButton;
+	
 	private SlimTalkListener mainPane = null;
 	private SlimTalk talkModel = null; 
 	private String[] history = null; 
@@ -79,22 +84,21 @@ public class TalkPane extends JSplitPane
 	private boolean underline = false;
 	private boolean bold = false;
 	private boolean italic = false;
-	private boolean autoEscape = false;
+	private File attachment = null;
 	
 	public TalkPane(SlimTalkListener pMainPane, SlimTalk pTalk) {
 		super();
 		mainPane = pMainPane;
 		talkModel = pTalk;
-		init();
-		talkModel.registerListener(this);
-		setName(pTalk.getId());
-		history = new String[10];
-		historyIndex = 0;
-		historyCallIndex = 0;
 		underline = pTalk.isDefaultUndeline();
 		bold = pTalk.isDefaultBold();
 		italic = pTalk.isDefaultItalic();
-		autoEscape = pTalk.isDefaultEscapeXML();
+		setName(pTalk.getId());
+		init();
+		talkModel.registerListener(this);
+		history = new String[10];
+		historyIndex = 0;
+		historyCallIndex = 0;
 	}
 	
 	
@@ -114,7 +118,7 @@ public class TalkPane extends JSplitPane
 				talkArea.setEditable(false);
 				talkAreaPane.setViewportView(talkArea);
 				talkArea.setText(HTMLConstants.HTML + talkModel.getText() + HTMLConstants.ENDHTML);
-				talkArea.addHyperlinkListener(new SlimHyperlinkListener());
+				talkArea.addHyperlinkListener(new SlimHyperlinkListener(this));
 				talkArea.setTransferHandler(new ContactTransferHandler(talkModel));
 				talkAreaPane.setPreferredSize(new java.awt.Dimension(310, 200));
 			}
@@ -175,13 +179,23 @@ public class TalkPane extends JSplitPane
 					messageToolbar.add(colorButton);
 				}
 				{
+					fontButton = new JButton();
+					fontButton.setIcon(new SlimIcon("font.png")); //$NON-NLS-1$
+					fontButton.addActionListener(this); 
+					fontButton.setActionCommand(TalkPaneActionCommand.FACE);
+					fontButton.setToolTipText(Externalizer.getString("LANSLIM.237", talkModel.getMessageFontFace())); //$NON-NLS-1$
+					fontButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
+					messageToolbar.addSeparator();
+					messageToolbar.add(fontButton);
+				}
+				{
 					ComboBoxModel sizeComboBoxModel = 
 						new DefaultComboBoxModel(
 								new String[] { "1", "2", "3", "4", "5", "6", "7" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 					sizeComboBox = new JComboBox();
 					sizeComboBox.setModel(sizeComboBoxModel);
 					sizeComboBox.setSelectedIndex(Integer.parseInt(talkModel.getMessageFontSize()) -1);
-					sizeComboBox.setMaximumSize(new Dimension(40, 20));
+					sizeComboBox.setMaximumSize(new Dimension(40, 22));
 					sizeComboBox.addActionListener(this);
 					sizeComboBox.setActionCommand(TalkPaneActionCommand.SIZE);
 					sizeComboBox.setToolTipText(Externalizer.getString("LANSLIM.95")); //$NON-NLS-1$
@@ -196,7 +210,7 @@ public class TalkPane extends JSplitPane
 					smileyCBox = new JComboBox(intArray);
 			        smileyCBox.setRenderer(new SmileyComboBoxRenderer(true));
 			        smileyCBox.setMaximumRowCount(5);
-			        smileyCBox.setMaximumSize(new Dimension(80, 24));
+			        smileyCBox.setMaximumSize(new Dimension(80, 22));
 			        smileyCBox.addActionListener(this);
 			        smileyCBox.setActionCommand(TalkPaneActionCommand.SMILEY);
 			        smileyCBox.setToolTipText(Externalizer.getString("LANSLIM.96")); //$NON-NLS-1$
@@ -205,13 +219,33 @@ public class TalkPane extends JSplitPane
 				}
 				{
 					escapeXMLButton = new JButton();
-					escapeXMLButton.setIcon(new SlimIcon("xml.png")); //$NON-NLS-1$
+					escapeXMLButton.setIcon(new SlimIcon("xml_accept.png")); //$NON-NLS-1$
 					escapeXMLButton.addActionListener(this);
 					escapeXMLButton.setActionCommand(TalkPaneActionCommand.AUTO_ESCAPE);
-					escapeXMLButton.setToolTipText(Externalizer.getString("LANSLIM.219")); //$NON-NLS-1$
-					escapeXMLButton.setBorder(SlimButtonBorder.getSelectedBorder(talkModel.isDefaultEscapeXML()));
+					escapeXMLButton.setToolTipText(Externalizer.getString("LANSLIM.218")); //$NON-NLS-1$
+					escapeXMLButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
 			        messageToolbar.addSeparator();
 					messageToolbar.add(escapeXMLButton);
+				}
+				{
+					bellButton = new JButton();
+					bellButton.setIcon(new SlimIcon("sound.png")); //$NON-NLS-1$
+					bellButton.addActionListener(this);
+					bellButton.setActionCommand(TalkPaneActionCommand.SOUND);
+					bellButton.setToolTipText(Externalizer.getString("LANSLIM.225")); //$NON-NLS-1$
+					bellButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
+			        messageToolbar.addSeparator();
+					messageToolbar.add(bellButton);
+				}
+				{
+					attachmentButton = new JButton();
+					attachmentButton.setIcon(new SlimIcon("attachment.png")); //$NON-NLS-1$
+					attachmentButton.addActionListener(this);
+					attachmentButton.setActionCommand(TalkPaneActionCommand.ATTACHMENT);
+					attachmentButton.setToolTipText(Externalizer.getString("LANSLIM.216")); //$NON-NLS-1$
+					attachmentButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
+			        messageToolbar.addSeparator();
+					messageToolbar.add(attachmentButton);
 				}
 				{
 					sendButton = new JButton();
@@ -253,7 +287,11 @@ public class TalkPane extends JSplitPane
 
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand() == TalkPaneActionCommand.COLOR) {
+		if (e.getActionCommand() == TalkPaneActionCommand.SEND) {
+			send();
+			newMessageArea.requestFocus();
+		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.COLOR) {
 		    Color newColor = JColorChooser.showDialog(
 		    		TalkPane.this,
 		            Externalizer.getString("LANSLIM.99"), //$NON-NLS-1$
@@ -273,6 +311,16 @@ public class TalkPane extends JSplitPane
 			talkModel.setMessageFontSize(sizeComboBox.getSelectedItem().toString());
     		newMessageArea.requestFocus();
 		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.FACE) {
+			SlimFontChooser lFontDialog = new SlimFontChooser((Frame)getRootPane().getParent(), talkModel.getMessageFontFace());
+			lFontDialog.pack();
+			lFontDialog.setLocationRelativeTo(this);
+			lFontDialog.setVisible(true);
+			
+			String lChosenFont = lFontDialog.getCurrentFont(); 
+			talkModel.setMessageFontFace(lChosenFont);
+			fontButton.setToolTipText(Externalizer.getString("LANSLIM.237", lChosenFont)); //$NON-NLS-1$
+		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.BOLD) {
 			styleButtonAction(bold, HTMLConstants.BOLD, HTMLConstants.ENDBOLD);
 			bold = !bold;
@@ -291,10 +339,6 @@ public class TalkPane extends JSplitPane
 			underlineButton.setBorder(SlimButtonBorder.getSelectedBorder(underline));
 			newMessageArea.requestFocus();
 		}
-		else if (e.getActionCommand() == TalkPaneActionCommand.SEND) {
-			send();
-			newMessageArea.requestFocus();
-		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.SMILEY) {
     		int lPos = newMessageArea.getSelectionStart();
 			String before = newMessageArea.getText().substring(0, lPos);
@@ -309,8 +353,53 @@ public class TalkPane extends JSplitPane
 			newMessageArea.requestFocus();
 		}
 		else if (e.getActionCommand() == TalkPaneActionCommand.AUTO_ESCAPE) {
-			autoEscape = !autoEscape;
-			escapeXMLButton.setBorder(SlimButtonBorder.getSelectedBorder(autoEscape));
+			boolean lEscape = !talkModel.isEscapeXMLchar();
+			talkModel.setEscapeXMLChar(lEscape);
+			if (lEscape) {
+				escapeXMLButton.setIcon(new SlimIcon("xml.png")); //$NON-NLS-1$
+				escapeXMLButton.setToolTipText(Externalizer.getString("LANSLIM.219")); //$NON-NLS-1$
+			}
+			else {
+				escapeXMLButton.setIcon(new SlimIcon("xml_accept.png")); //$NON-NLS-1$
+				escapeXMLButton.setToolTipText(Externalizer.getString("LANSLIM.218")); //$NON-NLS-1$
+			}
+			newMessageArea.requestFocus();
+		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.SOUND) {
+			try {
+				talkModel.sendSound();
+			}
+			catch (SlimException se) {
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+				    Externalizer.getString("LANSLIM.45", se.getMessage()), //$NON-NLS-1$ //$NON-NLS-2$
+				    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
+				    JOptionPane.ERROR_MESSAGE);
+			}
+			catch (IOException ioe) {
+				JOptionPane.showMessageDialog(getRootPane().getParent(),
+				    Externalizer.getString("LANSLIM.45", ioe.getMessage()), //$NON-NLS-1$ //$NON-NLS-2$
+				    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
+				    JOptionPane.ERROR_MESSAGE);
+			}
+			newMessageArea.requestFocus();
+		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.ATTACHMENT) {
+			if (attachment == null) {
+				
+				JFileChooser fc = new JFileChooser();
+				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				int returnVal = fc.showOpenDialog(this);
+		        if (returnVal == JFileChooser.APPROVE_OPTION && fc.getSelectedFile() != null) {
+		        	attachment = fc.getSelectedFile();
+					attachmentButton.setIcon(new SlimIcon("attachment_cancel.png")); //$NON-NLS-1$
+					attachmentButton.setToolTipText(Externalizer.getString("LANSLIM.217", attachment.getName())); //$NON-NLS-1$
+				}
+			}
+			else {
+				attachment = null;
+				attachmentButton.setIcon(new SlimIcon("attachment.png")); //$NON-NLS-1$
+				attachmentButton.setToolTipText(Externalizer.getString("LANSLIM.216")); //$NON-NLS-1$
+			}
 			newMessageArea.requestFocus();
 		}
 
@@ -331,11 +420,11 @@ public class TalkPane extends JSplitPane
 	private void send() {
 		try {
 			String lMessage = newMessageArea.getText();
-			if (autoEscape) {
-				lMessage = lMessage.replaceAll("<", "&lt;");
-			}
-			talkModel.sendUpdateTalkMessage(lMessage, true);
-			history[historyIndex] = newMessageArea.getText();
+			talkModel.sendUpdateTalkMessage(lMessage, attachment);
+			attachment = null;
+			attachmentButton.setIcon(new SlimIcon("attachment.png")); //$NON-NLS-1$
+			attachmentButton.setToolTipText(Externalizer.getString("LANSLIM.216")); //$NON-NLS-1$
+			history[historyIndex] = lMessage;
 			if (historyIndex < 9) {
 				historyIndex++;
 			}
@@ -356,7 +445,13 @@ public class TalkPane extends JSplitPane
 		}
 		catch (SlimException se) {
 			JOptionPane.showMessageDialog(getRootPane().getParent(),
-			    Externalizer.getString("LANSLIM.45", Externalizer.getString("LANSLIM.40")), //$NON-NLS-1$ //$NON-NLS-2$
+			    Externalizer.getString("LANSLIM.45", se.getMessage()), //$NON-NLS-1$ //$NON-NLS-2$
+			    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
+			    JOptionPane.ERROR_MESSAGE);
+		}
+		catch (IOException ioe) {
+			JOptionPane.showMessageDialog(getRootPane().getParent(),
+			    Externalizer.getString("LANSLIM.45", ioe.getMessage()), //$NON-NLS-1$ //$NON-NLS-2$
 			    Externalizer.getString("LANSLIM.22"), //$NON-NLS-1$
 			    JOptionPane.ERROR_MESSAGE);
 		}
@@ -614,6 +709,8 @@ public class TalkPane extends JSplitPane
 	
 	private class TalkPaneActionCommand {
 
+		public static final String FACE = "face"; //$NON-NLS-1$
+
 		public static final String COLOR = "color"; //$NON-NLS-1$
 		
 		public static final String BOLD = "bold"; //$NON-NLS-1$
@@ -632,14 +729,18 @@ public class TalkPane extends JSplitPane
 
 		public static final String AUTO_ESCAPE = "autoEscape"; //$NON-NLS-1$
 
+		public static final String SOUND = "sound"; //$NON-NLS-1$
+
+		public static final String ATTACHMENT = "attachment"; //$NON-NLS-1$
+
 	}
 
 	private class EscapeXMLCharMouseListener extends MouseAdapter {
 		
-		EscapeXMLCaracterPopupMenu popupMenu = null;
+		EscapeXMLCharacterPopupMenu popupMenu = null;
 		
 		public EscapeXMLCharMouseListener(TalkPane pPane) {
-			popupMenu = new EscapeXMLCaracterPopupMenu(pPane);
+			popupMenu = new EscapeXMLCharacterPopupMenu(pPane);
 		}
 		
 		public void mouseReleased(MouseEvent e) {
@@ -650,9 +751,9 @@ public class TalkPane extends JSplitPane
 		
 	}
 
-	private class EscapeXMLCaracterPopupMenu extends JPopupMenu {
+	private class EscapeXMLCharacterPopupMenu extends JPopupMenu {
 
-		public EscapeXMLCaracterPopupMenu(TalkPane pPane) {
+		public EscapeXMLCharacterPopupMenu(TalkPane pPane) {
 			JMenuItem userEditMenuItem = new JMenuItem(Externalizer.getString("LANSLIM.218")); //$NON-NLS-1$
 	        userEditMenuItem.addActionListener(pPane);
 	        userEditMenuItem.setActionCommand(TalkPaneActionCommand.ESCAPE_CHAR);
@@ -687,8 +788,60 @@ public class TalkPane extends JSplitPane
 				break;
 			}
 		}
-		newMessageArea.setText(before + lBeforeReplace.replaceAll("<", "&lt;") + after);
+		newMessageArea.setText(before + lBeforeReplace.replaceAll("<", "&lt;") + after); //$NON-NLS-1$ //$NON-NLS-2$
 		newMessageArea.setCaretPosition(pos + + count * 3);
 	}
 
+	protected String downlaodLink(String pURL) {
+		
+		String lResult = null;
+		String lTempDir = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
+		String lTmpFileName = pURL.substring(HTMLConstants.FILE_PROTOCOL.length());
+		String lTargetFileName = lTmpFileName.substring(0, lTmpFileName.lastIndexOf('.'));
+		File lFinal = new File(talkModel.getDownloadDir(), lTargetFileName);
+		File lTmp = new File(lTempDir, lTmpFileName); 
+		if (lTmp.exists()) {
+			boolean lConfirmed = !lFinal.exists();
+			if (!lConfirmed) {
+    			int lAnswer = JOptionPane.showConfirmDialog(getRootPane().getParent(), 
+    					Externalizer.getString("LANSLIM.238", lTargetFileName, talkModel.getDownloadDir()), //$NON-NLS-1$
+    					Externalizer.getString("LANSLIM.239"), //$NON-NLS-1$
+    					JOptionPane.YES_NO_OPTION);
+    			lConfirmed = (lAnswer == JOptionPane.YES_OPTION);
+    			if (lConfirmed) {
+    				boolean lSuccess = lFinal.delete();
+    				if (!lSuccess) {
+    					lConfirmed = false;
+            			JOptionPane.showMessageDialog(getRootPane().getParent(), 
+            					Externalizer.getString("LANSLIM.240", lTargetFileName, talkModel.getDownloadDir()), //$NON-NLS-1$
+            					Externalizer.getString("LANSLIM.241"), //$NON-NLS-1$
+            					JOptionPane.ERROR_MESSAGE);
+    				}
+    			}
+			}
+			if (lConfirmed) {
+				boolean lSuccess = lTmp.renameTo(lFinal);
+				if (!lSuccess || !lSuccess) {
+        			JOptionPane.showMessageDialog(getRootPane().getParent(), 
+        					Externalizer.getString("LANSLIM.240", lTargetFileName, talkModel.getDownloadDir()), //$NON-NLS-1$
+        					Externalizer.getString("LANSLIM.241"), //$NON-NLS-1$
+        					JOptionPane.ERROR_MESSAGE);
+				}
+				else {
+					lResult = HTMLConstants.FILE_PROTOCOL + talkModel.getDownloadDir();
+				}
+			}
+		}
+		else if (lFinal.exists()) {
+			lResult = HTMLConstants.FILE_PROTOCOL + talkModel.getDownloadDir();
+		}
+		else {
+			JOptionPane.showMessageDialog(getRootPane().getParent(), 
+					Externalizer.getString("LANSLIM.240", lTargetFileName, lTempDir), //$NON-NLS-1$
+					Externalizer.getString("LANSLIM.241"), //$NON-NLS-1$
+					JOptionPane.ERROR_MESSAGE);
+		}
+		return lResult;
+	}
+	
 }
