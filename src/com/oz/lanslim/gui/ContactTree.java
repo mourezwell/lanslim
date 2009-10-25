@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,6 +39,9 @@ public class ContactTree extends JTree implements ContactView,
 		setExpandsSelectedPaths(true);
 		addTreeExpansionListener(this);
         treeModel.registerExpander(this);
+        //Enable tool tips.
+        ToolTipManager.sharedInstance().registerComponent(this);
+
 		
 	    // Where the tree is initialized:
         getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
