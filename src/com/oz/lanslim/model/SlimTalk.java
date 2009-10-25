@@ -1,5 +1,11 @@
 package com.oz.lanslim.model;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +19,7 @@ import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.gui.SlimIcon;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
 import com.oz.lanslim.message.SlimExitTalkMessage;
+import com.oz.lanslim.message.SlimFileAttachmentMessage;
 import com.oz.lanslim.message.SlimInviteTalkMessage;
 import com.oz.lanslim.message.SlimNewTalkMessage;
 import com.oz.lanslim.message.SlimUpdateTalkMessage;
@@ -31,25 +38,36 @@ public class SlimTalk {
 
 	private static final String PEOPLE_SEPARATOR= ", "; //$NON-NLS-1$
 
+	private static final String DING_DONG= "!! Ding Dong !!"; //$NON-NLS-1$
+
+	private static final int ATTACHMENT_PART_SIZE = 32000;
+	
+	private static final String ATTACHMENT_PART_SUFFIX = ".part"; //$NON-NLS-1$
+	
 	private String title = null;
 	private String id = null;
 	private List peopleIn = null;
 	private String messageFontColor = null;
 	private String messageFontSize = null;
+	private String messageFontFace = null;
 	private String text = null;
 	private SlimTalkListener listener = null;
 	private SlimModel model = null;
 	private boolean leader = false;
-
+	private boolean confirmed = false;
+	private boolean escapeXMLChar = false;
+	
 	public SlimTalk(SlimModel pModel, String pTitle, String pId, List pPeople, SlimUserContact pLeader, 
-			String pDate) {
+			String pDate, boolean pConfirmed) {
 		model = pModel;
 		title = pTitle;
 		peopleIn = pPeople;
 		id = pId;
+		confirmed = pConfirmed;
 		messageFontColor = pModel.getSettings().getColor();
 		messageFontSize = String.valueOf(pModel.getSettings().getFontSize());
-		SlimUserContact lYou = pModel.getContacts().getSettingsUser();
+		messageFontFace = pModel.getSettings().getFontFace();
+		SlimUserContact lYou = pModel.getSettings().getContactInfo();
 		
 		if (pLeader.equals(lYou)) {
 			leader = true;
@@ -67,7 +85,7 @@ public class SlimTalk {
 
 	public SlimTalk(SlimModel pModel, String pTitle, List pPeople) {
 		this(pModel, pTitle, (pTitle + (int)Math.round(Math.random() * 1000000)), pPeople, 
-				pModel.getContacts().getSettingsUser(), HTMLConstants.TIME_FORMAT.format(new Date()));
+				pModel.getSettings().getContactInfo(), HTMLConstants.TIME_FORMAT.format(new Date()), false);
 	}
 	
 	public String getId() {
@@ -139,18 +157,21 @@ public class SlimTalk {
 	}
 	
 	private void sendInviteTalkMessage(SlimUserContact pContact, String pDate) throws SlimException {
-		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimInviteTalkMessage setm = new SlimInviteTalkMessage(sender, getId(), pContact, pDate);
-		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
-				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					if (isLeader()) {
-						suc.addMessageInQueue(setm);
+
+		if (confirmed) {
+			SlimUserContact sender = model.getSettings().getContactInfo();
+			SlimInviteTalkMessage setm = new SlimInviteTalkMessage(sender, getId(), pContact, pDate);
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (!suc.equals(model.getSettings().getContactInfo())) {
+					if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+						if (isLeader()) {
+							suc.addMessageInQueue(setm);
+						}
 					}
-				}
-				else {
-					model.getNetworkAdapter().send(setm, suc);
+					else {
+						model.getNetworkAdapter().send(setm, suc);
+					}
 				}
 			}
 		}
@@ -158,18 +179,21 @@ public class SlimTalk {
 
 	
 	private void sendExcludeTalkMessage(SlimUserContact pContact, String pDate) throws SlimException {
-		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimExcludeTalkMessage setm = new SlimExcludeTalkMessage(sender, getId(), pContact, pDate);
-		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
-				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					if (isLeader()) {
-						suc.addMessageInQueue(setm);
+
+		if (confirmed) {
+			SlimUserContact sender = model.getSettings().getContactInfo();
+			SlimExcludeTalkMessage setm = new SlimExcludeTalkMessage(sender, getId(), pContact, pDate);
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (!suc.equals(model.getSettings().getContactInfo())) {
+					if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+						if (isLeader()) {
+							suc.addMessageInQueue(setm);
+						}
 					}
-				}
-				else {
-					model.getNetworkAdapter().send(setm, suc);
+					else {
+						model.getNetworkAdapter().send(setm, suc);
+					}
 				}
 			}
 		}
@@ -248,19 +272,21 @@ public class SlimTalk {
 			}
 		}
 		
-		String date = HTMLConstants.TIME_FORMAT.format(new Date());
-		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimExitTalkMessage setm = new SlimExitTalkMessage(sender, getId(), date);
-		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
-			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
-				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-					if (isLeader()) {
-						suc.addMessageInQueue(setm);
+		if (confirmed) {
+			String date = HTMLConstants.TIME_FORMAT.format(new Date());
+			SlimUserContact sender = model.getSettings().getContactInfo();
+			SlimExitTalkMessage setm = new SlimExitTalkMessage(sender, getId(), date);
+			for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+				SlimUserContact suc = (SlimUserContact)it.next();
+				if (!suc.equals(model.getSettings().getContactInfo())) {
+					if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+						if (isLeader()) {
+							suc.addMessageInQueue(setm);
+						}
 					}
-				}
-				else {
-					model.getNetworkAdapter().send(setm, suc);
+					else {
+						model.getNetworkAdapter().send(setm, suc);
+					}
 				}
 			}
 		}
@@ -300,36 +326,143 @@ public class SlimTalk {
 	
 	// receiveNewTalkMessage is located in TalkList class because it is called before Talk creation  
 	private void sendNewTalkMessage(SlimUserContact pContact) throws SlimException {
-		String date = HTMLConstants.TIME_FORMAT.format(new Date());
-		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimNewTalkMessage sntm = new SlimNewTalkMessage(sender, getId(), getTitle(), peopleIn, date);
 
-		if (pContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
-			if (isLeader()) {
-				pContact.addMessageInQueue(sntm);
+		if (confirmed) {
+			String date = HTMLConstants.TIME_FORMAT.format(new Date());
+			SlimUserContact sender = model.getSettings().getContactInfo();
+			SlimNewTalkMessage sntm = new SlimNewTalkMessage(sender, getId(), getTitle(), peopleIn, date);
+	
+			if (pContact.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+				if (isLeader()) {
+					pContact.addMessageInQueue(sntm);
+				}
+			}
+			else {
+				model.getNetworkAdapter().send(sntm, pContact);
 			}
 		}
-		else {
-			model.getNetworkAdapter().send(sntm, pContact);
-		}
+	}
+
+	public synchronized void sendSound() 
+		throws SlimException, IOException {
+	
+		sendUpdateTalkMessage(DING_DONG, null);
 	}
 	
-	public synchronized void sendUpdateTalkMessage(String pRawMessage, boolean pBuildBefore) 
-		throws SlimException {
-		
-		String lMessageToSend = pRawMessage;
-		String date = HTMLConstants.TIME_FORMAT.format(new Date());
+	
+	public synchronized void receiveAttachmentMessage(SlimFileAttachmentMessage pMesage) {
 
-		if (pBuildBefore) {
-			lMessageToSend = prepareMessageBeforeSending(pRawMessage);
+		try {
+			String lFileName = pMesage.getFileName();
+			int lFilePart = pMesage.getPart();
+			String lNewPartName = lFileName + ATTACHMENT_PART_SUFFIX + lFilePart;
+			File lNew = new File(System.getProperty("java.io.tmpdir"), lNewPartName);
+			if (lNew.exists()) {
+				lNew.delete();
+			}
+			if (lFilePart > 1) {
+				String lLastPartName = lFileName + ATTACHMENT_PART_SUFFIX + (lFilePart-1);
+		        File lLast = new File(System.getProperty("java.io.tmpdir"), lLastPartName);
+		        if (lLast.exists()) {
+		        	boolean lSuccess = lLast.renameTo(lNew);
+		        	if (!lSuccess) {
+		        		SlimLogger.log("Fail to rename " + lLastPartName + " in " + lNewPartName); //$NON-NLS-1$
+		        	}
+		        }
+		        else {
+		        	SlimLogger.log(lLastPartName + " is missing in " + 
+		        			System.getProperty("java.io.tmpdir") + " attachment is broken");
+		        	return;
+		        }
+			}
+	        OutputStream lOut = new FileOutputStream(lNew, lFilePart > 1);
+	        byte[] lCurrentContent = pMesage.getContent();
+	        if (lCurrentContent != null) {
+	        	lOut.write(lCurrentContent);
+	        }
+	        lOut.close();
 		}
+		catch (IOException lE) {
+			SlimLogger.logException("talk.receiveAttachmentMessage", lE); //$NON-NLS-1$
+		}
+        
+	}
+	
+	
+	
+	private int sendFileAttachmentMessage(File pAttachment) throws IOException, SlimException { 
+
+
 		SlimUserContact sender = model.getSettings().getContactInfo();
-		text = text + buildMessageBeforeDisplaying(lMessageToSend, sender, date);
+		String date = HTMLConstants.TIME_FORMAT.format(new Date());
+		String lFileName = pAttachment.getName();
+
+        InputStream lIn = new FileInputStream(pAttachment);
+
+        // Transfer bytes from in to out
+		byte[] lBuf = new byte[ATTACHMENT_PART_SIZE];
+        int lLen = lIn.read(lBuf);
+        int lParts = 0;
+        while (lLen > 0) {
+        	lParts = lParts + 1;
+
+        	try {
+        		Thread.sleep(100);
+        	}
+        	catch (InterruptedException lE) {
+        		//don't care
+        	}
+        	SlimFileAttachmentMessage lSfam = new SlimFileAttachmentMessage(sender, getId(), date, 
+        			lFileName, lBuf, lParts, lLen);
+
+    		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
+    			SlimUserContact suc = (SlimUserContact)it.next();
+    			if (!suc.equals(model.getSettings().getContactInfo())) {
+    				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+    					if (isLeader()) {
+    						suc.addMessageInQueue(lSfam);
+    					} 
+    				}
+    				else {
+    					model.getNetworkAdapter().send(lSfam, suc);
+    				}
+    			}
+    			else {
+    				receiveAttachmentMessage(lSfam);
+    			}
+    		}
+            lLen = lIn.read(lBuf);
+        }
+        lIn.close();
+        
+		return lParts;
+	}
+	
+	
+	public synchronized void sendUpdateTalkMessage(String pRawMessage, File pAttachment) 
+		throws SlimException, IOException {
+		
+		if (!confirmed) {
+			confirmed = true;
+			sendNewTalkMessage();
+		}
+		int lParts = 0;
+		String lAttachmentName = null;
+		if (pAttachment != null) {
+			lAttachmentName = pAttachment.getName();
+			lParts = sendFileAttachmentMessage(pAttachment);
+		}
+		
+		String lMessageToSend = prepareMessageBeforeSending(pRawMessage);
+		
+		String date = HTMLConstants.TIME_FORMAT.format(new Date());
+		SlimUserContact sender = model.getSettings().getContactInfo();
+		text = text + buildMessageBeforeDisplaying(lMessageToSend, sender, date, lAttachmentName, lParts);
 		if (listener !=  null) {
 			listener.notifyTextTalkUpdate(this);
 		}
-		SlimUpdateTalkMessage sutm = 
-			new SlimUpdateTalkMessage(sender, getId(), lMessageToSend, date, false);
+		SlimUpdateTalkMessage sutm = new SlimUpdateTalkMessage(sender, getId(), 
+				lMessageToSend,	date, false, lAttachmentName, lParts);
 		
 		boolean lCryptoLocallyEnable = model.getSettings().isCryptoEnable();
 		for (Iterator it = peopleIn.iterator(); it.hasNext();) {
@@ -338,14 +471,14 @@ public class SlimTalk {
 				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
 					if (isLeader()) {
 						suc.addMessageInQueue(sutm);
-					}
+					} 
 				}
 				else {
 					SlimKey lKey = suc.getKey();
 					if (lCryptoLocallyEnable && lKey != null) {
 						String lEncodedMsg = lKey.encodeMsg(lMessageToSend);
-						SlimUpdateTalkMessage ssutm = 
-							new SlimUpdateTalkMessage(sender, getId(), lEncodedMsg, date, true);
+						SlimUpdateTalkMessage ssutm = new SlimUpdateTalkMessage(sender, getId(), 
+								lEncodedMsg, date, true, lAttachmentName, lParts);
 						model.getNetworkAdapter().send(ssutm, suc);
 					}
 					else {
@@ -387,7 +520,8 @@ public class SlimTalk {
 			}
 		}
 
-		text = text + buildMessageBeforeDisplaying(pMessage.getNewMessage(), pMessage.getSender(), pMessage.getDate());
+		text = text + buildMessageBeforeDisplaying(pMessage.getNewMessage(), pMessage.getSender(), 
+				pMessage.getDate(),	pMessage.getAttachement(), pMessage.getPartNumber());
 		if (listener !=  null) {
 			listener.notifyTextTalkUpdate(this);
 		}
@@ -428,9 +562,29 @@ public class SlimTalk {
 		messageFontColor = pMessageFontColor;
 	}
 
+	public String getMessageFontFace() {
+		return messageFontFace;
+	}
+
+	public void setMessageFontFace(String pMessageFontFace) {
+		messageFontFace = pMessageFontFace;
+	}
+
+	public boolean isEscapeXMLchar() {
+		return escapeXMLChar;
+	}
+
+	public void setEscapeXMLChar(boolean pEscapeXMLChar) {
+		escapeXMLChar = pEscapeXMLChar;
+	}
+
 	private String prepareMessageBeforeSending(String pMessageArea) {
 		
 		String temp = pMessageArea ;
+
+		if (escapeXMLChar) {
+			temp = temp.replaceAll("<", "&lt;");
+		}
 		temp = temp.replaceAll(NEW_LINE_REG_EXP, HTMLConstants.NEWLINE);
 		
 		int bold = count(temp, HTMLConstants.BOLD);
@@ -449,8 +603,10 @@ public class SlimTalk {
 			temp = temp + HTMLConstants.ENDUNDERLINE;
 		}
 		
-		return (HTMLConstants.FONTCOLOR + messageFontColor + HTMLConstants.FONTSIZE + messageFontSize 
-				+ HTMLConstants.TAGEND + temp + HTMLConstants.ENDFONT + HTMLConstants.NEWLINE);
+		return (HTMLConstants.FONTCOLOR + messageFontColor 
+				+ HTMLConstants.FONTSIZE + messageFontSize 
+				+ HTMLConstants.FONTFACE + messageFontFace + HTMLConstants.TAGEND 
+				+ temp + HTMLConstants.ENDFONT + HTMLConstants.NEWLINE);
 	}
 
 	
@@ -470,11 +626,17 @@ public class SlimTalk {
 
 
 	
-	private String buildMessageBeforeDisplaying(String pMessageArea, SlimUserContact pSender, String pDate) {
+	private String buildMessageBeforeDisplaying(String pMessageArea, SlimUserContact pSender, String pDate, 
+			String pAttachementName, int pPartNumber) {
 		
 		String temp = pMessageArea ;
 
-
+		if (pMessageArea.indexOf(DING_DONG) >= 0 && model.getSettings().isSoundEnable()) {
+			File lSoundFile = new File(getClass().getResource("/com/oz/lanslim/sounds/DingDong.wav").getFile());
+			WavePlayer lDong = new WavePlayer(lSoundFile);
+			lDong.play();
+		}
+		
 		// add smilleys
 		for (int i = 0; i < SMILEY_REG_EXP.length; i++) {
 			temp = temp.replaceAll(SMILEY_REG_EXP[i], getSmileyImgTag(i));
@@ -497,6 +659,14 @@ public class SlimTalk {
 				}
 				s = temp.indexOf(HTMLConstants.HTTP, s + 2*(e-s) + 14);
 			}
+		}
+		
+		// add Attachment
+		if (pAttachementName != null) {
+			URL imageURL = ClassLoader.getSystemResource(SlimIcon.IMAGE_PACKAGE + "attachment.png");
+			temp = temp + HTMLConstants.LINK + HTMLConstants.FILE_PROTOCOL + pAttachementName  + ATTACHMENT_PART_SUFFIX + pPartNumber + HTMLConstants.TAGEND 
+				+ HTMLConstants.IMAGE + imageURL + HTMLConstants.TAGEND + HTMLConstants.ENDIMAGE + pAttachementName + HTMLConstants.ENDLINK 
+				+ HTMLConstants.NEWLINE;
 		}
 		
 		return HTMLConstants.getHeader(pSender.getName(), pDate) + temp;
@@ -528,8 +698,8 @@ public class SlimTalk {
 		return model.getSettings().getShortcuts()[i];
 	}
 
-	public boolean isDefaultEscapeXML() {
-		return model.getSettings().isAutoEscapeXML();
+	public String getDownloadDir() {
+		return model.getSettings().getDownloadDir();
 	}
 
 }
