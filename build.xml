@@ -11,6 +11,8 @@
         <pathelement location="classes"/>
         <pathelement location="lib/looks-2.1.4.jar"/>
         <pathelement location="lib/forms-1.2.0.jar"/>
+        <pathelement location="lib/jna.jar"/>
+        <pathelement location="lib/examples.jar"/>
         <pathelement location="lib/jdic.jar"/>
     </path>
     <target depends="clean" name="init">
@@ -45,12 +47,12 @@
     	<tstamp/>	
         <jar destfile="liv/lanslim.jar" basedir="classes">
             <manifest>
-              	<attribute name="Manifest-Version" value="${version}"/>
               	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
               	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
               	<attribute name="Implementation-Version" value="${version}"/>
             	<attribute name="Implementation-Vendor" value="Olivier Mourez"/>
 	            <attribute name="Main-Class" value="com.oz.lanslim.LANSLIMMain"/>
+	            <attribute name="Class-Path" value="jna.jar examples.jar"/>
         	</manifest>         
         </jar>
     </target>
@@ -68,13 +70,14 @@
 
 	
     <target name="build-distrib">
-		<zip destfile="lanslim_${version}.zip">
+		<zip destfile="lanslim_v${version}.zip">
 			<fileset dir="liv">
 				<include name="lanslim.exe"/>
 				<include name="tray.dll"/>
+				<include name="jna.jar"/>
 			</fileset>
 		</zip>
-		<zip destfile="lanslim_${version}_src.zip">
+		<zip destfile="lanslim_v${version}_src.zip">
 			<fileset dir=".">
 				<include name="src/**/*.java"/>
 				<include name="src/**/*.png"/>

@@ -9,5 +9,7 @@
 			<attribute name="javadoc_location" value="file:/T:/Downloads/jdic-0.9.3-bin-cross-platform/javadoc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/jna.jar"/>
+	<classpathentry kind="lib" path="lib/examples.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
