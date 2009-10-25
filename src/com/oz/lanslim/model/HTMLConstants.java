@@ -18,7 +18,8 @@ public class HTMLConstants {
 	public static final  String ENDUNDERLINE = "</u>"; //$NON-NLS-1$
 	
 	public static final  String FONTCOLOR = "<font color=\""; //$NON-NLS-1$
-	public static final  String FONTSIZE = "\"size=\""; //$NON-NLS-1$
+	public static final  String FONTSIZE = "\" size=\""; //$NON-NLS-1$
+	public static final  String FONTFACE = "\" face=\""; //$NON-NLS-1$
 	public static final  String ENDFONT = "</font>"; //$NON-NLS-1$
 	
 	public static final  String LINK = "<a href=\""; //$NON-NLS-1$
@@ -41,6 +42,9 @@ public class HTMLConstants {
 
 	public static final String DATE_START = " ["; //$NON-NLS-1$
 	public static final String DATE_END = "]>"; //$NON-NLS-1$
+
+	public static final String FILE_PROTOCOL = "file://"; //$NON-NLS-1$
+
 	
 	public static final DateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
 	
