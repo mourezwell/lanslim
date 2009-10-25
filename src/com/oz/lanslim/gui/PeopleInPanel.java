@@ -18,12 +18,11 @@ import javax.swing.JToolBar;
 
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
-import com.oz.lanslim.model.PeopleInAvailabilityListener;
 import com.oz.lanslim.model.SlimModel;
 import com.oz.lanslim.model.SlimTalk;
 import com.oz.lanslim.model.SlimUserContact;
 
-public class PeopleInPanel extends JPanel implements ActionListener, PeopleInAvailabilityListener {
+public class PeopleInPanel extends JPanel implements ActionListener {
 
 	private JToolBar peopleInBar;
 	private JLabel peopleInLabel;
@@ -42,7 +41,6 @@ public class PeopleInPanel extends JPanel implements ActionListener, PeopleInAva
 		model = pModel;
 		talkDisplay = pDisplay;
 		init();
-		pModel.getContacts().registerPeopleInListener(this);
 	}
 	
 	private void init() {
@@ -174,11 +172,6 @@ public class PeopleInPanel extends JPanel implements ActionListener, PeopleInAva
 		
 		public static final String EXCLUDE = "exclude"; //$NON-NLS-1$
 		
-
-	}
-
-	public void updateAvailabilities() {
-		repaint();	
 	}
 
 }
