@@ -11,6 +11,7 @@ import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
 import com.oz.lanslim.message.SlimExitTalkMessage;
+import com.oz.lanslim.message.SlimFileAttachmentMessage;
 import com.oz.lanslim.message.SlimInviteTalkMessage;
 import com.oz.lanslim.message.SlimMessage;
 import com.oz.lanslim.message.SlimMessageTypeEnum;
@@ -90,6 +91,10 @@ public class SlimNetworkAdapter implements Runnable {
 						else if (SlimMessageTypeEnum.EXCLUDE_TALK.equals(sm.getType())) {
 							SlimExcludeTalkMessage setm = (SlimExcludeTalkMessage)sm;
 							SwingUtilities.invokeLater(new ReceiveExcludeTalkTask(model, setm));
+						}				
+						else if (SlimMessageTypeEnum.ATTACHMENT_TALK.equals(sm.getType())) {
+							SlimFileAttachmentMessage sfam = (SlimFileAttachmentMessage)sm;
+							SwingUtilities.invokeLater(new ReceiveFileAttachmentMessageTask(model, sfam));
 						}				
 						else {
 							SlimLogger.log(Externalizer.getString("LANSLIM.44")); //$NON-NLS-1$

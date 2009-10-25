@@ -25,7 +25,9 @@ public class SlimMessageTypeEnum implements Serializable {
 	public static final SlimMessageTypeEnum UPDATE_TALK = new SlimMessageTypeEnum(5, "UPDATE_TALK"); //$NON-NLS-1$
 
 	public static final SlimMessageTypeEnum EXCLUDE_TALK = new SlimMessageTypeEnum(6, "EXCLUDE_TALK"); //$NON-NLS-1$
-	
+
+	public static final SlimMessageTypeEnum ATTACHMENT_TALK = new SlimMessageTypeEnum(7, "ATTACHMENT_TALK"); //$NON-NLS-1$
+
 	private SlimMessageTypeEnum(int i, String s) {
 		id = i;
 		text = s;
@@ -57,6 +59,9 @@ public class SlimMessageTypeEnum implements Serializable {
 		if (EXCLUDE_TALK.toString().equals(pType)) {
 			return EXCLUDE_TALK;
 		}
+		if (ATTACHMENT_TALK.toString().equals(pType)) {
+			return ATTACHMENT_TALK;
+		}
 		throw new SlimException(Externalizer.getString("LANSLIM.47", pType)); //$NON-NLS-1$
 	}
 	public int toInt() {
@@ -79,6 +84,8 @@ public class SlimMessageTypeEnum implements Serializable {
 				return UPDATE_TALK;
 			case 6: 
 				return EXCLUDE_TALK;
+			case 7: 
+				return ATTACHMENT_TALK;
 			default:
 				throw new SlimException(Externalizer.getString("LANSLIM.47", new Integer(pType))); //$NON-NLS-1$
 		}

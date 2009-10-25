@@ -10,14 +10,21 @@ public class SlimUpdateTalkMessage extends SlimTalkMessage implements Serializab
 
 	private static final String MESSAGE_ITEM = "Message"; //$NON-NLS-1$
 	private static final String CRYPTO_ITEM = "Encrypted"; //$NON-NLS-1$
+	private static final String ATTACHMENT_ITEM = "Attachement"; //$NON-NLS-1$
+	private static final String PARTNUMBER_ITEM = "Parts"; //$NON-NLS-1$
 	private String message;
 	private boolean encrypted;
+	private String attachment;
+	private int partNumber;
 	
 	public SlimUpdateTalkMessage(SlimUserContact pSender, String pTalkId, String pNewMessage, 
-			String pDate, boolean pEncrypted) {
+			String pDate, boolean pEncrypted, String pAttachement, int pPartNumber) {
 		super(pSender, SlimMessageTypeEnum.UPDATE_TALK, pTalkId, pDate);
 		message = pNewMessage;
 		encrypted = pEncrypted;
+		encrypted = pEncrypted;
+		attachment = pAttachement;
+		partNumber = pPartNumber;
 	}
 
 	public void setNewMessage(String pMessage) {
@@ -32,9 +39,21 @@ public class SlimUpdateTalkMessage extends SlimTalkMessage implements Serializab
 		return encrypted;
 	}
 
+	public String getAttachement() {
+		return attachment;
+	}
+
+	public int getPartNumber() {
+		return partNumber;
+	}
+
 	public String toString() {
-		return super.toString() + itemToString(MESSAGE_ITEM, message.toString()) 
-			+ itemToString(CRYPTO_ITEM, String.valueOf(encrypted));
+		String lResult = super.toString() + itemToString(CRYPTO_ITEM, String.valueOf(encrypted));
+		if (attachment != null) {
+			lResult = lResult + itemToString(ATTACHMENT_ITEM, attachment) 
+				+ itemToString(PARTNUMBER_ITEM, String.valueOf(partNumber));
+		}
+		return lResult + itemToString(MESSAGE_ITEM, message.toString()); 
 	}
 	
 	public static SlimUpdateTalkMessage fromStringItems(Map pItems) throws SlimException {
@@ -48,7 +67,12 @@ public class SlimUpdateTalkMessage extends SlimTalkMessage implements Serializab
 		if (lEncryptedStr != null) {
 			lEncrypted = Boolean.valueOf(lEncryptedStr).booleanValue();
 		}
-		return new SlimUpdateTalkMessage(suc, tid, msg, date, lEncrypted);
+		String lAttachment = (String)pItems.get(ATTACHMENT_ITEM);
+		int lPartNumber = 1;
+		if (lAttachment != null) {
+			lPartNumber = Integer.parseInt((String)pItems.get(PARTNUMBER_ITEM));
+		}
+		return new SlimUpdateTalkMessage(suc, tid, msg, date, lEncrypted, lAttachment, lPartNumber);
 	}
 	
 }

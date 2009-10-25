@@ -12,6 +12,7 @@ import com.oz.lanslim.SlimLogger;
 import com.oz.lanslim.message.SlimAvailabilityUserMessage;
 import com.oz.lanslim.message.SlimExcludeTalkMessage;
 import com.oz.lanslim.message.SlimExitTalkMessage;
+import com.oz.lanslim.message.SlimFileAttachmentMessage;
 import com.oz.lanslim.message.SlimInviteTalkMessage;
 import com.oz.lanslim.message.SlimMessage;
 import com.oz.lanslim.message.SlimMessageTypeEnum;
@@ -101,6 +102,9 @@ public class SlimSocket {
 			}				
 			else if (type == SlimMessageTypeEnum.UPDATE_TALK){
 				return SlimUpdateTalkMessage.fromStringItems(lItems);
+			}				
+			else if (type == SlimMessageTypeEnum.ATTACHMENT_TALK){
+				return SlimFileAttachmentMessage.fromStringItems(lItems);
 			}				
 			else {
 				SlimLogger.log(Externalizer.getString("LANSLIM.38", type)); //$NON-NLS-1$
