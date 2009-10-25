@@ -86,7 +86,7 @@ public class SlimHyperLink extends JLabel implements MouseListener {
 		setVisitedColor(visitedcolor);
 		addMouseListener(this);
 		popupMenu = new HyperLinkPopupMenu();
-		actionListener = new SlimHyperlinkListener();
+		actionListener = new SlimHyperlinkListener(null);
 		setToolTipText(url);
 	}
 
