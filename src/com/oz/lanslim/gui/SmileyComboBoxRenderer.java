@@ -1,6 +1,8 @@
 package com.oz.lanslim.gui;
 
 import java.awt.Component;
+
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
@@ -9,6 +11,19 @@ import com.oz.lanslim.StringConstants;
 import com.oz.lanslim.model.SlimTalk;
 
 public class SmileyComboBoxRenderer extends JLabel implements ListCellRenderer {
+
+	public static final ImageIcon[] SMILLEYS = {
+		new SlimIcon(0 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(1 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(2 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(3 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(4 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(5 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(6 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(7 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(8 + SlimIcon.IMAGE_EXTENSION), 
+		new SlimIcon(9 + SlimIcon.IMAGE_EXTENSION) 
+	};
 
 	private boolean enable = false;
 	
@@ -38,13 +53,9 @@ public class SmileyComboBoxRenderer extends JLabel implements ListCellRenderer {
 		}
 
 		// Set the icon and text. If icon was null, say so.
+		setText(StringConstants.SPACE + SlimTalk.SMILEY_TEXT[selectedIndex]);
 		if (enable) {
-			String imgLocation = selectedIndex + SlimIcon.IMAGE_EXTENSION;
-			setText(StringConstants.SPACE + SlimTalk.SMILEY_TEXT[selectedIndex]);
-			setIcon(new SlimIcon(imgLocation));
-		}
-		else {
-			setText(StringConstants.SPACE + SlimTalk.SMILEY_TEXT[selectedIndex]);
+			setIcon(SMILLEYS[selectedIndex]);
 		}
 		return this;
 	}
