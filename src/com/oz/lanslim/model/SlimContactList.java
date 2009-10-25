@@ -385,7 +385,8 @@ public class SlimContactList {
 		try {
 			SlimUserContact sender = model.getSettings().getContactInfo();
 			SlimAvailabilityUserMessage saum = 
-				new SlimAvailabilityUserMessage(sender, pStatus, sender.getKey());
+				new SlimAvailabilityUserMessage(sender, pStatus, sender.getKey(),
+						sender.getState(), sender.getMood());
 			model.getNetworkAdapter().send(saum, pContact);
 		}
 		catch (SlimException lException) {
@@ -428,6 +429,8 @@ public class SlimContactList {
 		else { // offline
 			knownSuc.setAvailability(lNew);
 		}
+		knownSuc.setMood(pMessage.getMood());
+		knownSuc.setState(pMessage.getState());
 		
 		if (lNew != SlimAvailabilityEnum.OFFLINE && lOld == SlimAvailabilityEnum.OFFLINE) {
 			sendEnqueuedMessage(knownSuc);
@@ -449,6 +452,22 @@ public class SlimContactList {
 		}
 		if (!updateSentToNetwork) {
 			model.getNetworkAdapter().reset();
+		}
+	}
+
+	public synchronized void sendUpdateMoodOrState() {
+		
+		SlimUserContact sender = model.getSettings().getContactInfo();
+		SlimUserContact target = null;
+
+		for (Iterator it = getAllUserContact().iterator(); it.hasNext();) {
+			target = (SlimUserContact)it.next();
+			if (!target.equals(sender) && target.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
+				sendAvailabiltyMessage(target, SlimAvailabilityEnum.UNKNOWN);
+			}
+		}
+		if (peopleInListener != null) {
+			peopleInListener.updateAvailabilities();
 		}
 	}
 
@@ -739,8 +758,8 @@ public class SlimContactList {
 		return true;
 	}
 	
-	public SlimUserContact getSettingsUser() {
-		return model.getSettings().getContactInfo();
+	public boolean isSettingsUser(SlimContact pSuc) {
+		return model.getSettings().getContactInfo().equals(pSuc);
 	}
 	
 }

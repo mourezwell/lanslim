@@ -17,9 +17,14 @@ public class SlimUserContact extends SlimContact implements Serializable {
 			"([^" + HOST_SEPARATOR + "]*)" + HOST_SEPARATOR +  //$NON-NLS-1$ //$NON-NLS-2$
 			"([^\\" + PORT_SEPARATOR + "]*)" + PORT_SEPARATOR + "([0-9]{1,6})");   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
+	private static final String DEFAULT_MOOD = "";
+
 	private String host = null;
 	private int port = 0;
 	private SlimKey key = null;
+	private SlimStateEnum state = null;
+	private SlimStateListener stateListener = null;
+	private String mood = null;
 
 	private LinkedList messageQueue = null;
 	
@@ -29,6 +34,8 @@ public class SlimUserContact extends SlimContact implements Serializable {
 		setPort(pPort);
 		setHost(pIp);
 		messageQueue = new LinkedList();
+		state = SlimStateEnum.AVAILABLE;
+		mood = DEFAULT_MOOD;
 	}
 
 	public synchronized SlimTalkMessage getOldestMessageInQueue() {
@@ -134,6 +141,37 @@ public class SlimUserContact extends SlimContact implements Serializable {
 
 	public void setKey(SlimKey pKey) {
 		key = pKey;
+	}
+
+	public SlimStateEnum getState() {
+		return state;
+	}
+
+	public void setState(SlimStateEnum pState) {
+		if (state != pState) {
+			state = pState;
+			if (stateListener != null) {
+				stateListener.updateState(state);
+			}
+		}
+	}
+
+	public void registerListener(SlimStateListener pListener) {
+		stateListener = pListener;
+	}
+
+	public String getMood() {
+		return mood;
+	}
+
+	public void setMood(String pMood) {
+		if ((mood != null && !mood.equals(pMood)) 
+				|| (mood == null && pMood != null)) {
+			mood = pMood;
+			if (stateListener != null) {
+				stateListener.updateState(state);
+			}
+		}
 	}
 
 }

@@ -1,6 +1,8 @@
 package com.oz.lanslim;
 
-public interface SlimIconListener {
+import com.oz.lanslim.model.SlimStateListener;
+
+public interface SlimIconListener extends SlimStateListener {
 	
 	public void startIconBlinking(boolean pBlink, boolean pPop, String pMessage);
 

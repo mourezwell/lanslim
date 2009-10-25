@@ -12,4 +12,6 @@ public class StringConstants {
 
 	public static final String COLON = ":";  //$NON-NLS-1$
 
+	public static final String DASH = "-";  //$NON-NLS-1$
+
 }
