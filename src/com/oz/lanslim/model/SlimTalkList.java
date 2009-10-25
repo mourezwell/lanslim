@@ -53,7 +53,7 @@ public class SlimTalkList {
 			}
 		}
 		SlimTalk lTalk = new SlimTalk(model, pMessage.getTitle(), pMessage.getTalkId(), attendees, 
-				pMessage.getSender(), pMessage.getDate());
+				pMessage.getSender(), pMessage.getDate(), true);
 		// the new talk may replace previous one, which won't be updated anymore
 		talks.put(lTalk.getId(), lTalk);
 		listener.notifyNewTalk(lTalk);
