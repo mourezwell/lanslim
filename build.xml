@@ -82,6 +82,7 @@
 				<include name="src/**/*.java"/>
 				<include name="src/**/*.png"/>
 				<include name="src/**/*.properties"/>
+				<include name="src/**/*.wav"/>
 				<include name="lib/*.*"/>
 				<include name="build.xml"/>
 				<include name="build.properties"/>
