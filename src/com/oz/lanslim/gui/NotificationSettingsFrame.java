@@ -17,12 +17,16 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 	
 	private JCheckBox availabiltyBlinkBox;
 	private JCheckBox availabiltyBubbleBox;
+	private JCheckBox availabiltyBeepBox;
 	private JCheckBox newTalkBlinkBox;
 	private JCheckBox newTalkBubbleBox;
+	private JCheckBox newTalkBeepBox;
 	private JCheckBox newMessageBlinkBox;
 	private JCheckBox newMessageBubbleBox;
+	private JCheckBox newMessageBeepBox;
 	private JCheckBox peopleInChangeBlinkBox;
 	private JCheckBox peopleInChangeBubbleBox;
+	private JCheckBox peopleInChangeBeepBox;
 	
 	private JButton cancelButton;
 	private JButton okButton;
@@ -40,7 +44,7 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 			setTitle(Externalizer.getString("LANSLIM.73")); //$NON-NLS-1$
 			
 			FormLayout thisLayout = new FormLayout(
-					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
+					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)",  //$NON-NLS-1$
 					"max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu), max(p;5dlu)"); //$NON-NLS-1$
 			getContentPane().setLayout(thisLayout);
 			setSize(200, 410);
@@ -52,6 +56,8 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 			getContentPane().add(lBlinkLabel, new CellConstraints("4, 2, 1, 1, default, default")); //$NON-NLS-1$
 			JLabel lBubbleLabel = new JLabel(Externalizer.getString("LANSLIM.76")); //$NON-NLS-1$
 			getContentPane().add(lBubbleLabel, new CellConstraints("6, 2, 1, 1, default, default")); //$NON-NLS-1$ 
+			JLabel lBeepLabel = new JLabel(Externalizer.getString("LANSLIM.223")); //$NON-NLS-1$
+			getContentPane().add(lBeepLabel, new CellConstraints("8, 2, 1, 1, default, default")); //$NON-NLS-1$ 
 			
 			{
 				JLabel lLabel = new JLabel(Externalizer.getString("LANSLIM.203")); //$NON-NLS-1$
@@ -62,6 +68,9 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 				availabiltyBubbleBox = new JCheckBox();
 				availabiltyBubbleBox.setSelected(model.isNotifAvailabiltyBubble());
 				getContentPane().add(availabiltyBubbleBox, new CellConstraints("6, 4, 1, 1, default, default")); //$NON-NLS-1$
+				availabiltyBeepBox = new JCheckBox();
+				availabiltyBeepBox.setSelected(model.isNotifAvailabiltyBeep());
+				getContentPane().add(availabiltyBeepBox, new CellConstraints("8, 4, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
 				JLabel lLabel = new JLabel(Externalizer.getString("LANSLIM.204")); //$NON-NLS-1$
@@ -72,6 +81,9 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 				newMessageBubbleBox = new JCheckBox();
 				newMessageBubbleBox.setSelected(model.isNotifNewMessageBubble());
 				getContentPane().add(newMessageBubbleBox, new CellConstraints("6, 6, 1, 1, default, default")); //$NON-NLS-1$
+				newMessageBeepBox = new JCheckBox();
+				newMessageBeepBox.setSelected(model.isNotifNewMessageBeep());
+				getContentPane().add(newMessageBeepBox, new CellConstraints("8, 6, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
 				JLabel lLabel = new JLabel(Externalizer.getString("LANSLIM.205")); //$NON-NLS-1$
@@ -82,6 +94,9 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 				newTalkBubbleBox = new JCheckBox();
 				newTalkBubbleBox.setSelected(model.isNotifNewTalkBubble());
 				getContentPane().add(newTalkBubbleBox, new CellConstraints("6, 8, 1, 1, default, default")); //$NON-NLS-1$
+				newTalkBeepBox = new JCheckBox();
+				newTalkBeepBox.setSelected(model.isNotifNewTalkBeep());
+				getContentPane().add(newTalkBeepBox, new CellConstraints("8, 8, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
 				JLabel lLabel = new JLabel(Externalizer.getString("LANSLIM.206")); //$NON-NLS-1$
@@ -92,6 +107,9 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 				peopleInChangeBubbleBox = new JCheckBox();
 				peopleInChangeBubbleBox.setSelected(model.isNotifPeopleInBubble());
 				getContentPane().add(peopleInChangeBubbleBox, new CellConstraints("6, 10, 1, 1, default, default")); //$NON-NLS-1$
+				peopleInChangeBeepBox = new JCheckBox();
+				peopleInChangeBeepBox.setSelected(model.isNotifPeopleInBeep());
+				getContentPane().add(peopleInChangeBeepBox, new CellConstraints("8, 10, 1, 1, default, default")); //$NON-NLS-1$
 			}
 			{
 				JLabel trayWarning = new JLabel();
@@ -132,12 +150,16 @@ public class NotificationSettingsFrame extends JDialog implements ActionListener
 		if (e.getActionCommand().equals(ShortcutFrameActionCommand.OK)) {
 			model.setNotifAvailabiltyBlink(availabiltyBlinkBox.isSelected());
 			model.setNotifAvailabiltyBubble(availabiltyBubbleBox.isSelected());
+			model.setNotifAvailabiltyBeep(availabiltyBeepBox.isSelected());
 			model.setNotifNewMessageBlink(newMessageBlinkBox.isSelected());
 			model.setNotifNewMessageBubble(newMessageBubbleBox.isSelected());
+			model.setNotifNewMessageBeep(newMessageBeepBox.isSelected());
 			model.setNotifNewTalkBlink(newTalkBlinkBox.isSelected());
 			model.setNotifNewTalkBubble(newTalkBubbleBox.isSelected());
+			model.setNotifNewTalkBeep(newTalkBeepBox.isSelected());
 			model.setNotifPeopleInBlink(peopleInChangeBlinkBox.isSelected());
 			model.setNotifPeopleInBubble(peopleInChangeBubbleBox.isSelected());
+			model.setNotifPeopleInBeep(peopleInChangeBeepBox.isSelected());
 			setVisible(false);
 		}
 		else if (e.getActionCommand().equals(ShortcutFrameActionCommand.CANCEL)) {
