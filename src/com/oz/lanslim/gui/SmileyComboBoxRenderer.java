@@ -13,16 +13,16 @@ import com.oz.lanslim.model.SlimTalk;
 public class SmileyComboBoxRenderer extends JLabel implements ListCellRenderer {
 
 	public static final ImageIcon[] SMILLEYS = {
-		new SlimIcon(0 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(1 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(2 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(3 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(4 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(5 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(6 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(7 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(8 + SlimIcon.IMAGE_EXTENSION), 
-		new SlimIcon(9 + SlimIcon.IMAGE_EXTENSION) 
+		new SlimIcon(0), 
+		new SlimIcon(1), 
+		new SlimIcon(2), 
+		new SlimIcon(3), 
+		new SlimIcon(4), 
+		new SlimIcon(5), 
+		new SlimIcon(6), 
+		new SlimIcon(7), 
+		new SlimIcon(8), 
+		new SlimIcon(9) 
 	};
 
 	private boolean enable = false;

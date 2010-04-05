@@ -222,35 +222,13 @@ public class TrayIconManager implements SlimIconListener, ActionListener {
 	protected void updateIcon(boolean pNegativeSwitch) {
 		
 		synchronized (lock) {
-			ImageIcon lIcon = null;
-			if (negativeIcon) {
-				if (state.equals(SlimStateEnum.AVAILABLE)) {
-					lIcon = SlimIcon.AVAILABLE_NEG;
-				}
-				else if (state.equals(SlimStateEnum.AWAY)) {
-					lIcon = SlimIcon.AWAY_NEG;
-				}
-				else { //BUSY
-					lIcon = SlimIcon.BUSY_NEG;
-				}
-				if (pNegativeSwitch) {
-					negativeIcon = false;
-				}
+			
+			ImageIcon lIcon = SlimIcon.getApplicationIcon(state, negativeIcon);
+			
+			if (pNegativeSwitch) {
+				negativeIcon = !negativeIcon;
 			}
-			else {
-				if (state.equals(SlimStateEnum.AVAILABLE)) {
-					lIcon = SlimIcon.AVAILABLE_ICON;
-				}
-				else if (state.equals(SlimStateEnum.AWAY)) {
-					lIcon = SlimIcon.AWAY_ICON;
-				}
-				else { //BUSY
-					lIcon = SlimIcon.BUSY_ICON;
-				}
-				if (pNegativeSwitch) {
-					negativeIcon = true;
-				}
-			}
+			
 			frame.setIconImage(lIcon.getImage());
 			if (trayIcon != null) {
 				trayIcon.setIcon(lIcon);
