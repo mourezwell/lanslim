@@ -33,6 +33,7 @@ public class SlimContactList {
 	private static final String CATEGORYNAME_SUFFIX = ".categoryname"; //$NON-NLS-1$
 	private static final String CATEGORYMEMBERS_PREFIX = ".categorymembers."; //$NON-NLS-1$
 	private static final String CATEGORYEXPANDED_SUFFIX = ".categoryexpanded"; //$NON-NLS-1$
+	private static final String USERBLOCKED_SUFFIX =  ".userblocked"; //$NON-NLS-1$
 	
 	public static String CATEGORY_GROUP = "Groups"; //$NON-NLS-1$
 	public static String CATEGORY_UNDEFINED = "Undefined"; //$NON-NLS-1$
@@ -68,8 +69,8 @@ public class SlimContactList {
 		CATEGORY_GROUP = Externalizer.getString("LANSLIM.181"); //$NON-NLS-1$
 		CATEGORY_UNDEFINED = Externalizer.getString("LANSLIM.182"); //$NON-NLS-1$
 		
-		categories.put(CATEGORY_GROUP, new Boolean(false));
-		categories.put(CATEGORY_UNDEFINED, new Boolean(false));
+		categories.put(CATEGORY_GROUP, new Boolean(true));
+		categories.put(CATEGORY_UNDEFINED, new Boolean(true));
 		
 	}
 	
@@ -98,11 +99,17 @@ public class SlimContactList {
 						else {
 							lPortString = SlimSettings.DEFAULT_PORT;
 						}
+						lKey = SLIM_CONTACT_PROPS_PREFIX + i + USERBLOCKED_SUFFIX;
+						boolean lBlocked = Boolean.parseBoolean(p.getProperty(lKey));
+						
 						if (lIP != null && lPortString != null) {
 							try {
 								SlimUserContact suc = new SlimUserContact(lName, 
 										lIP.trim(), lPortString.trim());
 								list.put(lName, suc);
+								if (lBlocked) {
+									suc.setBlocked(true);
+								}
 							}
 							catch (SlimException e) {
 								SlimLogger.logException("ContactList.constructor", e); //$NON-NLS-1$
@@ -169,14 +176,6 @@ public class SlimContactList {
 			catch (SlimException e) {
 				SlimLogger.logException("ContactList.constructor", e); //$NON-NLS-1$
 			}
-		}
-		
-		// in case they are not already defined
-		if (!categories.containsKey(CATEGORY_GROUP)) {
-			categories.put(CATEGORY_GROUP, new Boolean(true));
-		}
-		if (!categories.containsKey(CATEGORY_UNDEFINED)) {
-			categories.put(CATEGORY_UNDEFINED, new Boolean(true));
 		}
 	}
 	
@@ -245,9 +244,12 @@ public class SlimContactList {
 		
 		model.storeSettings();
 		updateListener();
-		if (existingContactWithSameName.getAvailability() != SlimAvailabilityEnum.UNKNOWN
-				&& !existingContactWithSameName.equals(model.getSettings().getContactInfo())) {  
-			sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
+		
+		if (existingContactWithSameName.getAvailability() != SlimAvailabilityEnum.UNKNOWN) {
+			SlimUserContact suc = (SlimUserContact)existingContactWithSameName;
+			if (!suc.isBlocked() && !suc.equals(model.getSettings().getContactInfo())) {
+				sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
+			}
 		}
 		return true;
 	}
@@ -284,7 +286,9 @@ public class SlimContactList {
 		updateListener();
 		
 		if (pOldContact.getAvailability() != SlimAvailabilityEnum.UNKNOWN
-			&& !pOldContact.equals(model.getSettings().getContactInfo())) {  
+			&& !pOldContact.equals(model.getSettings().getContactInfo())
+			&& !((SlimUserContact)pOldContact).isBlocked()) {
+			
 			sendAvailabiltyMessage((SlimUserContact)pOldContact, SlimAvailabilityEnum.ONLINE);
 		}
 		return true;
@@ -303,6 +307,22 @@ public class SlimContactList {
 		updateListener();
 	}
 
+	public synchronized void blockContact(SlimContact pContact) {
+		if (!pContact.isGroup()) {
+			SlimUserContact suc = (SlimUserContact)pContact;
+			if (suc.isBlocked()) {
+				suc.setBlocked(false);
+				sendAvailabiltyMessage(suc, SlimAvailabilityEnum.ONLINE);
+			}
+			else {
+				sendAvailabiltyMessage(suc, SlimAvailabilityEnum.OFFLINE);
+				suc.setAvailability(SlimAvailabilityEnum.OFFLINE);
+				suc.setBlocked(true);
+			}
+		}		
+		model.storeSettings();
+		updateListener();
+	}
 	
 	public synchronized Properties toProperties() {
 		Map contactByCategory = new HashMap();
@@ -328,7 +348,8 @@ public class SlimContactList {
 				SlimUserContact uc = (SlimUserContact)c;
 				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERNAME_SUFFIX, uc.getName());
 				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERIP_SUFFIX, uc.getHost());
-				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERPORT_SUFFIX, Integer.toString(uc.getPort()));
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERPORT_SUFFIX, String.valueOf(uc.getPort()));
+				p.put(SLIM_CONTACT_PROPS_PREFIX + i + USERBLOCKED_SUFFIX, String.valueOf(uc.isBlocked()));
 				
 				if (categoryByContact.containsKey(uc.getName())) {
 					String lCat = (String)categoryByContact.get(uc.getName());
@@ -413,29 +434,32 @@ public class SlimContactList {
 	public synchronized void receiveAvailabiltyMessage(SlimAvailabilityUserMessage pMessage) {
 		
 		SlimUserContact knownSuc = getOrAddUserByAddress(pMessage.getSender());
+
+		if (!knownSuc.isBlocked()) {
+			SlimAvailabilityEnum lNew = pMessage.getAvailability();
+			SlimAvailabilityEnum lOld = knownSuc.getAvailability();
+			
+			knownSuc.setKey(pMessage.getKey());
+			if (lNew == SlimAvailabilityEnum.ONLINE) {
+				knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
+				if (!knownSuc.isBlocked()) {
+					sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.UNKNOWN);
+				}
+			}
+			else if (lNew == SlimAvailabilityEnum.UNKNOWN) {
+				knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
+			}
+			else { // offline
+				knownSuc.setAvailability(lNew);
+			}
+			knownSuc.setMood(pMessage.getMood());
+			knownSuc.setState(pMessage.getState());
 		
-		SlimAvailabilityEnum lNew = pMessage.getAvailability();
-		SlimAvailabilityEnum lOld = knownSuc.getAvailability();
-		
-		knownSuc.setKey(pMessage.getKey());
-		
-		if (lNew == SlimAvailabilityEnum.ONLINE) {
-			knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
-			sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.UNKNOWN);
+			if (lNew != SlimAvailabilityEnum.OFFLINE && lOld == SlimAvailabilityEnum.OFFLINE) {
+				sendEnqueuedMessage(knownSuc);
+			}
+			updateListener();
 		}
-		else if (lNew == SlimAvailabilityEnum.UNKNOWN) {
-			knownSuc.setAvailability(SlimAvailabilityEnum.ONLINE);
-		}
-		else { // offline
-			knownSuc.setAvailability(lNew);
-		}
-		knownSuc.setMood(pMessage.getMood());
-		knownSuc.setState(pMessage.getState());
-		
-		if (lNew != SlimAvailabilityEnum.OFFLINE && lOld == SlimAvailabilityEnum.OFFLINE) {
-			sendEnqueuedMessage(knownSuc);
-		}
-		updateListener();
 	}
 
 	protected void sendUpdateUserMessage(SlimUserContact pOldSettings) throws SlimException {
@@ -457,13 +481,14 @@ public class SlimContactList {
 
 	public synchronized void sendUpdateMoodOrState() {
 		
-		SlimUserContact sender = model.getSettings().getContactInfo();
-		SlimUserContact target = null;
+		SlimUserContact suc = null;
 
 		for (Iterator it = getAllUserContact().iterator(); it.hasNext();) {
-			target = (SlimUserContact)it.next();
-			if (!target.equals(sender) && target.getAvailability().equals(SlimAvailabilityEnum.ONLINE)) {
-				sendAvailabiltyMessage(target, SlimAvailabilityEnum.UNKNOWN);
+			suc = (SlimUserContact)it.next();
+			if (!suc.equals(model.getSettings().getContactInfo()) 
+					&& suc.getAvailability().equals(SlimAvailabilityEnum.ONLINE) 
+					&& !suc.isBlocked()) {
+				sendAvailabiltyMessage(suc, SlimAvailabilityEnum.UNKNOWN);
 			}
 		}
 		if (peopleInListener != null) {
@@ -526,7 +551,7 @@ public class SlimContactList {
 	protected void sendWelcomeMessage() {
 		for (Iterator it = getAllUserContact().iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
+			if (!suc.equals(model.getSettings().getContactInfo()) && !suc.isBlocked()) {
 				sendAvailabiltyMessage(suc, SlimAvailabilityEnum.ONLINE);
 			}
 		}
@@ -535,7 +560,7 @@ public class SlimContactList {
 	public synchronized void refresh() {
 		for (Iterator it = getAllUserContact().iterator(); it.hasNext();) {
 			SlimUserContact suc = (SlimUserContact)it.next();
-			if (!suc.equals(model.getSettings().getContactInfo())) {
+			if (!suc.equals(model.getSettings().getContactInfo()) && !suc.isBlocked()) {
 				suc.setAvailability(SlimAvailabilityEnum.OFFLINE);
 				sendAvailabiltyMessage(suc, SlimAvailabilityEnum.ONLINE);
 			}
@@ -543,7 +568,8 @@ public class SlimContactList {
 	}
 	
 	public synchronized void refresh(SlimContact pContact) {
-		if (!pContact.isGroup() && !(pContact.equals(model.getSettings().getContactInfo()))) {
+		if (!pContact.isGroup() && !(pContact.equals(model.getSettings().getContactInfo())) 
+				&& !((SlimUserContact)pContact).isBlocked()) {
 			pContact.setAvailability(SlimAvailabilityEnum.OFFLINE);
 			sendAvailabiltyMessage((SlimUserContact)pContact, SlimAvailabilityEnum.ONLINE);
 		}

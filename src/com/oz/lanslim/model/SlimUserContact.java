@@ -25,6 +25,7 @@ public class SlimUserContact extends SlimContact implements Serializable {
 	private SlimStateEnum state = null;
 	private SlimStateListener stateListener = null;
 	private String mood = null;
+	private boolean blocked = false;
 
 	private LinkedList messageQueue = null;
 	
@@ -172,6 +173,14 @@ public class SlimUserContact extends SlimContact implements Serializable {
 				stateListener.updateState(state);
 			}
 		}
+	}
+
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public void setBlocked(boolean pBlocked) {
+		blocked = pBlocked;
 	}
 
 }

@@ -73,7 +73,7 @@ public class ContactTreeModel extends DefaultTreeModel
 		while (it3.hasNext()) {
 			SlimUserContact user = (SlimUserContact)it3.next();
 			if (!list.isSettingsUser(user)) {
-				if (user.getAvailability() != SlimAvailabilityEnum.OFFLINE || !hideOfflineFilter) {
+				if (user.getAvailability() != SlimAvailabilityEnum.OFFLINE || !hideOfflineFilter || user.isBlocked()) {
 					if (user.getName().toLowerCase().startsWith(prefixNameFilter)) {
 						addContactInCategoryNode(user, getCategoryNode(list.getCategory(user)));
 					}
@@ -102,7 +102,7 @@ public class ContactTreeModel extends DefaultTreeModel
 				expander.expandNode(pCategoryNode);
 			}
 			else {
-				expander.expandNode(pCategoryNode);
+				expander.collapseNode(pCategoryNode);
 			}
 		}
 	}
@@ -162,7 +162,7 @@ public class ContactTreeModel extends DefaultTreeModel
 			while (it3.hasNext()) {
 				SlimUserContact user = (SlimUserContact)it3.next();
 				if (!list.isSettingsUser(user)) {
-					if (user.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+					if (user.getAvailability() == SlimAvailabilityEnum.OFFLINE && !user.isBlocked()) {
 						if (user.getName().toLowerCase().startsWith(prefixNameFilter)) {
 							addContactInCategoryNode(user, getCategoryNode(list.getCategory(user)));
 						}
@@ -204,7 +204,8 @@ public class ContactTreeModel extends DefaultTreeModel
 			DefaultMutableTreeNode child = catNode.getFirstLeaf();
 			while (child != null) {
 				SlimContact suc = (SlimContact)child.getUserObject();
-				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+				if (suc.getAvailability() == SlimAvailabilityEnum.OFFLINE 
+						&& !((SlimUserContact)suc).isBlocked()) {
 					DefaultMutableTreeNode next = (DefaultMutableTreeNode)catNode.getChildAfter(child);
 					removeNodeFromParent(child);
 					child = next;

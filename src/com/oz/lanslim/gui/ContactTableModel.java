@@ -11,6 +11,7 @@ import com.oz.lanslim.model.SlimAvailabilityEnum;
 import com.oz.lanslim.model.SlimContact;
 import com.oz.lanslim.model.SlimContactList;
 import com.oz.lanslim.model.SlimContactListener;
+import com.oz.lanslim.model.SlimUserContact;
 
 public class ContactTableModel extends AbstractTableModel implements SlimContactListener {
 	
@@ -81,7 +82,9 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 				}
 				if (hideOfflineFilter && 
 						((SlimContact)contactObjectArrayModel[i][statusColumnIndex]).getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
-					continue;
+					if (!((SlimUserContact)contactObjectArrayModel[i][statusColumnIndex]).isBlocked()) {
+						continue;
+					}
 				}
 				r = r + 1;
 			}
@@ -99,7 +102,9 @@ public class ContactTableModel extends AbstractTableModel implements SlimContact
 				}
 				if (hideOfflineFilter && 
 						((SlimContact)contactObjectArrayModel[i][statusColumnIndex]).getAvailability().equals(SlimAvailabilityEnum.OFFLINE)) {
-					continue;
+					if (!((SlimUserContact)contactObjectArrayModel[i][statusColumnIndex]).isBlocked()) {
+						continue;
+					}
 				}
 				if (r == rowIndex) {
 					return contactObjectArrayModel[i][columnIndex];

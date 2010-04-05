@@ -38,5 +38,9 @@ public class ContactPopupMenu extends JPopupMenu {
     	refreshMenuItem.addActionListener(pListner);
         add(refreshMenuItem);
         
+        JMenuItem userBlockItem = new JMenuItem(Externalizer.getString("LANSLIM.243"), new SlimIcon("user_block.png")); //$NON-NLS-1$ //$NON-NLS-2$
+        userBlockItem.setActionCommand(ContactPaneActionCommand.USER_BLOCK);
+        userBlockItem.addActionListener(pListner);
+        add(userBlockItem);
 	}
 }

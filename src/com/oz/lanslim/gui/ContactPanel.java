@@ -47,6 +47,7 @@ public class ContactPanel extends JPanel
 	private JButton editButton;
 	private JButton refreshButton;
 	private JButton newCatButton;
+	private JButton blockButton;
 	
 	private JScrollPane contactTablePane;
 	private ContactView contactTable;
@@ -125,6 +126,14 @@ public class ContactPanel extends JPanel
 			newCatButton.addActionListener(this);
 			newCatButton.setToolTipText(Externalizer.getString("LANSLIM.82")); //$NON-NLS-1$
 			contactBar.add(newCatButton);
+		}
+		{
+			blockButton = new JButton();
+			blockButton.setIcon(new SlimIcon("user_block.png")); //$NON-NLS-1$
+			blockButton.setActionCommand(ContactPaneActionCommand.USER_BLOCK);
+			blockButton.addActionListener(this);
+			blockButton.setToolTipText(Externalizer.getString("LANSLIM.243")); //$NON-NLS-1$
+			contactBar.add(blockButton);
 		}
 		{
 			contactTablePane = new JScrollPane();
@@ -410,6 +419,20 @@ public class ContactPanel extends JPanel
 	                }
 				}
 			}
+			else if (e.getActionCommand() == ContactPaneActionCommand.USER_BLOCK) {
+				SlimContact[] lSelectedContacts = contactTable.getSelectedContacts();
+				if (lSelectedContacts.length < 1) {
+					JOptionPane.showMessageDialog(getRootPane().getParent(),
+						    Externalizer.getString("LANSLIM.87"), //$NON-NLS-1$
+						    Externalizer.getString("LANSLIM.28"), //$NON-NLS-1$
+						    JOptionPane.WARNING_MESSAGE);
+				}
+				else {
+					for (int j = 0 ; j < lSelectedContacts.length; j++) {
+						model.getContacts().blockContact(lSelectedContacts[j]);
+					}
+				}
+			}
 			else if (e.getActionCommand() == ContactPaneActionCommand.CATEGORY_NEW) {
 				NewCategoryFrame lFrame = new NewCategoryFrame((Frame)getRootPane().getParent(), 
 						model, null);
@@ -449,6 +472,8 @@ public class ContactPanel extends JPanel
 		public static final String HIDE_GROUPS = "hideGroups"; //$NON-NLS-1$
 
 		public static final String HIDE_OFFLINE = "hideOffline"; //$NON-NLS-1$
+		
+		public static final String USER_BLOCK = "userBlock"; //$NON-NLS-1$
 	}
 	
 }

@@ -48,7 +48,8 @@ public class SlimTalkList {
 			// on recherche dans notre carnet d'adresse les membre ou on les ajoute
 			SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(suc);
 			attendees.add(knownSuc);
-			if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+			if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE 
+					&& !knownSuc.isBlocked()) {
 				model.getContacts().sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.ONLINE);
 			}
 		}

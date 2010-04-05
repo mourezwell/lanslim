@@ -211,7 +211,7 @@ public class SlimTalk {
 		}
 
 		SlimUserContact knownSuc = model.getContacts().getOrAddUserByAddress(pMessage.getNewContact());
-		if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE) {
+		if (knownSuc.getAvailability() == SlimAvailabilityEnum.OFFLINE && !knownSuc.isBlocked()) {
 			model.getContacts().sendAvailabiltyMessage(knownSuc, SlimAvailabilityEnum.ONLINE);
 		}
 		if (!peopleIn.contains(knownSuc)) {
@@ -663,7 +663,7 @@ public class SlimTalk {
 		
 		// add Attachment
 		if (pAttachementName != null) {
-			URL imageURL = ClassLoader.getSystemResource(SlimIcon.IMAGE_PACKAGE + "attachment.png");
+			URL imageURL = SlimIcon.getURL("attachment.png");
 			temp = temp + HTMLConstants.LINK + HTMLConstants.FILE_PROTOCOL + pAttachementName  + ATTACHMENT_PART_SUFFIX + pPartNumber + HTMLConstants.TAGEND 
 				+ HTMLConstants.IMAGE + imageURL + HTMLConstants.TAGEND + HTMLConstants.ENDIMAGE + pAttachementName + HTMLConstants.ENDLINK 
 				+ HTMLConstants.NEWLINE;
@@ -673,7 +673,7 @@ public class SlimTalk {
 	}
 	
 	private String getSmileyImgTag(int smilNb) {
-		URL imageURL = ClassLoader.getSystemResource(SlimIcon.IMAGE_PACKAGE + smilNb + SlimIcon.IMAGE_EXTENSION);
+		URL imageURL = SlimIcon.getURL(smilNb);
 		if (imageURL != null) {
 			return (HTMLConstants.IMAGE + imageURL + HTMLConstants.TAGEND + HTMLConstants.ENDIMAGE);
 		}
