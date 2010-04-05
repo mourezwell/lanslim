@@ -21,7 +21,7 @@ import com.oz.lanslim.StringConstants;
 
 public class AboutDialog extends JDialog implements ActionListener {
 
-	private static final String VERSION = "1.4.0"; //$NON-NLS-1$
+	private static final String VERSION = "1.5.0"; //$NON-NLS-1$
 	private static final String AUTHOR_NAME = "Olivier Mourez"; //$NON-NLS-1$
 	private static final String AUTHOR_ADDRESS = "mourezwell@users.sourceforge.net"; //$NON-NLS-1$
 	private static final String MAIL_LINK = "mailto:"; //$NON-NLS-1$
