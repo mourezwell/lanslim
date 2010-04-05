@@ -35,6 +35,7 @@ public class HTMLConstants {
 	
 	public static final  String GREY = "888888"; //$NON-NLS-1$
 	public static final  String BLACK = "000000"; //$NON-NLS-1$
+	public static final  String WHITE = "FFFFFF"; //$NON-NLS-1$
 	
 	public static final  String SYSTEM = "SYSTEM"; //$NON-NLS-1$
 	public static final  String DEFAULT_SIZE = "4"; //$NON-NLS-1$
