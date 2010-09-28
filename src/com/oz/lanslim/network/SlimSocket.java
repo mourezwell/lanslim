@@ -78,7 +78,7 @@ public class SlimSocket {
 		socket.receive(dp);
 		String lMessage = null;
 		try {
-			lMessage = new String(dp.getData(), 0, dp.getLength(), "ISO-8859-1"); //$NON-NLS-1$
+			lMessage = new String(dp.getData(), 0, dp.getLength(), "UTF-8"); //$NON-NLS-1$
 			Map lItems = SlimMessage.itemsFromString(lMessage);
 			SlimMessageTypeEnum type = SlimMessage.getType(lItems);
 			
@@ -119,7 +119,7 @@ public class SlimSocket {
 
 	public void send(SlimMessage pMessage, SlimUserContact pContact) throws IOException {
 		String lMessageAstring = pMessage.toString();
-		byte[] ba = lMessageAstring.getBytes("ISO-8859-1"); //$NON-NLS-1$
+		byte[] ba = lMessageAstring.getBytes("UTF-8"); //$NON-NLS-1$
 		if (ba.length > MAX_MESSAGE_SIZE) {
 			throw new IOException(Externalizer.getString("LANSLIM.29")); //$NON-NLS-1$
 		}

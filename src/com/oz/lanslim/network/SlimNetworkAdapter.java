@@ -126,7 +126,7 @@ public class SlimNetworkAdapter implements Runnable {
 			try {
 				socket.send(pMessage, pContact);
 			}
-			catch (IOException ioe) {
+			catch (Exception ioe) {
 				throw new SlimException(Externalizer.getString("LANSLIM.45", SlimLogger.shortFormatException(ioe))); //$NON-NLS-1$
 			}
 		}
