@@ -632,7 +632,7 @@ public class SlimTalk {
 		String temp = pMessageArea ;
 
 		if (pMessageArea.indexOf(DING_DONG) >= 0 && model.getSettings().isSoundEnable()) {
-			File lSoundFile = new File(getClass().getResource("/com/oz/lanslim/sounds/DingDong.wav").getFile());
+			URL lSoundFile = getClass().getClassLoader().getResource("com/oz/lanslim/sounds/DingDong.wav");
 			WavePlayer lDong = new WavePlayer(lSoundFile);
 			lDong.play();
 		}

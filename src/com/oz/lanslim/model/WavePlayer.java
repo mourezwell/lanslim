@@ -1,7 +1,7 @@
 package com.oz.lanslim.model;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -17,7 +17,7 @@ public class WavePlayer {
 
 	private Clip sound;
 
-	public WavePlayer(File pSoundFile) {
+	public WavePlayer(URL pSoundFile) {
 		try {
 			AudioInputStream stream = AudioSystem.getAudioInputStream(pSoundFile);
 			DataLine.Info clipInfo = new DataLine.Info(Clip.class, stream.getFormat());

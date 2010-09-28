@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 
 import com.oz.lanslim.Externalizer;
@@ -50,7 +51,7 @@ public class SlimModel {
 			networkAdapter = new SlimNetworkAdapter(this);
 			contacts = new SlimContactList(this);
 		}
-		File lSoundFile = new File(getClass().getResource("/com/oz/lanslim/sounds/Type.wav").getFile());
+		URL lSoundFile = getClass().getClassLoader().getResource("com/oz/lanslim/sounds/Type.wav");
 		beep = new WavePlayer(lSoundFile);
 		settingsLoaded = true;
 		idleMonitor = new IdleTimeMonitor(settings.getContactInfo());
