@@ -200,23 +200,37 @@ public class NewUserFrame extends JDialog implements ActionListener {
 				try {
 					contact = new SlimUserContact(nameField.getText(), 
 							hostField.getText(), portField.getText());
-					boolean lAdded = model.getContacts().addContact(contact);
-					if (!lAdded) {
-						contact = null;
-						JOptionPane.showMessageDialog(getRootPane().getParent(),
-							    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
-							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
-							    JOptionPane.WARNING_MESSAGE);
+					boolean lConfirmed = true;
+					try {
+						contact.isValidHost();
 					}
-					else {
-						model.getContacts().moveUserIntoCategory(contact, 
-								(String)categoryComboBox.getSelectedItem());
-						if (blockedBox.isSelected()) {
-							model.getContacts().blockContact(contact);
+					catch (SlimException se) {
+						int lRet = JOptionPane.showConfirmDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.244"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
+							    JOptionPane.YES_NO_OPTION,
+							    JOptionPane.WARNING_MESSAGE);
+						lConfirmed = (lRet == JOptionPane.YES_OPTION);
+					}
+					if (lConfirmed) {
+						boolean lAdded = model.getContacts().addContact(contact);
+						if (!lAdded) {
+							contact = null;
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
+								    JOptionPane.WARNING_MESSAGE);
 						}
-						model.getContacts().moveUserIntoCategory(contact, 
-								(String)categoryComboBox.getSelectedItem());
-						setVisible(false);
+						else {
+							model.getContacts().moveUserIntoCategory(contact, 
+									(String)categoryComboBox.getSelectedItem());
+							if (blockedBox.isSelected()) {
+								model.getContacts().blockContact(contact);
+							}
+							model.getContacts().moveUserIntoCategory(contact, 
+									(String)categoryComboBox.getSelectedItem());
+							setVisible(false);
+						}
 					}
 				}
 				catch (SlimException se) {
@@ -230,25 +244,38 @@ public class NewUserFrame extends JDialog implements ActionListener {
 				try {
 					SlimUserContact newContact = new SlimUserContact(
 							nameField.getText(), hostField.getText(), portField.getText());
-
-					boolean lAdded = model.getContacts().updateContact(contact, newContact);
-					if (!lAdded) {
-						JOptionPane.showMessageDialog(getRootPane().getParent(),
-							    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
-							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
-							    JOptionPane.WARNING_MESSAGE);
+					boolean lConfirmed = true;
+					try {
+						contact.isValidHost();
 					}
-					else {
-						model.getContacts().moveUserIntoCategory(newContact, 
-								(String)categoryComboBox.getSelectedItem());
-						if (blockedBox.isSelected() != contact.isBlocked()) {
-							model.getContacts().blockContact(contact);
+					catch (SlimException se) {
+						int lRet = JOptionPane.showConfirmDialog(getRootPane().getParent(),
+							    Externalizer.getString("LANSLIM.245"), //$NON-NLS-1$
+							    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
+							    JOptionPane.YES_NO_OPTION,
+							    JOptionPane.WARNING_MESSAGE);
+						lConfirmed = (lRet == JOptionPane.YES_OPTION);
+					}
+					if (lConfirmed) {
+						boolean lAdded = model.getContacts().updateContact(contact, newContact);
+						if (!lAdded) {
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.123"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.18"), //$NON-NLS-1$
+								    JOptionPane.WARNING_MESSAGE);
 						}
-						JOptionPane.showMessageDialog(getRootPane().getParent(),
-							    Externalizer.getString("LANSLIM.125"), //$NON-NLS-1$
-							    Externalizer.getString("LANSLIM.122"), //$NON-NLS-1$
-							    JOptionPane.INFORMATION_MESSAGE);
-						setVisible(false);
+						else {
+							model.getContacts().moveUserIntoCategory(newContact, 
+									(String)categoryComboBox.getSelectedItem());
+							if (blockedBox.isSelected() != contact.isBlocked()) {
+								model.getContacts().blockContact(contact);
+							}
+							JOptionPane.showMessageDialog(getRootPane().getParent(),
+								    Externalizer.getString("LANSLIM.125"), //$NON-NLS-1$
+								    Externalizer.getString("LANSLIM.122"), //$NON-NLS-1$
+								    JOptionPane.INFORMATION_MESSAGE);
+							setVisible(false);
+						}
 					}
 				}
 				catch (SlimException se) {

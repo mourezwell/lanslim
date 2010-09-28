@@ -262,12 +262,7 @@ public class SlimSettings {
 		}
 		
 		lTemp = p.getProperty(HOST_PROP);
-		try {
-			contactInfo.setHost(lTemp);
-		}
-		catch (SlimException se) {
-			// ignore start exception
-		}
+		contactInfo.setHost(lTemp);
 	
 		if (unlockPort) {
 			lTemp = p.getProperty(PORT_PROP);

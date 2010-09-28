@@ -66,30 +66,35 @@ public class SlimUserContact extends SlimContact implements Serializable {
 		return port;
 	}
 
-	public void setHost(String pIp) throws SlimException {
-		InetSocketAddress address = new InetSocketAddress(pIp, port);
-		if (address.getAddress() == null) {
-			throw new SlimException(Externalizer.getString("LANSLIM.161", pIp)); //$NON-NLS-1$
-		}
-		else if (address.getAddress().isMulticastAddress()) {
-			throw new SlimException(Externalizer.getString("LANSLIM.162", pIp)); //$NON-NLS-1$
-		}
-		else if (address.getAddress().isLoopbackAddress() 
-				&& !Boolean.getBoolean(SlimSettings.UNLOCK_PORT_SYSTEM_PROPERTY_KEY)) {
-			throw new SlimException(Externalizer.getString("LANSLIM.163", pIp)); //$NON-NLS-1$
-		} 
-		else if (address.getAddress().isAnyLocalAddress()) {
-			throw new SlimException(Externalizer.getString("LANSLIM.164", pIp)); //$NON-NLS-1$
-		}
-		else if (pIp.indexOf(PORT_SEPARATOR) > 0) {
-			throw new SlimException(Externalizer.getString("LANSLIM.165", pIp, PORT_SEPARATOR)); //$NON-NLS-1$
-		}
-		else if (pIp.indexOf(FORMIDDEN_CHAR) > 0) {
-			throw new SlimException(Externalizer.getString("LANSLIM.165", pIp, FORMIDDEN_CHAR)); //$NON-NLS-1$
-		}
+	public void setHost(String pIp){
 		host = pIp;
 	}
 
+	public boolean isValidHost() throws SlimException {
+
+		InetSocketAddress address = new InetSocketAddress(host, port);
+		if (address.getAddress() == null) {
+			throw new SlimException(Externalizer.getString("LANSLIM.161", host)); //$NON-NLS-1$
+		}
+		else if (address.getAddress().isMulticastAddress()) {
+			throw new SlimException(Externalizer.getString("LANSLIM.162", host)); //$NON-NLS-1$
+		}
+		else if (address.getAddress().isLoopbackAddress() 
+				&& !Boolean.getBoolean(SlimSettings.UNLOCK_PORT_SYSTEM_PROPERTY_KEY)) {
+			throw new SlimException(Externalizer.getString("LANSLIM.163", host)); //$NON-NLS-1$
+		} 
+		else if (address.getAddress().isAnyLocalAddress()) {
+			throw new SlimException(Externalizer.getString("LANSLIM.164", host)); //$NON-NLS-1$
+		}
+		else if (host.indexOf(PORT_SEPARATOR) > 0) {
+			throw new SlimException(Externalizer.getString("LANSLIM.165", host, PORT_SEPARATOR)); //$NON-NLS-1$
+		}
+		else if (host.indexOf(FORMIDDEN_CHAR) > 0) {
+			throw new SlimException(Externalizer.getString("LANSLIM.165", host, FORMIDDEN_CHAR)); //$NON-NLS-1$
+		}
+		return true;
+	}
+	
 	public void setPort(String pPort) throws SlimException {
 		try {
 			int lPort = Integer.parseInt(pPort);
@@ -118,7 +123,7 @@ public class SlimUserContact extends SlimContact implements Serializable {
 		}
 		return false;
 	}
-	
+
 	private boolean isValidPort(int pPort) {
 		
 		return (pPort > 0  && pPort < 65536);

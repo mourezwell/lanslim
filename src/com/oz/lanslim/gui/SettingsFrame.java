@@ -528,6 +528,7 @@ public class SettingsFrame extends JDialog implements ActionListener {
 				
 				SlimUserContact contact = 
 					new SlimUserContact(nameField.getText(), hostField.getText(), portField.getText());
+				contact.isValidHost();
 				contact.setAvailability(SlimAvailabilityEnum.ONLINE);
 				model.updateSettings(contact);
 				setVisible(false);
