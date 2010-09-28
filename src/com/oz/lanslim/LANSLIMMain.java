@@ -7,6 +7,8 @@ import java.io.PrintStream;
 
 import javax.swing.SwingUtilities;
 
+import com.inet.jortho.FileUserDictionary;
+import com.inet.jortho.SpellChecker;
 import com.oz.lanslim.gui.AboutDialog;
 import com.oz.lanslim.gui.SlimMainFrame;
 import com.oz.lanslim.gui.TrayIconManager;
@@ -62,6 +64,13 @@ public class LANSLIMMain {
 			}
 		};
 		Runtime.getRuntime().addShutdownHook(shutdowHook);
+		
+        // Create user dictionary in the current working directory of your application
+        SpellChecker.setUserDictionaryProvider( new FileUserDictionary() );
+        
+        // Load the configuration from the file dictionaries.cnf and 
+        // use the current locale or the first language as default 
+        SpellChecker.registerDictionaries( null, null );
 		
 		frame = new SlimMainFrame(model);
 		

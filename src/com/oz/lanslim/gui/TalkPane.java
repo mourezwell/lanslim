@@ -43,6 +43,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.html.HTMLEditorKit;
 
+import com.inet.jortho.SpellChecker;
 import com.oz.lanslim.Externalizer;
 import com.oz.lanslim.SlimException;
 import com.oz.lanslim.StringConstants;
@@ -74,6 +75,7 @@ public class TalkPane extends JSplitPane
 	private JComboBox sizeComboBox;
 	private JButton fontButton;
 	private JButton attachmentButton;
+	private JButton spellingButton;
 	
 	private SlimTalkListener mainPane = null;
 	private SlimTalk talkModel = null; 
@@ -84,6 +86,7 @@ public class TalkPane extends JSplitPane
 	private boolean underline = false;
 	private boolean bold = false;
 	private boolean italic = false;
+	private boolean spelling = false;
 	private File attachment = null;
 	
 	public TalkPane(SlimTalkListener pMainPane, SlimTalk pTalk) {
@@ -228,6 +231,16 @@ public class TalkPane extends JSplitPane
 					messageToolbar.add(escapeXMLButton);
 				}
 				{
+					spellingButton = new JButton();
+					spellingButton.setIcon(new SlimIcon("search_cancel.png")); //$NON-NLS-1$
+					spellingButton.addActionListener(this);
+					spellingButton.setActionCommand(TalkPaneActionCommand.SPELLING);
+					spellingButton.setToolTipText(Externalizer.getString("LANSLIM.247")); //$NON-NLS-1$
+					spellingButton.setBorder(SlimButtonBorder.getSelectedBorder(false));
+			        messageToolbar.addSeparator();
+					messageToolbar.add(spellingButton);
+				}
+				{
 					bellButton = new JButton();
 					bellButton.setIcon(new SlimIcon("sound.png")); //$NON-NLS-1$
 					bellButton.addActionListener(this);
@@ -362,6 +375,20 @@ public class TalkPane extends JSplitPane
 			else {
 				escapeXMLButton.setIcon(new SlimIcon("xml_accept.png")); //$NON-NLS-1$
 				escapeXMLButton.setToolTipText(Externalizer.getString("LANSLIM.218")); //$NON-NLS-1$
+			}
+			newMessageArea.requestFocus();
+		}
+		else if (e.getActionCommand() == TalkPaneActionCommand.SPELLING) {
+			spelling = !spelling;
+			if (spelling) {
+				spellingButton.setIcon(new SlimIcon("search_cancel.png")); //$NON-NLS-1$
+				spellingButton.setToolTipText(Externalizer.getString("LANSLIM.246")); //$NON-NLS-1$
+		        SpellChecker.register( newMessageArea );
+			}
+			else {
+				spellingButton.setIcon(new SlimIcon("search.png")); //$NON-NLS-1$
+				spellingButton.setToolTipText(Externalizer.getString("LANSLIM.247")); //$NON-NLS-1$
+		        SpellChecker.unregister( newMessageArea );
 			}
 			newMessageArea.requestFocus();
 		}
@@ -732,6 +759,8 @@ public class TalkPane extends JSplitPane
 		public static final String SOUND = "sound"; //$NON-NLS-1$
 
 		public static final String ATTACHMENT = "attachment"; //$NON-NLS-1$
+
+		public static final String SPELLING = "spelling"; //$NON-NLS-1$
 
 	}
 
