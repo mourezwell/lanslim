@@ -14,6 +14,7 @@
         <pathelement location="lib/jna.jar"/>
         <pathelement location="lib/examples.jar"/>
         <pathelement location="lib/jdic.jar"/>
+        <pathelement location="lib/jortho.jar"/>
     </path>
     <target depends="clean" name="init">
         <mkdir dir="classes"/>
@@ -35,15 +36,7 @@
     </target>
 
     <target depends="build" name="build-jar">
-    	<unjar src="lib/looks-2.1.4.jar" dest="classes" overwrite="true"/>
-    	<unjar src="lib/forms-1.2.0.jar" dest="classes" overwrite="true"/>
-    	<unjar src="lib/jdic.jar" dest="classes" overwrite="true"/>
     	<delete file="classes/META_INF/MANIFEST.MF" failonerror="false"/>
-    	<copy file="readme.txt" tofile="classes/readme.txt"/>
-    	<copy file="JGoodies.LICENSE.txt" tofile="classes/JGoodies.LICENSE.txt"/>
-    	<copy file="jdic.COPYING.txt" tofile="classes/jdic.COPYING.txt"/>
-    	<copy file="TableSorter.COPYRIGHT.txt" tofile="classes/TableSorter.COPYRIGHT.txt"/>
-    	<copy file="LANSLIM.LICENSE.txt" tofile="classes/LANSLIM.LICENSE.txt"/>
     	<tstamp/>	
         <jar destfile="liv/lanslim.jar" basedir="classes">
             <manifest>
@@ -52,13 +45,13 @@
               	<attribute name="Implementation-Version" value="${version}"/>
             	<attribute name="Implementation-Vendor" value="Olivier Mourez"/>
 	            <attribute name="Main-Class" value="com.oz.lanslim.LANSLIMMain"/>
-	            <attribute name="Class-Path" value="jna.jar examples.jar"/>
+	            <attribute name="Class-Path" value="jortho.jar jdic.jar forms-1.2.0.jar looks-2.1.4.jar jna.jar"/>
         	</manifest>         
         </jar>
     </target>
 
     <target name="build-exe">
-    	<property name="launch4j.home" value="D:\java\launch4j"/>
+    	<property name="launch4j.home" value="c:\appl\launch4j"/>
 		<path id="launch4j.classpath">
 	        <pathelement location="${launch4j.home}/launch4j.jar"/>
 	        <pathelement location="${launch4j.home}/lib/xstream.jar"/>
@@ -66,7 +59,18 @@
 		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpathref="launch4j.classpath"/>
 		<launch4j configFile="launch4j.xml" />
     	<copy file="lib/tray.dll" tofile="liv/tray.dll"/>
-    	<copy file="lib/jna.jar" tofile="liv/jna.jar"/>
+        <copy file="lib/jortho.jar" tofile="liv/jortho.jar"/>
+        <copy file="lib/jdic.jar" tofile="liv/jdic.jar"/>
+        <copy file="lib/forms-1.2.0.jar" tofile="liv/forms-1.2.0.jar"/>
+        <copy file="lib/looks-2.1.4.jar" tofile="liv/looks-2.1.4.jar"/>
+        <copy file="lib/jna.jar" tofile="liv/jna.jar"/>
+        <copy file="dictionaries.cnf" tofile="liv/dictionaries.cnf"/>
+        <copy todir="liv">
+    	    <fileset dir=".">
+                <include name="*.ortho"/>
+                <include name="*.txt"/>
+    	    </fileset>
+        </copy>
 	</target>
 
 	
@@ -76,6 +80,13 @@
 				<include name="lanslim.exe"/>
 				<include name="tray.dll"/>
 				<include name="jna.jar"/>
+		        <include name="jortho.jar"/>
+		        <include name="jdic.jar"/>
+		        <include name="forms-1.2.0.jar"/>
+		        <include name="looks-2.1.4.jar"/>
+                <include name="dictionaries.cnf"/>
+                <include name="*.ortho"/>
+                <include name="*.txt"/>
 			</fileset>
 		</zip>
 		<zip destfile="lanslim_v${version}_src.zip">
@@ -89,7 +100,9 @@
 				<include name="build.properties"/>
 				<include name="launch4j.xml"/>
 				<include name="comments.ico"/>
-				<include name="*.txt"/>
+                <include name="dictionaries.cnf"/>
+                <include name="*.ortho"/>
+                <include name="*.txt"/>
 			</fileset>
 		</zip>
 	</target>
