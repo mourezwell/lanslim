@@ -12,6 +12,7 @@
         <configuration>
           <source/>
           <target/>
+          <fork>true</fork>
         </configuration>
       </plugin>
     </plugins>
