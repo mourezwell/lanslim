@@ -6,7 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import com.oz.lanslim.model.SlimUserContact;
+import com.oz.lanslim.model.SlimContact;
 
 public class ContactTableAvailabilityCellRenderer extends JLabel implements TableCellRenderer {
 
@@ -19,7 +19,7 @@ public class ContactTableAvailabilityCellRenderer extends JLabel implements Tabl
                             boolean isSelected, boolean hasFocus,
                             int row, int column) {
     	
-		SlimUserContact lContact = (SlimUserContact)value;
+		SlimContact lContact = (SlimContact)value;
     	SlimIcon.setContactIcon(lContact, this);
 		
     	return this;
