@@ -7,38 +7,41 @@
 	
     <property file="build.properties"/>
     
-	<path id="lanslim.classpath">
-        <pathelement location="classes"/>
-        <pathelement location="lib/looks-2.1.4.jar"/>
-        <pathelement location="lib/forms-1.2.0.jar"/>
-        <pathelement location="lib/jna.jar"/>
-        <pathelement location="lib/examples.jar"/>
-        <pathelement location="lib/jdic.jar"/>
-        <pathelement location="lib/jortho.jar"/>
+	<path id="build.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+    	</fileset>
     </path>
-    <target depends="clean" name="init">
-        <mkdir dir="classes"/>
-        <mkdir dir="liv"/>
-        <copy includeemptydirs="false" todir="classes">
-            <fileset dir="src" excludes="**/*.java"/>
+	
+    <path id="run.classpath">
+        <pathelement location="${build.dir}"/>
+        <path refid="build.classpath"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}" failonerror="false"/>
+        <delete dir="${liv.dir}" failonerror="false"/>
+    </target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${liv.dir}"/>
+        <copy includeemptydirs="false" todir="${build.dir}">
+            <fileset dir="${res.dir}" excludes="**./*.java"/>
         </copy>
     </target>
-    <target name="clean">
-        <delete dir="classes" failonerror="false"/>
-        <delete dir="liv" failonerror="false"/>
-    </target>
 	
-    <target depends="init" name="build">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="classes" source="${source}" target="${target}">
-            <src path="src"/>
-            <classpath refid="lanslim.classpath"/>
+    <target name="build" depends="init">
+        <javac destdir="${build.dir}" debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}">
+            <src path="${src.dir}"/>
+            <classpath refid="build.classpath"/>
         </javac>
     </target>
 
-    <target depends="build" name="build-jar">
-    	<delete file="classes/META_INF/MANIFEST.MF" failonerror="false"/>
+    <target name="build-jar" depends="build">
+    	<delete file="${build.dir}/META_INF/MANIFEST.MF" failonerror="false"/>
     	<tstamp/>	
-        <jar destfile="liv/lanslim.jar" basedir="classes">
+        <jar destfile="${liv.dir}/lanslim.jar" basedir="${build.dir}">
             <manifest>
               	<attribute name="Built-By" value="${user.name} On ${TODAY}"/>
               	<attribute name="Implementation-Title" value="LANSLIM (Local Area Network Server Less Instant Messaging)"/>
@@ -51,56 +54,48 @@
     </target>
 
     <target name="build-exe">
-    	<property name="launch4j.home" value="c:\appl\launch4j"/>
-		<path id="launch4j.classpath">
-	        <pathelement location="${launch4j.home}/launch4j.jar"/>
-	        <pathelement location="${launch4j.home}/lib/xstream.jar"/>
-	    </path>
-		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpathref="launch4j.classpath"/>
-		<launch4j configFile="launch4j.xml" />
-    	<copy file="lib/tray.dll" tofile="liv/tray.dll"/>
-        <copy file="lib/jortho.jar" tofile="liv/jortho.jar"/>
-        <copy file="lib/jdic.jar" tofile="liv/jdic.jar"/>
-        <copy file="lib/forms-1.2.0.jar" tofile="liv/forms-1.2.0.jar"/>
-        <copy file="lib/looks-2.1.4.jar" tofile="liv/looks-2.1.4.jar"/>
-        <copy file="lib/jna.jar" tofile="liv/jna.jar"/>
-        <copy file="dictionaries.cnf" tofile="liv/dictionaries.cnf"/>
-        <copy todir="liv">
+        <path id="launch4j.classpath">
+             <pathelement location="${launch4j.home}/launch4j.jar"/>
+             <pathelement location="${launch4j.home}/lib/xstream.jar"/>
+         </path>
+        <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpathref="launch4j.classpath"/>
+		<launch4j configFile="launch4j.xml" jar="${liv.dir}/lanslim.jar" outfile="${liv.dir}/lanslime.exe" 
+			fileversion="${version}.0" txtfileversion="V${version}" productversion="${version}.0" txtproductversion="V${version}"/>
+        <copy todir="${liv.dir}">
     	    <fileset dir=".">
+                <include name="*.cnf"/>
                 <include name="*.ortho"/>
                 <include name="*.txt"/>
     	    </fileset>
+            <fileset dir="${lib.dir}">
+                <include name="*.jar"/>
+                <include name="*.dll"/>
+            </fileset>
         </copy>
 	</target>
-
 	
     <target name="build-distrib">
 		<zip destfile="lanslim_v${version}.zip">
-			<fileset dir="liv">
-				<include name="lanslim.exe"/>
-				<include name="tray.dll"/>
-				<include name="jna.jar"/>
-		        <include name="jortho.jar"/>
-		        <include name="jdic.jar"/>
-		        <include name="forms-1.2.0.jar"/>
-		        <include name="looks-2.1.4.jar"/>
-                <include name="dictionaries.cnf"/>
+			<fileset dir="${liv.dir}">
+				<include name="*.exe"/>
+				<include name="*.dll"/>
+				<include name="*.jar"/>
+                <include name="*.cnf"/>
                 <include name="*.ortho"/>
                 <include name="*.txt"/>
 			</fileset>
 		</zip>
 		<zip destfile="lanslim_v${version}_src.zip">
 			<fileset dir=".">
-				<include name="src/**/*.java"/>
-				<include name="src/**/*.png"/>
-				<include name="src/**/*.properties"/>
-				<include name="src/**/*.wav"/>
-				<include name="lib/*.*"/>
-				<include name="build.xml"/>
-				<include name="build.properties"/>
-				<include name="launch4j.xml"/>
-				<include name="comments.ico"/>
-                <include name="dictionaries.cnf"/>
+				<include name="${src.dir}/**/*.java"/>
+				<include name="${res.dir}/**/*.png"/>
+                <include name="${res.dir}/**/*.wav"/>
+                <include name="${res.dir}/**/*.properties"/>
+				<include name="${lib.dir}/*.*"/>
+				<include name="*.xml"/>
+				<include name="*.properties"/>
+				<include name="*.ico"/>
+                <include name="*.cnf"/>
                 <include name="*.ortho"/>
                 <include name="*.txt"/>
 			</fileset>
@@ -113,19 +108,71 @@
     <target name="LANSLIM 1526 olivier">
         <java classname="com.oz.lanslim.LANSLIMMain" failonerror="true" fork="yes">
             <jvmarg line="-Djava.library.path=&quot;D:\documents\workspace\lanslim&quot;"/>
-            <classpath refid="lanslim.classpath"/>
+            <classpath refid="run.classpath"/>
         </java>
     </target>
     <target name="LANSLIM 1527 omz">
         <java classname="com.oz.lanslim.LANSLIMMain" failonerror="true" fork="yes">
             <jvmarg line="-Duser.home=."/>
-            <classpath refid="lanslim.classpath"/>
+            <classpath refid="run.classpath"/>
         </java>
     </target>
     <target name="LANSLIM 1528 rezwell">
         <java classname="com.oz.lanslim.LANSLIMMain" failonerror="true" fork="yes">
             <jvmarg line="-Duser.home=.."/>
-            <classpath refid="lanslim.classpath"/>
+            <classpath refid="run.classpath"/>
         </java>
     </target>
+	
+    <!-- unit testing -->
+
+    <path id="test.classpath">
+         <path refid="run.classpath"/>
+         <fileset dir="${test.lib.dir}">
+           <include name="*.jar"/>
+         </fileset>
+         <pathelement location="${test.build.dir}" />
+    </path>
+
+    <target name="build-unit" depends="build">
+
+        <delete dir="${test.build.dir}"/>
+        <mkdir dir="${test.build.dir}"/>
+
+        <!-- compile the FailedTests class if present --> 
+        <javac destdir="${test.build.dir}">
+            <src path="${test.src.dir}"/>
+            <classpath refid="test.classpath"/>
+        </javac>
+        
+    </target>
+    
+    <target name="run-unit" depends="build-unit">
+        
+        <delete dir="${test.report.dir}"/>
+        <mkdir dir="${test.report.dir}/xml"/>
+
+        <junit haltonfailure="no" failureproperty="failed" printsummary="yes">
+          <classpath>
+            <path refid="test.classpath"/>
+          </classpath>
+          <formatter type="xml" />
+          <batchtest fork="yes" todir="${test.report.dir}/xml">
+            <fileset dir="${test.src.dir}">
+              <include name="**/Test*.java" />
+            </fileset>
+          </batchtest>
+        </junit>
+        
+        <mkdir dir="${test.report.dir}/html"/>
+        <junitreport todir="${test.report.dir}/html">
+          <fileset dir="${test.report.dir}/xml">
+            <include name="TEST-*.xml"/>
+          </fileset>
+          <report format="frames" todir="${test.report.dir}/html"/>
+        </junitreport>
+        
+        <!-- <fail message="TEST FAILURE" if="failed" /> -->
+    </target>
+	
 </project>
