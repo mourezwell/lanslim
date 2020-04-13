@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.oz</groupId>
 	<artifactId>lanslim</artifactId>
-	<version>1.6.1-SNAPSHOT</version>
+	<version>1.6.2-SNAPSHOT</version>
 	<name>lanslim</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
