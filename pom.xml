@@ -8,6 +8,10 @@
 	<name>lanslim</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ 	        <sonar.projectKey>mourezwell_lanslim</sonar.projectKey>
+		<sonar.organization>mourezwell</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.login>${sonar.login}</sonar.login>
 	</properties>
 	<build>
 		<plugins>
@@ -44,6 +48,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			    <plugin>
+			      <groupId>org.sonarsource.scanner.maven</groupId>
+			      <artifactId>sonar-maven-plugin</artifactId>
+			      <version>3.6.0.1398</version>
+			      <executions>
+				<execution>
+				  <phase>verify</phase>
+				  <goals>
+				    <goal>sonar</goal>
+				  </goals>
+				</execution>
+			      </executions>
+			    </plugin>
 		</plugins>
 	</build>
 	<dependencies>
