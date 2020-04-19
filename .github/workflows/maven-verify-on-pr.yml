@@ -35,4 +35,4 @@ jobs:
     - name: cc test coverage postbuilt
       run: |
         ./cc-test-reporter format-coverage -t jacoco ./target/site/jacoco/jacoco.xml
-        ./cc-test-reporter upload-coverage
+        ./cc-test-reporter upload-coverage --debug
