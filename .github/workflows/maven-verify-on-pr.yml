@@ -23,6 +23,7 @@ jobs:
       uses: allenevans/set-env@v1.0.0
       with:
           CC_TEST_REPORTER_ID: '${{secrets.CC_TEST_REPORTER_ID}}'
+          JACOCO_SOURCE_PATH: 'src/main/java' 
           
     - name: cc test coverage prebuilt
       run: |
@@ -32,5 +33,6 @@ jobs:
     - name: Build with Maven
       run: mvn -B verify -Dsonar.login=${{secrets.SONAR_LOGIN}}
     - name: cc test coverage postbuilt
-      run: ./cc-test-reporter after-build --debug --exit-code 0
-
+      run: |
+        ./cc-test-reporter format-coverage -t jacoco ./target/site/jacoco/jacoco.xml
+        ./cc-test-reporter upload-coverage
