@@ -23,7 +23,9 @@ jobs:
       uses: allenevans/set-env@v1.0.0
       with:
           CC_TEST_REPORTER_ID: '${{secrets.CC_TEST_REPORTER_ID}}'
-          JACOCO_SOURCE_PATH: 'src/main/java' 
+          JACOCO_SOURCE_PATH: 'src/main/java'
+          GIT_COMMIT_SHA: '${{github.sha}}'
+          GIT_BRANCH: '${{github.ref}}'
           
     - name: cc test coverage prebuilt
       run: |
