@@ -25,7 +25,7 @@ jobs:
           CC_TEST_REPORTER_ID: '${{secrets.CC_TEST_REPORTER_ID}}'
           JACOCO_SOURCE_PATH: 'src/main/java'
           GIT_COMMIT_SHA: '${{github.sha}}'
-          GIT_BRANCH: '${{github.ref}}'
+          GIT_BRANCH_REF: '${{github.ref}}'
           
     - name: cc test coverage prebuilt
       run: |
@@ -40,6 +40,7 @@ jobs:
 
     - name: cc test coverage postbuilt
       run: |
+        export GIT_BRANCH=${GIT_BRANCH_REF:11}
         ./cc-test-reporter format-coverage -t jacoco ./target/site/jacoco/jacoco.xml
         ./cc-test-reporter upload-coverage --debug
 
