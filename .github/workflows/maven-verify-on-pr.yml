@@ -18,5 +18,23 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+
+    - name: set environment variables
+      uses: allenevans/set-env@v1.0.0
+      with:
+          CC_TEST_REPORTER_ID: '${{secrets.CC_TEST_REPORTER_ID}}'
+          JACOCO_SOURCE_PATH: 'src/main/java'
+          GIT_COMMIT_SHA: '${{github.sha}}'
+          GIT_BRANCH: '${{github.head_ref}}'
+          
+    - name: cc test coverage prebuilt
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
     - name: Build with Maven
       run: mvn -B verify -Dsonar.login=${{secrets.SONAR_LOGIN}}
+    - name: cc test coverage postbuilt
+      run: |
+        ./cc-test-reporter format-coverage -t jacoco ./target/site/jacoco/jacoco.xml
+        ./cc-test-reporter upload-coverage --debug
