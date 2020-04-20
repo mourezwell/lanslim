@@ -1,1 +1,6 @@
+dist: xenial
 language: java
+jdk: openjdk8
+
+install: mvn clean
+script: mvn install
