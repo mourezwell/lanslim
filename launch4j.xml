@@ -18,7 +18,7 @@
   </singleInstance> 
   <jre>
     <path>%JAVA_HOME%</path>
-    <minVersion>1.4.2</minVersion>
+    <minVersion>11</minVersion>
     <maxVersion></maxVersion>
     <dontUsePrivateJres>false</dontUsePrivateJres>
     <initialHeapSize>0</initialHeapSize>
