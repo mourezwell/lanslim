@@ -49,12 +49,18 @@ public abstract class SlimContact implements Serializable {
 	
 	public abstract boolean isGroup();
 	
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof SlimContact) {
 			SlimContact sc = (SlimContact)obj;
 			return name.equalsIgnoreCase(sc.name) && isGroup() == sc.isGroup();
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return name == null ? 0 : name.hashCode();
 	}
 
 }

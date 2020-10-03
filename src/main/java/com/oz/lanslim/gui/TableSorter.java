@@ -104,9 +104,9 @@ public class TableSorter extends AbstractTableModel {
 
     private static Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
 
-    public static final Comparator COMPARABLE_COMAPRATOR = new Comparator() {
+    public static final Comparator COMPARABLE_COMPARATOR = new Comparator() {
         public int compare(Object o1, Object o2) {
-            return ((Comparable) o1).compareTo(o2);
+            return ((Comparable)o1).compareTo(o2);
         }
     };
     public static final Comparator LEXICAL_COMPARATOR = new Comparator() {
@@ -121,8 +121,8 @@ public class TableSorter extends AbstractTableModel {
     private JTableHeader tableHeader;
     private MouseListener mouseListener;
     private TableModelListener tableModelListener;
-    private Map columnComparators = new HashMap();
-    private List sortingColumns = new ArrayList();
+    private Map<Class<?>, Comparator> columnComparators = new HashMap<Class<?>, Comparator>();
+    private List<Directive> sortingColumns = new ArrayList<Directive>();
 
     public TableSorter() {
         mouseListener = new MouseHandler();
@@ -233,7 +233,7 @@ public class TableSorter extends AbstractTableModel {
         sortingStatusChanged();
     }
 
-    public void setColumnComparator(Class type, Comparator comparator) {
+    public void setColumnComparator(Class<?> type, Comparator comparator) {
         if (comparator == null) {
             columnComparators.remove(type);
         } else {
@@ -242,13 +242,13 @@ public class TableSorter extends AbstractTableModel {
     }
 
     protected Comparator getComparator(int column) {
-        Class columnType = tableModel.getColumnClass(column);
-        Comparator comparator = (Comparator) columnComparators.get(columnType);
+        Class<?> columnType = tableModel.getColumnClass(column);
+        Comparator comparator = columnComparators.get(columnType);
         if (comparator != null) {
             return comparator;
         }
         if (Comparable.class.isAssignableFrom(columnType)) {
-            return COMPARABLE_COMAPRATOR;
+            return COMPARABLE_COMPARATOR;
         }
         return LEXICAL_COMPARATOR;
     }
@@ -297,7 +297,7 @@ public class TableSorter extends AbstractTableModel {
         return tableModel.getColumnName(column);
     }
 
-    public Class getColumnClass(int column) {
+    public Class<?> getColumnClass(int column) {
         return tableModel.getColumnClass(column);
     }
 
@@ -315,18 +315,18 @@ public class TableSorter extends AbstractTableModel {
 
     // Helper classes
     
-    private class Row implements Comparable {
+    private class Row implements Comparable<Row> {
         private int modelIndex;
 
         public Row(int index) {
             modelIndex = index;
         }
 
-        public int compareTo(Object o) {
+        public int compareTo(Row o) {
             int row1 = modelIndex;
             int row2 = ((Row) o).modelIndex;
 
-            for (Iterator it = sortingColumns.iterator(); it.hasNext();) {
+            for (Iterator<Directive> it = sortingColumns.iterator(); it.hasNext();) {
                 Directive directive = (Directive) it.next();
                 int column = directive.column;
                 Object o1 = tableModel.getValueAt(row1, column);
