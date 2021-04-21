@@ -850,7 +850,7 @@ public class TalkPane extends JSplitPane
 			}
 			if (lConfirmed) {
 				boolean lSuccess = lTmp.renameTo(lFinal);
-				if (!lSuccess || !lSuccess) {
+				if (!lSuccess) {
         			JOptionPane.showMessageDialog(getRootPane().getParent(), 
         					Externalizer.getString("LANSLIM.240", lTargetFileName, talkModel.getDownloadDir()), //$NON-NLS-1$
         					Externalizer.getString("LANSLIM.241"), //$NON-NLS-1$

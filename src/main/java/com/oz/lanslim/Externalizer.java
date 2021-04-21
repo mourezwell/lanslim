@@ -52,20 +52,20 @@ public class Externalizer {
 	
 	public static String getString(String key, Object pComp) {
 		String lRaw = getString(key);
-		return lRaw.replaceFirst(COMPL_START_REGEX + 0 + COMPL_END_REGEX, pComp.toString().replace('$', 'ง'));
+		return lRaw.replaceFirst(COMPL_START_REGEX + 0 + COMPL_END_REGEX, pComp.toString().replace('$', 'ยง'));
 	}
 	
 	public static String getString(String key, Object pComp1, Object pComp2) {
 		String lRaw = getString(key);
-		lRaw = lRaw.replaceFirst(COMPL_START_REGEX + 0 + COMPL_END_REGEX, pComp1.toString().replace('$', 'ง'));
-		lRaw = lRaw.replaceFirst(COMPL_START_REGEX + 1 + COMPL_END_REGEX, pComp2.toString().replace('$', 'ง'));
+		lRaw = lRaw.replaceFirst(COMPL_START_REGEX + 0 + COMPL_END_REGEX, pComp1.toString().replace('$', 'ยง'));
+		lRaw = lRaw.replaceFirst(COMPL_START_REGEX + 1 + COMPL_END_REGEX, pComp2.toString().replace('$', 'ยง'));
 		return lRaw;
 	}
 
 	public static String getString(String key, Object[] pComp) {
 		String lRaw = getString(key);
 		for (int i=0; i < pComp.length; i++) {
-			lRaw = lRaw.replaceFirst(COMPL_START_REGEX + i + COMPL_END_REGEX, pComp[i].toString().replace('$', 'ง')); //$NON-NLS-1$ //$NON-NLS-2$
+			lRaw = lRaw.replaceFirst(COMPL_START_REGEX + i + COMPL_END_REGEX, pComp[i].toString().replace('$', 'ยง')); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return lRaw;
 	}
