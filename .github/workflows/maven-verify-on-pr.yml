@@ -20,12 +20,11 @@ jobs:
         java-version: 11
 
     - name: set environment variables
-      uses: allenevans/set-env@v1.0.0
-      with:
-          CC_TEST_REPORTER_ID: '${{secrets.CC_TEST_REPORTER_ID}}'
-          JACOCO_SOURCE_PATH: 'src/main/java'
-          GIT_COMMIT_SHA: '${{github.sha}}'
-          GIT_BRANCH: '${{github.head_ref}}'
+      run: |
+          echo "CC_TEST_REPORTER_ID=${{secrets.CC_TEST_REPORTER_ID}}" >> $GITHUB_ENV
+          echo "JACOCO_SOURCE_PATH=src/main/java" >> $GITHUB_ENV
+          echo "GIT_COMMIT_SHA=${{github.sha}}" >> $GITHUB_ENV
+          echo "GIT_BRANCH_REF=${{github.ref}}" >> $GITHUB_ENV
           
     - name: cc test coverage prebuilt
       run: |
